@@ -1,0 +1,13 @@
+F:\xampp\htdocs\dev\tesmart-local\routes\admin.php
+F:\xampp\htdocs\dev\tesmart-local\app\Http\Controllers\Admin\ProductController.php
+F:\xampp\htdocs\dev\tesmart-local\resources\views\admin-views\product\list.blade.php
+F:\xampp\htdocs\dev\tesmart-local\public\assets\admin\css\theme.minc619.css
+
+
+ALTER TABLE `products` ADD `sku` VARCHAR(50) NULL DEFAULT NULL AFTER `price`;
+ALTER TABLE `products` ADD `sub_title` VARCHAR(255) NULL DEFAULT NULL AFTER `name`;
+ALTER TABLE `products` ADD `bar_code` VARCHAR(255) NULL DEFAULT NULL AFTER `sub_title`;
+ALTER TABLE `products` ADD `cat_id` INT(40) NULL DEFAULT NULL AFTER `sub_title`, ADD `sub_cat_id` INT(40) NULL DEFAULT NULL AFTER `cat_id`, ADD `child_cat_id` INT(40) NULL DEFAULT NULL AFTER `sub_cat_id`;
+ALTER TABLE `products` ADD `weight` VARCHAR(50) NULL DEFAULT NULL AFTER `updated_at`;
+ALTER TABLE `products` ADD `org_price` DOUBLE NULL DEFAULT NULL AFTER `image`;
+
