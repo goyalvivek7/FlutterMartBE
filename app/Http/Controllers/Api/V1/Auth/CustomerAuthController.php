@@ -27,14 +27,14 @@ class CustomerAuthController extends Controller
         if (isset($user)) {
             $user->phone_otp = $otp;
             $user->save();
-            return response()->json(['token' => $temporary_token, 'otp' => $otp, 'state' => 'login'], 200);
+            return response()->json(['status' => 'success', 'token' => $temporary_token, 'otp' => $otp, 'state' => 'login', 'message'=>'Login Successfully'], 200);
         } else {
             $user = User::create([
                 'phone' => $request->phone,
                 'phone_otp' => $otp,
                 'temporary_token' => $temporary_token,
             ]);
-            return response()->json(['token' => $temporary_token, 'otp' => $otp, 'state' => 'register'], 200);
+            return response()->json(['status' => 'success', 'token' => $temporary_token, 'otp' => $otp, 'state' => 'register', 'message'=>'Register Successfully'], 200);
         }
     }
 

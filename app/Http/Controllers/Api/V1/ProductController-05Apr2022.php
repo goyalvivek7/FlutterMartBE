@@ -10,26 +10,25 @@ use App\Model\Review;
 use App\Model\Search;
 use App\Model\Banner;
 use App\Model\Sale;
-use App\Model\Category;
 use App\Model\Translation;
+use App\Model\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
-  	
-  	public function recent_search(Request $request)
+
+    public function recent_search(Request $request)
     {
-        //$searchTerms = Search::where(['user_id' => $request['user_id']])->distinct ('search_term')->get();
-        $searchTerms = Search::select('search_term', 'user_id')->where(['user_id' => $request['user_id']])->distinct()->limit($request['limit'])->get();
+        $searchTerms = Search::where(['user_id' => $request['user_id']])->get();
 
         if(count($searchTerms) == 0){
             $apiStatus = "fail";
         } else {
             $apiStatus = "success";
         }
-        $apiStatus = "success";
+
         $search = [
             'total_size' => count($searchTerms),
             'status' => $apiStatus,
@@ -37,7 +36,7 @@ class ProductController extends Controller
         ];
         return response()->json($search, 200);
     }
-  
+
     public function get_latest_products(Request $request)
     {
         $products = ProductLogic::get_latest_products($request['limit'], $request['offset']);
@@ -47,32 +46,30 @@ class ProductController extends Controller
 
     public function get_searched_products(Request $request)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'name' => 'required',
-        //     ''
-        // ]);
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+        ]);
 
-        // if ($validator->fails()) {
-        //     return response()->json(['errors' => Helpers::error_processor($validator)], 403);
-        // }
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
 
-        //$products = ProductLogic::search_products($request['name'], $request['limit'], $request['offset']);
-        //echo '@@@@<pre />'; print_r($products); die;
-        //if (count($products['products']) == 0) {
-        if ($request['name'] != '' && $request['limit'] != "" && $request['offset'] != "") {
+        $products = ProductLogic::search_products($request['name'], $request['limit'], $request['offset']);
+        if (count($products['products']) == 0) {
             $key = explode(' ', $request['name']);
-            $paginator = Product::active()->withCount(['wishlist'])->with(['rating'])->where(function ($q) use ($key) {
+            $ids = Translation::where(['key' => 'name'])->where(function ($query) use ($key) {
                 foreach ($key as $value) {
-                    $q->orWhere('name', 'like', "%{$value}%");
+                    $query->orWhere('value', 'like', "%{$value}%");
                 }
-            })->paginate($request['limit'], ['*'], 'page', $request['offset']);
-
-            // if($paginator->total() == 0){
-            //     $apiStatus = "fail";
-            // } else {
-            //     $apiStatus = "success";
-            // }
-            $apiStatus = "success";
+            })->pluck('translationable_id')->toArray();
+            $paginator = Product::active()->whereIn('id', $ids)->withCount(['wishlist'])->with(['rating'])
+                ->paginate($request['limit'], ['*'], 'page', $request['offset']);
+          
+          	if($paginator->total() == 0){
+              $apiStatus = "fail";
+            } else {
+              $apiStatus = "success";
+            }
           
             $products = [
                 'total_size' => $paginator->total(),
@@ -81,26 +78,17 @@ class ProductController extends Controller
                 'offset' => $request['offset'],
                 'products' => $paginator->items()
             ];
-
-            $searches = new Search();
-            $searches->search_term = $request['name'];
-            if($request['user_id'] && $request['user_id'] != ""){
-            $searches->user_id = $request['user_id'];
-            }
-            $searches->save();
-        
-            $products['products'] = Helpers::product_data_formatting($products['products'], true);
-            return response()->json($products, 200);
-        } else {
-            $products = [
-                'total_size' => 0,
-              	'status' => 'fail',
-                'message' => 'Please send require fields',
-                'products' => []
-            ];
-            return response()->json($products, 200);
         }
-      	
+      
+      	$searches = new Search();
+        $searches->search_term = $request['name'];
+      	if($request['user_id'] && $request['user_id'] != ""){
+          $searches->user_id = $request['user_id'];
+        }
+        $searches->save();
+      
+        $products['products'] = Helpers::product_data_formatting($products['products'], true);
+        return response()->json($products, 200);
     }
 
     public function get_product($id)
@@ -223,8 +211,8 @@ class ProductController extends Controller
             ], 404);
         }
     }
-  
-  	public function homepage_sales(){
+
+    public function homepage_sales(){
         try {
           
           	$bannerRecords = Banner::where(['status'=>1])->get();
@@ -287,5 +275,4 @@ class ProductController extends Controller
             ], 404);
         }
     }
-  	
 }

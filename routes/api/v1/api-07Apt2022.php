@@ -73,8 +73,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
     Route::group(['prefix' => 'categories'], function () {
         Route::get('/', 'CategoryController@get_categories');
-        Route::post('get-product-with-child-id', 'CategoryController@get_product_with_child_id');
-        Route::post('get-sub-child-with-main-id', 'CategoryController@get_sub_child_with_main_id');
+      	Route::post('get-product-with-child-id', 'CategoryController@get_product_with_child_id');
+      	Route::post('get-sub-child-with-main-id', 'CategoryController@get_sub_child_with_main_id');
         Route::get('all-cat-sub-cat', 'CategoryController@all_cat_sub_cat');
         Route::get('products-with-categories', 'CategoryController@products_with_categories');
         Route::get('childes/{category_id}', 'CategoryController@get_childes');
@@ -96,12 +96,6 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
       Route::put('cancel', 'OrderController@cancel_order');
       Route::get('track', 'OrderController@track_order');
       Route::put('payment-method', 'OrderController@update_payment_method');
-    });
-
-    Route::group(['prefix' => 'wish-list'], function () {
-        Route::post('/', 'WishlistController@wish_list');
-        Route::post('add', 'WishlistController@add_to_wishlist');
-        Route::post('remove', 'WishlistController@remove_from_wishlist');
     });
 
     Route::group(['prefix' => 'customer', 'middleware' => 'auth:api'], function () {

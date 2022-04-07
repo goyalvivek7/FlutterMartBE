@@ -5,9 +5,9 @@ use Illuminate\Support\Facades\Route;
 Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function () {
 
     Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
-      	Route::post('verify-otp', 'CustomerAuthController@verify_otp');
-      	Route::post('login-register', 'CustomerAuthController@login_register');
-      	
+        Route::post('verify-otp', 'CustomerAuthController@verify_otp');
+        Route::post('login-register', 'CustomerAuthController@login_register');
+        
         Route::post('register', 'CustomerAuthController@registration');
         Route::post('login', 'CustomerAuthController@login');
 
@@ -50,7 +50,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
     });
 
     Route::group(['prefix' => 'products'], function () {
-      	Route::get('recent-search', 'ProductController@recent_search');
+        Route::get('recent-search', 'ProductController@recent_search');
         Route::get('latest', 'ProductController@get_latest_products');
         Route::get('discounted', 'ProductController@get_discounted_products');
         Route::get('search', 'ProductController@get_searched_products');
@@ -60,7 +60,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('rating/{product_id}', 'ProductController@get_product_rating');
         Route::get('daily-needs', 'ProductController@get_daily_need_products');
         Route::post('reviews/submit', 'ProductController@submit_product_review')->middleware('auth:api');
-      	Route::get('homepagesales', 'ProductController@homepage_sales');
+        Route::get('homepagesales', 'ProductController@homepage_sales');
     });
 
     Route::group(['prefix' => 'banners'], function () {
@@ -73,35 +73,11 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
     Route::group(['prefix' => 'categories'], function () {
         Route::get('/', 'CategoryController@get_categories');
-        Route::post('get-product-with-child-id', 'CategoryController@get_product_with_child_id');
-        Route::post('get-sub-child-with-main-id', 'CategoryController@get_sub_child_with_main_id');
         Route::get('all-cat-sub-cat', 'CategoryController@all_cat_sub_cat');
         Route::get('products-with-categories', 'CategoryController@products_with_categories');
         Route::get('childes/{category_id}', 'CategoryController@get_childes');
         Route::get('products/{category_id}', 'CategoryController@get_products');
         Route::get('products/{category_id}/all', 'CategoryController@get_all_products');
-    });
-  
-  	Route::group(['prefix' => 'address'], function () {
-      Route::get('list', 'CustomerController@address_list');
-      Route::post('add', 'CustomerController@add_new_address');
-      Route::put('update/{id}', 'CustomerController@update_address');
-      Route::delete('delete', 'CustomerController@delete_address');
-    });
-  
-  	Route::group(['prefix' => 'order'], function () {
-      Route::get('list', 'OrderController@get_order_list');
-      Route::get('details', 'OrderController@get_order_details');
-      Route::post('place', 'OrderController@place_order');
-      Route::put('cancel', 'OrderController@cancel_order');
-      Route::get('track', 'OrderController@track_order');
-      Route::put('payment-method', 'OrderController@update_payment_method');
-    });
-
-    Route::group(['prefix' => 'wish-list'], function () {
-        Route::post('/', 'WishlistController@wish_list');
-        Route::post('add', 'WishlistController@add_to_wishlist');
-        Route::post('remove', 'WishlistController@remove_from_wishlist');
     });
 
     Route::group(['prefix' => 'customer', 'middleware' => 'auth:api'], function () {
@@ -116,7 +92,14 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
             Route::delete('delete', 'CustomerController@delete_address');
         });
 
-        
+        Route::group(['prefix' => 'order'], function () {
+            Route::get('list', 'OrderController@get_order_list');
+            Route::get('details', 'OrderController@get_order_details');
+            Route::post('place', 'OrderController@place_order');
+            Route::put('cancel', 'OrderController@cancel_order');
+            Route::get('track', 'OrderController@track_order');
+            Route::put('payment-method', 'OrderController@update_payment_method');
+        });
         // Chatting
         Route::group(['prefix' => 'message'], function () {
             Route::get('get', 'ConversationController@messages');

@@ -42,6 +42,8 @@ class ProductLogic
                 $q->orWhere('name', 'like', "%{$value}%");
             }
         })->paginate($limit, ['*'], 'page', $offset);
+
+        //echo $paginator->total().'----<pre />'; print_r($paginator); die;
 		
       	if($paginator->total() == 0){
           $apiStatus = "fail";

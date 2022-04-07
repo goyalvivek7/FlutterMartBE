@@ -19,14 +19,7 @@ class CustomerController extends Controller
 {
     public function address_list(Request $request)
     {
-        //return response()->json(CustomerAddress::where('user_id', $request->user()->id)->latest()->get(), 200);
-      	$address = CustomerAddress::where('user_id', $request->user_id)->latest()->get();
-        if(!empty($address) && $address != "" && $address != NULL && $address != [] && $address!= '[]'){
-          return response()->json(['state' => 'Add Address', 'status' => 'success', 'data' => $address], 200);
-        } else {
-          return response()->json(['state' => 'Add Address', 'status' => 'fail', 'data' => []], 200);
-        }                              
-      	return response()->json(CustomerAddress::where('user_id', $request->user_id)->latest()->get(), 200);
+        return response()->json(CustomerAddress::where('user_id', $request->user()->id)->latest()->get(), 200);
     }
 
     public function add_new_address(Request $request)
@@ -39,13 +32,11 @@ class CustomerController extends Controller
         ]);
 
         if ($validator->fails()) {
-            //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
-          	return response()->json(['state' => 'Add Address', 'status' => 'fail'], 200);
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
         $address = [
-            //'user_id' => $request->user()->id,
-          	'user_id' => $request->user_id,
+            'user_id' => $request->user()->id,
             'contact_person_name' => $request->contact_person_name,
             'contact_person_number' => $request->contact_person_number,
             'address_type' => $request->address_type,
@@ -56,8 +47,7 @@ class CustomerController extends Controller
             'updated_at' => now()
         ];
         DB::table('customer_addresses')->insert($address);
-        //return response()->json(['message' => 'successfully added!'], 200);
-      	return response()->json(['state' => 'register', 'status' => 'success', 'message' => 'successfully added!'], 200);
+        return response()->json(['message' => 'successfully added!'], 200);
     }
 
     public function update_address(Request $request,$id)

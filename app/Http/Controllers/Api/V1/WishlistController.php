@@ -13,48 +13,88 @@ class WishlistController extends Controller
     public function add_to_wishlist(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'product_id' => 'required'
+            'product_id' => 'required',
+            'user_id' => 'required',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            return response()->json($response, 200);
+            //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-        $wishlist = Wishlist::where('user_id', $request->user()->id)->where('product_id', $request->product_id)->first();
+        //$wishlist = Wishlist::where('user_id', $request->user()->id)->where('product_id', $request->product_id)->first();
+        $wishlist = Wishlist::where('user_id', $request->user_id)->where('product_id', $request->product_id)->first();
 
         if (empty($wishlist)) {
             $wishlist = new Wishlist;
-            $wishlist->user_id = $request->user()->id;
+            //$wishlist->user_id = $request->user()->id;
+            $wishlist->user_id = $request->user_id;
             $wishlist->product_id = $request->product_id;
             $wishlist->save();
-            return response()->json(['message' => 'successfully added!'], 200);
+            $response['status'] = 'success';
+            $response['message'] = 'successfully added!';
+            return response()->json($response, 200);
+            //return response()->json(['message' => 'successfully added!'], 200);
         }
 
-        return response()->json(['message' => 'Already in your wishlist'], 409);
+        $response['status'] = 'fail';
+        $response['message'] = 'Already in your wishlist.';
+        return response()->json($response, 200);
+        //return response()->json(['message' => 'Already in your wishlist'], 409);
     }
 
     public function remove_from_wishlist(Request $request)
     {
+      	
         $validator = Validator::make($request->all(), [
-            'product_id' => 'required'
+            'product_id' => 'required',
+            'user_id' => 'required',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            return response()->json($response, 200);
+            //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-        $wishlist = Wishlist::where('user_id', $request->user()->id)->where('product_id', $request->product_id)->first();
+        $wishlist = Wishlist::where('user_id', $request->user_id)->where('product_id', $request->product_id)->first();
+        //$wishlist = Wishlist::where('user_id', $request->user()->id)->where('product_id', $request->product_id)->first();
 
         if (!empty($wishlist)) {
-            Wishlist::where(['user_id' => $request->user()->id, 'product_id' => $request->product_id])->delete();
-            return response()->json(['message' => 'successfully removed!'], 200);
+            //Wishlist::where(['user_id' => $request->user()->id, 'product_id' => $request->product_id])->delete();
+            Wishlist::where(['user_id' => $request->user_id, 'product_id' => $request->product_id])->delete();
+            $response['status'] = 'success';
+            $response['message'] = 'successfully removed!';
+            return response()->json($response, 200);
+            //return response()->json(['message' => 'successfully removed!'], 200);
 
         }
-        return response()->json(['message' => 'No such data found!'], 404);
+        $response['status'] = 'fail';
+        $response['message'] = 'No such data found!';
+        return response()->json($response, 200);
+        //return response()->json(['message' => 'No such data found!'], 404);
     }
 
     public function wish_list(Request $request)
     {
-        return response()->json(Wishlist::where('user_id', $request->user()->id)->get(), 200);
+      	$validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+        ]);
+        
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            return response()->json($response, 200);
+            //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        }
+        $wishList = Wishlist::where('user_id', $request->user_id)->get();
+        $response['status'] = 'success';
+        $response['message'] = 'Wishlist successfully fetched!';
+        $response['data'] = $wishList;
+        return response()->json($response, 200);
+        //return response()->json(Wishlist::where('user_id', $request->user()->id)->get(), 200);
     }
 }
