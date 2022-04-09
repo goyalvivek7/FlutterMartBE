@@ -307,8 +307,19 @@ class ProductController extends Controller
 
     public function sync_products(Request $request)
     {
-        $apiUrl = "http://103.234.185.42:50/API/Item";
-        $client = new Client();
+        //$apiUrl = "http://103.234.185.42:50/API/Item";
+        //$client = new Client();
+
+        $companyResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute1?TokenId=TESMART');
+        $companyResponseArray = json_decode($companyResponse,TRUE);
+        if(is_array($companyResponseArray) && !empty($companyResponseArray)){
+            foreach($companyResponseArray as $companyArray){
+                foreach($companyArray as $company){
+                    echo '<pre />'; print_r($company);
+                }
+            }
+        }
+        die;
 
         $bnpResponse = file_get_contents('http://103.234.185.42:50/API/Item?TokenId=TESMART');
         $productResponseArray = json_decode($bnpResponse,TRUE);

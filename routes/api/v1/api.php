@@ -7,6 +7,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
     Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
       	Route::post('verify-otp', 'CustomerAuthController@verify_otp');
       	Route::post('login-register', 'CustomerAuthController@login_register');
+        Route::post('profile', 'CustomerAuthController@get_profile');
       	
         Route::post('register', 'CustomerAuthController@registration');
         Route::post('login', 'CustomerAuthController@login');
@@ -104,6 +105,17 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('remove', 'WishlistController@remove_from_wishlist');
     });
 
+    Route::get('page/{page_name}', 'TimeSlotController@static_pages');
+    
+    //timeSlot
+    Route::group(['prefix' => 'timeSlot'], function () {
+        Route::get('/', 'TimeSlotController@getTime_slot');
+    });
+
+    Route::group(['prefix' => 'branch'], function () {
+        Route::get('/', 'TimeSlotController@branch_list');
+    });
+
     Route::group(['prefix' => 'customer', 'middleware' => 'auth:api'], function () {
         Route::get('info', 'CustomerController@info');
         Route::put('update-profile', 'CustomerController@update_profile');
@@ -138,10 +150,6 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
     Route::group(['prefix' => 'coupon', 'middleware' => 'auth:api'], function () {
         Route::get('list', 'CouponController@list');
         Route::get('apply', 'CouponController@apply');
-    });
-    //timeSlot
-    Route::group(['prefix' => 'timeSlot'], function () {
-        Route::get('/', 'TimeSlotController@getTime_slot');
     });
     //map api
     Route::group(['prefix' => 'mapapi'], function () {

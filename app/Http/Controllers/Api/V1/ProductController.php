@@ -107,12 +107,24 @@ class ProductController extends Controller
     {
         try {
             $product = ProductLogic::get_product($id);
-            $product = Helpers::product_data_formatting($product, false);
-            return response()->json($product, 200);
+
+            $response['status'] = 'success';
+            if(isset($product) && !empty($product)){
+                $product = Helpers::product_data_formatting($product, false);
+                $response['message'] = 'Product Detail Found.';
+                $response['data'][] = $product;
+            } else {
+                $response['message'] = 'Product Detail Not Found.';
+                $response['data'] = [];
+            }
+
+            return response()->json($response, 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'errors' => ['code' => 'product-001', 'message' => 'Product not found!'],
-            ], 404);
+            $response['status'] = 'fail';
+            $response['message'] = 'No Product Detail Found.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+            //return response()->json(['errors' => ['code' => 'product-001', 'message' => 'Product not found!'],], 404);
         }
     }
 

@@ -19,6 +19,35 @@ use Illuminate\Support\Str;
 class CustomerAuthController extends Controller
 {
 
+    public function get_profile(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            return response()->json($response, 200);
+        }
+
+        $user = User::where(['id' => $request->user_id])->first();
+        if (isset($user)) {
+            $response['status'] = 'success';
+            $response['message'] = 'User Found';
+            foreach ($user as $key => $value){
+                $userArray[$key] = $value;
+            }
+            $response['data'][] = $user;
+        } else {
+            $response['status'] = 'fail';
+            $response['message'] = 'User Not Found';
+            $response['data'] = [];
+        }
+
+        return response()->json($response, 200);
+
+    }
+
     public function login_register(Request $request){
         $temporary_token = Str::random(40);
         $otp = random_int(100000, 999999);
