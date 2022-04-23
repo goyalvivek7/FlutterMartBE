@@ -85,4 +85,55 @@ class TimeSlotController extends Controller
         }
     }
 
+    public function all_pages()
+    {
+        try {
+
+            $page = DB::table('pages')->where('status', 1)->get();
+            
+            if(count($page) > 0){
+                $response['status'] = 'success';
+                $response['message'] = 'Page Found';
+                $response['data'] = $page;
+            } else {
+                $response['status'] = 'success';
+                $response['message'] = 'Page Not Found';
+                $response['data'] = [];
+            }
+            
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Page Not Found';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+    }
+
+
+    public function delivery_options()
+    {
+        try {
+
+            $options = DB::table('delivery_options')->where('status', 1)->get();
+            
+            if(count($options) > 0){
+                $response['status'] = 'success';
+                $response['message'] = 'Delivery Options Found';
+                $response['data'] = $options;
+            } else {
+                $response['status'] = 'success';
+                $response['message'] = 'Delivery Options Not Found';
+                $response['data'] = [];
+            }
+            
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Delivery Options Not Found';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+    }
+
 }

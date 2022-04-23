@@ -105,7 +105,16 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('remove', 'WishlistController@remove_from_wishlist');
     });
 
+
+    Route::group(['prefix' => 'cart'], function () {
+        Route::post('add', 'CartController@add_to_cart');
+        Route::post('remove', 'CartController@add_to_cart');
+        Route::post('list', 'CartController@list');
+    });
+
+    Route::get('pages', 'TimeSlotController@all_pages');
     Route::get('page/{page_name}', 'TimeSlotController@static_pages');
+    Route::get('delivery-options', 'TimeSlotController@delivery_options');
     
     //timeSlot
     Route::group(['prefix' => 'timeSlot'], function () {

@@ -48,6 +48,17 @@ class CustomerAuthController extends Controller
 
     }
 
+    public function verify_otp(Request $request){
+      
+        $verify = User::where(['phone' => $request['phone'], 'phone_otp' => $request['otp']])->first();
+			
+        if (isset($verify)) {
+            return response()->json(['message' => 'OTP verified!', 'status' => 'success', 'data' => $verify], 200);
+        }
+
+        return response()->json(['message' => 'OTP fail!', 'status' => 'fail'], 200);
+    }
+
     public function login_register(Request $request){
         $temporary_token = Str::random(40);
         $otp = random_int(100000, 999999);

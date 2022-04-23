@@ -347,4 +347,8 @@
   'msg91_sms' => 'Msg91 sms',
   'template_id' => 'Template id',
   'authkey' => 'Authkey',
+  'back' => 'Back',
+  'of' => 'Of',
+  'variations' => 'Variations',
+  'reviewer' => 'Reviewer',
 );
