@@ -11,12 +11,150 @@ use App\Model\Order;
 use App\Model\OrderDetail;
 use App\Model\Product;
 use App\Model\Review;
+use App\Model\CartFinal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Razorpay\Api\Api;
+use Redirect;
+use Session;
 
 class OrderController extends Controller
 {
+  
+  	
+  	public function create_order(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'amount' => 'required',
+            'order_type' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = [];
+
+            return response()->json($response, 200);
+        }
+        
+        if($request['user_id'] != ""){
+
+            $userId = $request['user_id'];
+            $amount = $request['amount'];
+            $orderType = $request['order_type'];
+
+            if($orderType == "wallet"){
+                $lastWallet = DB::table('wallet_orders')->whereNotNull('receipt_id')->limit(1)->orderBy('id', 'DESC')->get();
+                if(count($lastWallet) > 0){
+                    $receiptId = (($lastWallet[0]->receipt_id) + 1);
+                } else {
+                    $receiptId = 1;
+                }
+            }
+
+            if($orderType == "cart"){
+              
+              	$finalCart = CartFinal::where('user_id', $userId)->where('cart_status', 'pending')->get();
+              	//echo '<pre />'; print_r($finalCart); die;
+                if(!empty($finalCart) && isset($finalCart[0])){
+                    $amount = (int) $finalCart[0]->final_amount;
+                  	$cartId = $finalCart[0]->id;
+                } else {
+                    $response['status'] = 'fail';
+                    $response['message'] = 'Error in getting order data.';
+                    $response['data'] = [];
+
+                    return response()->json($response, 200);
+                }
+              
+                $lastWallet = DB::table('orders')->whereNotNull('receipt_id')->limit(1)->orderBy('id', 'DESC')->get();
+                if(count($lastWallet) > 0){
+                    $receiptId = (($lastWallet[0]->receipt_id) + 1);
+                } else {
+                    $receiptId = 1;
+                }
+            }
+          	$amount = ($amount * 100);
+          
+            $api = new Api(config('razor.razor_key'), config('razor.razor_secret'));
+            $orderData = $api->order->create(
+                array(
+                    'receipt' => $receiptId, 
+                    'amount' => $amount, 
+                    'currency' => 'INR', 
+                    'notes'=> array(
+                        'user_id'=> $userId,
+                        'order_type'=> $orderType
+                    )
+                )
+            );
+            
+            if(isset($orderData) && $orderData['status'] == "created"){
+
+                $orderId = $orderData['id'];
+                $orderAmount = ($orderData['amount']/100);
+                $orderReceipt = $orderData['receipt'];
+                $orderNotes = $orderData['notes'];
+                $orderUserId = $orderNotes->user_id;
+                $orderOrderType = $orderNotes->order_type;
+
+                
+                if($orderOrderType == "wallet"){
+                    
+                    $walletOrders = [
+                        'user_id' => $orderUserId,
+                        'order_id' => $orderId,
+                        'amount' => $orderAmount,
+                        'receipt_id' => $orderReceipt,
+                        'status' => $orderData['status'],
+                        'order_date' => date('Y-m-d h:i:s')
+                    ];
+                    
+                    DB::table('wallet_orders')->insert($walletOrders);
+
+                }
+
+                if($orderOrderType == "cart"){
+                    
+                    $walletOrders = [
+                        'user_id' => $orderUserId,
+                        'order_id' => $orderId,
+                        'order_amount' => $orderAmount,
+                        'receipt_id' => $orderReceipt,
+                      	'cart_id' => $cartId,
+                        'order_status' => $orderData['status']
+                    ];
+                    
+                    DB::table('orders')->insert($walletOrders);
+
+                }
+
+                $orderAray['order_id'] = $orderId;
+                $orderAray['user_id'] = $orderUserId;
+                $orderAray['amount'] = $orderAmount;
+                $orderAray['receipt_id'] = $orderReceipt;
+                $orderAray['status'] = $orderData['status'];
+                $orderAray['order_type'] = $orderOrderType;
+
+                $response['status'] = 'success';
+                $response['message'] = 'Order Created';
+                $response['data'][] = $orderAray;
+                return response()->json($response, 200);
+
+            } else {
+
+                $response['status'] = 'fail';
+                $response['message'] = 'Getting some error in generating order';
+                $response['data'] = [];
+                return response()->json($response, 200);
+
+            }
+        }
+    }
+  
+  
     public function track_order(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -24,10 +162,18 @@ class OrderController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+            //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+            $response['status'] = 'fail';
+      	    $response['message'] = 'Please send all input Param';
+            $response['data'] = [];
+        } else {
+            //return response()->json(OrderLogic::track_order($request['order_id']), 200);
+            $response['status'] = 'success';
+            $response['message'] = 'Order tracked successfully!';
+            $response['data'][] = OrderLogic::track_order($request['order_id']);
         }
-
-        return response()->json(OrderLogic::track_order($request['order_id']), 200);
+      	
+      	return response()->json($response, 200);
     }
 
     public function place_order(Request $request)

@@ -6,7 +6,6 @@ use App\CentralLogics\Helpers;
 use App\Http\Controllers\Controller;
 use App\Model\DeliveryHistory;
 use App\Model\DeliveryMan;
-use App\Model\OrderHistory;
 use App\Model\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,14 +13,6 @@ use Illuminate\Support\Facades\Validator;
 
 class DeliverymanController extends Controller
 {
-
-    public function cancel_reasons(Request $request){
-        $cancalReasons = DB::table('cancel_resons')->where('status', 1)->get();
-        $response['status'] = 'success';
-        $response['data'] = $cancalReasons;
-        $response['message'] = 'Reasons Found';
-        return response()->json($response, 200);
-    }
 
     public function verify_otp(Request $request){
       
@@ -216,34 +207,20 @@ class DeliverymanController extends Controller
     public function update_order_status(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'deliveryman_id' => 'required',
+            'token' => 'required',
             'order_id' => 'required',
             'status' => 'required'
         ]);
         if ($validator->fails()) {
-            $response['status'] = 'fail';
-            $response['message'] = 'Plese send all inputs.';
-            $response['data'] = [];
-            return response()->json($response, 200);
-            //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
-
-        $signature = "";
-        if (!empty($request->file('signature'))) {
-            $signature = Helpers::upload('order/', 'png', $request->file('signature'));
-        }
-        if(isset($request['reason_id']) && $request['reason_id'] != ""){
-            $reasonId = $request['reason_id'];
-        } else {
-            $reasonId = "";
-        }
-        $statusReason = $request['status_reason'];
-        $dm = DeliveryMan::where(['id' => $request['deliveryman_id']])->first();
+        $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
         if (isset($dm) == false) {
-            $response['status'] = 'fail';
-            $response['message'] = 'Delivery Man Not Found';
-            $response['data'] = [];
-            return response()->json($response, 200);
+            return response()->json([
+                'errors' => [
+                    ['code' => 'delivery-man', 'message' => 'Invalid token!']
+                ]
+            ], 401);
         }
 
         Order::where(['id' => $request['order_id'], 'delivery_man_id' => $dm['id']])->update([
@@ -257,19 +234,7 @@ class DeliverymanController extends Controller
             $value=Helpers::order_status_update_message('ord_start');
         }elseif ($request['status']=='delivered'){
             $value=Helpers::order_status_update_message('delivery_boy_delivered');
-        }elseif ($request['status']=='canceled'){
-            $value=Helpers::order_status_update_message('canceled');
         }
-        
-        $complaint = OrderHistory::create([
-            'order_id' => $request['order_id'],
-            'user_id' => $dm['id'],
-            'user_type' => 'delivery_man',
-            'status_captured' => $request['status'],
-            'reason_id' => $reasonId,
-            'status_reason' => $statusReason,
-            'signature' => $signature
-        ]);
 
         try {
             if ($value){
@@ -280,21 +245,12 @@ class DeliverymanController extends Controller
                     'image'=>'',
                 ];
                 Helpers::send_push_notif_to_device($fcm_token,$data);
-
-                $response['status'] = 'success';
-                $response['state'] = 'register';
-                $response['message'] = 'Status updated';
-                $response['data'] = [];
-                return response()->json($response, 200);
-
             }
         } catch (\Exception $e) {
 
         }
 
-        
-
-        //return response()->json(['message' => 'Status updated'], 200);
+        return response()->json(['message' => 'Status updated'], 200);
     }
 
     public function get_order_details(Request $request)

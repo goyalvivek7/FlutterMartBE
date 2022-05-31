@@ -22,22 +22,28 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('verify-token', 'PasswordResetController@verify_token');
         Route::put('reset-password', 'PasswordResetController@reset_password_submit');
 
+        Route::post('profile-update', 'CustomerAuthController@profile_update');
+
         Route::group(['prefix' => 'delivery-man'], function () {
             Route::post('login', 'DeliveryManLoginController@login');
         });
     });
 
     Route::group(['prefix' => 'delivery-man'], function () {
+        Route::get('dashboard', 'DeliverymanController@dashboard');
+        Route::post('login', 'DeliverymanController@login');
+        Route::post('verify-otp', 'DeliverymanController@verify_otp');
         Route::get('profile', 'DeliverymanController@get_profile');
         Route::get('current-orders', 'DeliverymanController@get_current_orders');
         Route::get('all-orders', 'DeliverymanController@get_all_orders');
         Route::post('record-location-data', 'DeliverymanController@record_location_data');
         Route::get('order-delivery-history', 'DeliverymanController@get_order_history');
-        Route::put('update-order-status', 'DeliverymanController@update_order_status');
+        Route::post('update-order-status', 'DeliverymanController@update_order_status');
         Route::put('update-payment-status', 'DeliverymanController@order_payment_status_update');
         Route::get('order-details', 'DeliverymanController@get_order_details');
         Route::get('last-location', 'DeliverymanController@get_last_location');
         Route::put('update-fcm-token', 'DeliverymanController@update_fcm_token');
+        Route::get('cancel-reasons', 'DeliverymanController@cancel_reasons');
 
         Route::group(['prefix' => 'reviews', 'middleware' => ['auth:api']], function () {
             Route::get('/{delivery_man_id}', 'DeliveryManReviewController@get_reviews');
@@ -62,6 +68,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('daily-needs', 'ProductController@get_daily_need_products');
         Route::post('reviews/submit', 'ProductController@submit_product_review')->middleware('auth:api');
       	Route::get('homepagesales', 'ProductController@homepage_sales');
+        Route::get('barcode/{barcode}', 'ProductController@barcode_product');
     });
 
     Route::group(['prefix' => 'banners'], function () {
@@ -70,6 +77,14 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
     Route::group(['prefix' => 'notifications'], function () {
         Route::get('/', 'NotificationController@get_notifications');
+    });
+
+    Route::group(['prefix' => 'complaint'], function () {
+        Route::get('/issues_list', 'ComplaintController@issues_list');
+        Route::post('/create', 'ComplaintController@create');
+        Route::post('/complaint_list', 'ComplaintController@complaint_list');
+        Route::post('/complaint_reply', 'ComplaintController@complaint_reply');
+        Route::post('/complaint_detail', 'ComplaintController@complaint_detail');
     });
 
     Route::group(['prefix' => 'categories'], function () {
@@ -97,6 +112,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
       Route::put('cancel', 'OrderController@cancel_order');
       Route::get('track', 'OrderController@track_order');
       Route::put('payment-method', 'OrderController@update_payment_method');
+      Route::post('create-order', 'OrderController@create_order');
+      
     });
 
     Route::group(['prefix' => 'wish-list'], function () {
@@ -110,6 +127,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('add', 'CartController@add_to_cart');
         Route::post('remove', 'CartController@add_to_cart');
         Route::post('list', 'CartController@list');
+        Route::post('final-cart', 'CartController@final_cart');
     });
 
     Route::get('pages', 'TimeSlotController@all_pages');
@@ -156,10 +174,23 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('/', 'BannerController@get_banners');
     });
 
-    Route::group(['prefix' => 'coupon', 'middleware' => 'auth:api'], function () {
+    // Route::group(['prefix' => 'coupon', 'middleware' => 'auth:api'], function () {
+    //     Route::get('list', 'CouponController@list');
+    //     Route::get('apply', 'CouponController@apply');
+    // });
+
+    Route::group(['prefix' => 'wallet'], function () {
+        Route::get('user-balance', 'WalletController@user_balance');
+        Route::post('create-order', 'WalletController@create_order');
+        Route::post('update-order', 'WalletController@update_order');
+        Route::post('wallet-histories', 'WalletController@wallet_histories');
+    });
+
+    Route::group(['prefix' => 'coupon'], function () {
         Route::get('list', 'CouponController@list');
         Route::get('apply', 'CouponController@apply');
     });
+
     //map api
     Route::group(['prefix' => 'mapapi'], function () {
         Route::get('place-api-autocomplete', 'MapApiController@place_api_autocomplete');

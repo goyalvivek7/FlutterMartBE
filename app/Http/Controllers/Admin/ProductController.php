@@ -6,6 +6,7 @@ use App\CentralLogics\Helpers;
 use App\Http\Controllers\Controller;
 use App\Model\Category;
 use App\Model\Product;
+use App\Model\Brand;
 use App\Model\Review;
 use App\Model\Translation;
 use Brian2694\Toastr\Facades\Toastr;
@@ -305,20 +306,233 @@ class ProductController extends Controller
         return response()->json([], 200);
     }
 
-    public function sync_products(Request $request)
-    {
-        //$apiUrl = "http://103.234.185.42:50/API/Item";
-        //$client = new Client();
+    public function sync_products(Request $request){
 
-        $companyResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute1?TokenId=TESMART');
-        $companyResponseArray = json_decode($companyResponse,TRUE);
-        if(is_array($companyResponseArray) && !empty($companyResponseArray)){
-            foreach($companyResponseArray as $companyArray){
-                foreach($companyArray as $company){
-                    echo '<pre />'; print_r($company);
+        // $companyResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute1?TokenId=TESMART');
+        // $companyResponseArray = json_decode($companyResponse,TRUE);
+        // if(is_array($companyResponseArray) && !empty($companyResponseArray)){
+
+        //     Brand::where('id', '!=', null)->update(['status' => 0]);
+
+        //     foreach($companyResponseArray as $companyArray){
+        //         foreach($companyArray as $company){
+                    
+        //             $companyId = $company['company_id'];
+        //             $brandApiStatus = $company['status'];
+                    
+        //             if($brandApiStatus == "N"){
+        //                 $brandStatus = 0;
+        //             } elseif($brandApiStatus == "Y"){
+        //                 $brandStatus = 1;
+        //             }
+
+        //             $checkBrand = DB::table('brands')->where('company_id', $companyId)->limit(1)->get();
+        //             if($checkBrand && !empty($checkBrand) && isset($checkBrand[0]) && !empty($checkBrand[0])){
+
+        //                 Brand::where(['company_id' => $companyId])->update([
+        //                     'company_name' => $company['company_name'],
+        //                     'company_subtitle' => $company['company_subtitle'],
+        //                     'status' => $brandStatus,
+        //                     'created_date' => $company['date_time'],
+        //                 ]);
+
+        //             } else {    
+
+        //                 $brandData = [
+        //                     'company_id' => $company['company_id'],
+        //                     'company_name' => $company['company_name'],
+        //                     'company_subtitle' => $company['company_subtitle'],
+        //                     'status' => $brandStatus,
+        //                     'created_date' => $company['date_time']
+        //                 ];
+        //                 DB::table('brands')->insert($brandData);
+
+        //             }
+
+        //         }
+        //     }
+        // }
+
+
+
+        // Main Category API
+        $categoryResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute2?TokenId=TESMART');
+        $categoryResponseArray = json_decode($categoryResponse,TRUE);
+        if(is_array($categoryResponseArray) && !empty($categoryResponseArray)){
+
+            Category::where('id', '!=', null)->update(['status' => 0]);
+
+            foreach($categoryResponseArray as $categoryArray){
+                foreach($categoryArray as $catArray){
+
+                    $catCode = $catArray['category_id'];
+                    $catName = $catArray['category_name'];
+                    $catSubtitle = $catArray['category_subtitle'];
+                    $catApiStatus = $catArray['status'];
+                    $parentCompanyId = $catArray['parent_company_id'];
+                    $dateTime = $catArray['date_time'];
+
+                    if($catApiStatus == "N"){
+                        $catStatus = 0;
+                    } elseif($catApiStatus == "Y"){
+                        $catStatus = 1;
+                    }
+
+                    $checkCategory = DB::table('categories')->where('code', $catCode)->limit(1)->get();
+
+                    if($parentCompanyId == ""){
+                        $parentCompanyId = 0;
+                    }
+
+                    if($checkCategory && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
+
+                        Category::where(['code' => $catCode])->update([
+                            'name' => $catName,
+                            'sub_title' => $catSubtitle,
+                            'status' => $catStatus,
+                            'parent_id' => $parentCompanyId,
+                        ]);
+
+                    } else {    
+
+                        $catData = [
+                            'code' => $catCode,
+                            'name' => $catName,
+                            'sub_title' => $catSubtitle,
+                            'status' => $catStatus,
+                            'parent_id' => $parentCompanyId,
+                            'position' => 0,
+                        ];
+                        DB::table('categories')->insert($catData);
+
+                    }
+                }
+            }
+
+        }
+
+
+
+        // Sub Category API
+        $categoryResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute3?TokenId=TESMART');
+        $categoryResponseArray = json_decode($categoryResponse,TRUE);
+        if(is_array($categoryResponseArray) && !empty($categoryResponseArray)){
+
+            Category::where('id', '!=', null)->update(['status' => 0]);
+
+            foreach($categoryResponseArray as $categoryArray){
+                foreach($categoryArray as $catArray){
+
+                    $catCode = $catArray['category_id'];
+                    $catName = $catArray['category_name'];
+                    $catSubtitle = $catArray['category_subtitle'];
+                    $catApiStatus = $catArray['status'];
+                    $parentCompanyId = $catArray['parent_company_id'];
+                    $dateTime = $catArray['date_time'];
+
+                    if($catApiStatus == "N"){
+                        $catStatus = 0;
+                    } elseif($catApiStatus == "Y"){
+                        $catStatus = 1;
+                    }
+
+                    $checkCategory = DB::table('categories')->where('code', $catCode)->limit(1)->get();
+
+                    if($parentCompanyId == ""){
+                        $parentCompanyId = 0;
+                    }
+
+                    if($checkCategory && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
+
+                        Category::where(['code' => $catCode])->update([
+                            'name' => $catName,
+                            'sub_title' => $catSubtitle,
+                            'status' => $catStatus,
+                            'parent_id' => $parentCompanyId,
+                        ]);
+
+                    } else {    
+
+                        $catData = [
+                            'code' => $catCode,
+                            'name' => $catName,
+                            'sub_title' => $catSubtitle,
+                            'status' => $catStatus,
+                            'parent_id' => $parentCompanyId,
+                            'position' => 1,
+                        ];
+                        DB::table('categories')->insert($catData);
+
+                    }
                 }
             }
         }
+        
+
+        // Child Category API
+        $categoryResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute4?TokenId=TESMART');
+        $categoryResponseArray = json_decode($categoryResponse,TRUE);
+        if(is_array($categoryResponseArray) && !empty($categoryResponseArray)){
+
+            Category::where('id', '!=', null)->update(['status' => 0]);
+
+            foreach($categoryResponseArray as $categoryArray){
+                foreach($categoryArray as $catArray){
+
+                    $catCode = $catArray['category_id'];
+                    $catName = $catArray['category_name'];
+                    $catSubtitle = $catArray['category_subtitle'];
+                    $catApiStatus = $catArray['status'];
+                    $parentCompanyId = $catArray['parent_company_id'];
+                    $dateTime = $catArray['date_time'];
+
+                    if($catApiStatus == "N"){
+                        $catStatus = 0;
+                    } elseif($catApiStatus == "Y"){
+                        $catStatus = 1;
+                    }
+
+                    $checkCategory = DB::table('categories')->where('code', $catCode)->limit(1)->get();
+
+                    if($parentCompanyId == ""){
+                        $parentCompanyId = 0;
+                    }
+
+                    if($checkCategory && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
+
+                        Category::where(['code' => $catCode])->update([
+                            'name' => $catName,
+                            'sub_title' => $catSubtitle,
+                            'status' => $catStatus,
+                            'parent_id' => $parentCompanyId,
+                        ]);
+
+                    } else {
+
+                        $catData = [
+                            'code' => $catCode,
+                            'name' => $catName,
+                            'sub_title' => $catSubtitle,
+                            'status' => $catStatus,
+                            'parent_id' => $parentCompanyId,
+                            'position' => 2,
+                        ];
+                        DB::table('categories')->insert($catData);
+
+                    }
+                }
+            }
+
+        }
+
+
+
+
+
+
+
+
+
         die;
 
         $bnpResponse = file_get_contents('http://103.234.185.42:50/API/Item?TokenId=TESMART');

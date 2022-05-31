@@ -15,9 +15,49 @@ use App\Model\Translation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
+
+    public function barcode_product($barcode)
+    {
+        try {
+
+            $getProducts = DB::table('products')->where('bar_code', $barcode)->get();
+
+            if(count($getProducts) > 0){
+                $id = $getProducts[0]->id;
+
+                $product = ProductLogic::get_product($id);
+
+                $response['status'] = 'success';
+                if(isset($product) && !empty($product)){
+                    $product = Helpers::product_data_formatting($product, false);
+                    $response['message'] = 'Product Detail Found.';
+                    $response['data'][] = $product;
+                } else {
+                    $response['message'] = 'Product Detail Not Found.';
+                    $response['data'] = [];
+                }
+
+            } else {
+                $response['status'] = 'fail';
+                $response['message'] = 'No Product Detail Found.';
+                $response['data'] = [];
+            }
+
+            
+
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            $response['status'] = 'fail';
+            $response['message'] = 'No Product Detail Found.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+            //return response()->json(['errors' => ['code' => 'product-001', 'message' => 'Product not found!'],], 404);
+        }
+    }
   	
   	public function recent_search(Request $request)
     {
@@ -238,13 +278,19 @@ class ProductController extends Controller
   
   	public function homepage_sales(){
         try {
-          
+
           	$bannerRecords = Banner::where(['status'=>1])->get();
           	$salesRecords = Sale::where(['status'=>1])->get();
             
             $bannerArray = array(); $saleData = [];  $resData = []; $salearray = array();
+
+            $welcomeReords = DB::table('miscellaneous')->where('setting_type', 'welcome_icons')->where('status', 1)->orderBy('priorty', 'ASC')->get();
+            if($welcomeReords && $welcomeReords != "" && $welcomeReords != NULL){
+                $salearray['welcome_icons'] = $welcomeReords;
+            }
+
             if($salesRecords && $salesRecords != "" && $salesRecords != NULL){
-                
+
                 foreach($salesRecords as $saleRecord){
                     //echo '<pre />'; print_r($saleRecord);
                     //$salearray = array();

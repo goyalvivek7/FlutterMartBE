@@ -337,7 +337,7 @@ class Helpers
         } else {
             $data = '{"status":"0","message":""}';
         }
-
+        //echo $status.'<pre />'; print_r($data); die;
         $res = json_decode($data, true);
 
         if ($res['status'] == 0) {
