@@ -44,6 +44,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('last-location', 'DeliverymanController@get_last_location');
         Route::put('update-fcm-token', 'DeliverymanController@update_fcm_token');
         Route::get('cancel-reasons', 'DeliverymanController@cancel_reasons');
+        Route::post('notifications', 'DeliverymanController@notifications');
 
         Route::group(['prefix' => 'reviews', 'middleware' => ['auth:api']], function () {
             Route::get('/{delivery_man_id}', 'DeliveryManReviewController@get_reviews');
@@ -68,6 +69,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('daily-needs', 'ProductController@get_daily_need_products');
         Route::post('reviews/submit', 'ProductController@submit_product_review')->middleware('auth:api');
       	Route::get('homepagesales', 'ProductController@homepage_sales');
+        Route::get('smart-deals', 'ProductController@smart_deals');
         Route::get('barcode/{barcode}', 'ProductController@barcode_product');
     });
 
@@ -109,7 +111,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
       Route::get('list', 'OrderController@get_order_list');
       Route::get('details', 'OrderController@get_order_details');
       Route::post('place', 'OrderController@place_order');
-      Route::put('cancel', 'OrderController@cancel_order');
+      Route::post('cancel', 'OrderController@cancel_order');
+      Route::post('order-history', 'OrderController@order_history');
       Route::get('track', 'OrderController@track_order');
       Route::put('payment-method', 'OrderController@update_payment_method');
       Route::post('create-order', 'OrderController@create_order');
@@ -128,6 +131,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('remove', 'CartController@add_to_cart');
         Route::post('list', 'CartController@list');
         Route::post('final-cart', 'CartController@final_cart');
+        Route::get('membership-package', 'CartController@membership_package');
+        Route::post('create-membership-order', 'CartController@create_membership_order');
     });
 
     Route::get('pages', 'TimeSlotController@all_pages');

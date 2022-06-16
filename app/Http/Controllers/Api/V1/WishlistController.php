@@ -91,7 +91,7 @@ class WishlistController extends Controller
             //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
         //$wishList = Wishlist::where('user_id', $request->user_id)->get();
-        $wishList = Wishlist::select('wishlists.*', 'products.*', 'wishlists.id AS wishlist_id')->leftJoin('products', 'products.id', '=', 'wishlists.product_id')->where('wishlists.user_id', $request->user_id)->get();
+        $wishList = Wishlist::select('wishlists.*', 'products.*', 'wishlists.id AS wishlist_id', 'categories.name AS child_cat_name')->leftJoin('products', 'products.id', '=', 'wishlists.product_id')->leftJoin('categories', 'categories.id', '=', 'products.child_cat_id')->where('wishlists.user_id', $request->user_id)->get();
         $response['status'] = 'success';
         $response['message'] = 'Wishlist successfully fetched!';
         $response['data'] = $wishList;

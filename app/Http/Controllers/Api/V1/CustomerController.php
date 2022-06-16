@@ -43,6 +43,12 @@ class CustomerController extends Controller
           	return response()->json(['state' => 'Add Address', 'status' => 'fail'], 200);
         }
 
+        if($request->is_default && $request->is_default != ""){
+            $isDefault = $request->is_default;
+        } else {
+            $isDefault = 0;
+        }
+
         $address = [
             //'user_id' => $request->user()->id,
           	'user_id' => $request->user_id,
@@ -52,6 +58,7 @@ class CustomerController extends Controller
             'address' => $request->address,
             'longitude' => $request->longitude,
             'latitude' => $request->latitude,
+            'is_default' => $isDefault,
             'created_at' => now(),
             'updated_at' => now()
         ];

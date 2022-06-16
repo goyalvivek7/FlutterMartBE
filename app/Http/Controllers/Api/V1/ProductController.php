@@ -20,6 +20,24 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
 
+    
+    
+    public function smart_deals(){
+        try {
+            $smartDeals = DB::table('smart_deals')->where('status', 1)->get();
+            $response['status'] = 'success';
+            $response['message'] = 'Smart deals found.';
+            $response['data'] = $smartDeals;
+            return response()->json($response, 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'errors' => ["status" => "fail", 'message' => "Smart deals not found!", 'data' => []],
+            ], 404);
+        }
+    }
+
+
+
     public function barcode_product($barcode)
     {
         try {
@@ -69,13 +87,27 @@ class ProductController extends Controller
         } else {
             $apiStatus = "success";
         }
-        $apiStatus = "success";
-        $search = [
-            'total_size' => count($searchTerms),
-            'status' => $apiStatus,
-            'terms' => $searchTerms
-        ];
-        return response()->json($search, 200);
+        
+        // $search = [
+        //     'total_size' => count($searchTerms),
+        //     'status' => $apiStatus,
+        //     'terms' => $searchTerms
+        // ];
+
+        // return response()->json($search, 200);
+
+        $response['status'] = $apiStatus;
+        $response['message'] = 'Recent Search';
+        if(count($searchTerms)>0){
+            $response['data'] = $searchTerms;
+        } else {
+            $response['data'] = [];
+        }
+        $response['total_size'] = count($searchTerms);
+        
+        return response()->json($response, 200);
+
+        
     }
   
     public function get_latest_products(Request $request)

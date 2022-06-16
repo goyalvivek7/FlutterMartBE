@@ -153,7 +153,7 @@ class CartController extends Controller
         $userId = $request['user_id'];
         $couponDiscount = 0;
 
-        $cartOrder = DB::table('cart')->where('user_id', $userId)->where('status', 'pending')->get();
+        $cartOrder = DB::table('cart')->where('user_id', $userId)->get();
 
         if(!empty($cartOrder) && isset($cartOrder[0])){
 
@@ -169,8 +169,7 @@ class CartController extends Controller
                 $deliveryManagement = DB::table('business_settings')->where('key', 'delivery_management')->get();
                 $deliveryCharge = DB::table('business_settings')->where('key', 'delivery_charge')->get();
 
-                //$totalPrice += ($cart->quantity * $cart->total_price);
-                $totalPrice += $cart->total_price;
+                $totalPrice += ($cart->quantity * $cart->total_price);
                 $basicPrice += ($cart->quantity * $cart->product_price);
 
                 if(isset($productData) && !empty($productData[0])){
@@ -192,15 +191,12 @@ class CartController extends Controller
                     }
                     //echo '<pre />'; print_r($categoryArray);
 
-                    //echo $productData[0]->name.'----'.$taxType.'---'.$tax.'<br />';
+
                     if($taxType == "percent"){
-                        //$taxAmount += ($cart->quantity * (($tax * $cart->total_price)/100));
-                        $taxAmount += ($cart->quantity * (($tax * $cart->product_price)/100));
-                        //echo "percent--".$taxAmount.'<br />';
+                        $taxAmount += ($cart->quantity * (($tax * $cart->total_price)/100));
                     }
                     if($taxType == "amount"){
                         $taxAmount += ($cart->quantity * $tax);
-                        //echo "amount--".$taxAmount.'<br />';
                     }
                 }
 
@@ -379,6 +375,7 @@ class CartController extends Controller
             'user_id' => 'required',
             'product_id' => 'required',
             'quantity' => 'required',
+            'variations-type' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -391,12 +388,7 @@ class CartController extends Controller
         $userId = $request['user_id'];
         $productId = $request['product_id'];
         $quantity = $request['quantity'];
-
-        if(isset($request['variations-type']) && $request['variations-type'] != ""){
-            $variationsType = $request['variations-type'];
-        } else {
-            $variationsType = "";
-        }
+        $variationsType = $request['variations-type'];
         
         if($quantity <= 0){
             DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('status', 'pending')->delete();
@@ -425,7 +417,6 @@ class CartController extends Controller
                         $productImage = "";
                         $productImages = $productData[0]->image;
                         $productCode = $productData[0]->sku;
-                        $totalCartPrice = 0;
 
                         if($variationsType != ""){
                             if($variations != '[]'){
@@ -435,7 +426,6 @@ class CartController extends Controller
                                         $productPrice = $variation->price;
                                     }
                                 }
-                                $totalCartPrice = $productPrice * $quantity;
                             }
                         } else {
                             if($quantity > $totalStock){
@@ -448,12 +438,10 @@ class CartController extends Controller
 
                         if($discount != 0){
                             if($discountType == "amount"){
-                                //$productPrice = ($productPrice-$discount);
-                                $totalCartPrice = ($totalCartPrice-($discount * $quantity));
+                                $productPrice = ($productPrice-$discount);
                             }
                             if($discountType == "percent"){
-                                //$productPrice = (($productPrice*$discount)/100);
-                                $totalCartPrice = ($totalCartPrice - (($totalCartPrice*$discount)/100));
+                                $productPrice = (($productPrice*$discount)/100);
                             }
                         }
 
@@ -464,14 +452,15 @@ class CartController extends Controller
 
 
                         Cart::where(['user_id' => $request['user_id'], 'product_id' => $productId])->update([
-                            'product_price'  => $productPrice,
+                            'product_price'  => $productOrgPrice,
                             'product_image'  => $productImage,
                             'quantity'  => $quantity,
                             'variations'  => $variationsType,
                             'discount'  => $discount,
                             'discount_type'  => $discountType,
-                            'total_price'  => $totalCartPrice,
+                            'total_price'  => $productPrice,
                             'product_code'  => $productCode,
+                            'variations'  => $productCode,
                         ]);
 
                     }
@@ -494,7 +483,6 @@ class CartController extends Controller
                 $productImage = "";
                 $productImages = $productData[0]->image;
                 $productCode = $productData[0]->sku;
-                $totalCartPrice = 0;
 
                 if($variationsType != ""){
                     if($variations != '[]'){
@@ -504,7 +492,6 @@ class CartController extends Controller
                                 $productPrice = $variation->price;
                             }
                         }
-                        $totalCartPrice = $productPrice * $quantity;
                     }
                 } else {
                     if($quantity > $totalStock){
@@ -512,19 +499,15 @@ class CartController extends Controller
                         $response['message'] = 'This product quantity is out of stock.';
                         $response['data'] = [];
                         return response()->json($response, 200);
-                    } else {
-                        $totalCartPrice = $productPrice * $quantity;
                     }
                 }
 
                 if($discount != 0){
                     if($discountType == "amount"){
-                        //$productPrice = ($productPrice-$discount);
-                        $totalCartPrice = ($totalCartPrice-($discount * $quantity));
+                        $productPrice = ($productPrice-$discount);
                     }
                     if($discountType == "percent"){
-                        //$productPrice = (($productPrice*$discount)/100);
-                        $totalCartPrice = ($totalCartPrice - (($totalCartPrice*$discount)/100));
+                        $productPrice = ($productPrice - (($productPrice*$discount)/100));
                     }
                 }
 
@@ -537,13 +520,13 @@ class CartController extends Controller
                 $cart->user_id = $request['user_id'];
                 $cart->product_id = $request['product_id'];
                 $cart->product_name = $productName;
-                $cart->product_price = $productPrice;
+                $cart->product_price = $productOrgPrice;
                 $cart->product_image = $productImage;
                 $cart->quantity = $quantity;
                 $cart->variations = $variationsType;
                 $cart->discount = $discount;
                 $cart->discount_type = $discountType;
-                $cart->total_price = $totalCartPrice;
+                $cart->total_price = $productPrice;
                 $cart->product_code = $productCode;
                 $cart->save();
                 
@@ -561,8 +544,8 @@ class CartController extends Controller
         $basicCart['total_items'] = count($cartOrder);
         $totalPrice = 0;
         foreach($cartOrder as $cart){
-            //$totalPrice += ($cart->quantity * $cart->total_price);
-            $totalPrice += $cart->total_price;
+            //echo '<pre />'; print_r($cart);
+            $totalPrice += ($cart->quantity * $cart->total_price);
         }
         $basicCart['total_amount'] = $totalPrice;
 

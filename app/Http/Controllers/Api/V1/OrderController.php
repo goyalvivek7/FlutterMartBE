@@ -9,6 +9,7 @@ use App\Model\BusinessSetting;
 use App\Model\DMReview;
 use App\Model\Order;
 use App\Model\OrderDetail;
+use App\Model\OrderHistory;
 use App\Model\Product;
 use App\Model\Review;
 use App\Model\CartFinal;
@@ -22,6 +23,43 @@ use Session;
 class OrderController extends Controller
 {
   
+    public function order_history(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'order_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = [];
+
+            return response()->json($response, 200);
+        }
+
+        $userId = $request['user_id'];
+        $orderId = $request['order_id'];
+
+        $orderHistoryData = OrderHistory::Where(['order_id' => $orderId, 'user_id' => $userId])->get();
+        
+        if ($orderHistoryData->count() > 0) {
+
+            $response['status'] = 'successs';
+            $response['message'] = 'Order History Found';
+            $response['data'] = $orderHistoryData;
+            return response()->json($response, 200);
+
+        } else {
+
+            $response['status'] = 'fail';
+            $response['message'] = 'Order History Not Found';
+            $response['data'] = [];
+            return response()->json($response, 200);
+
+        }
+
+    }
   	
   	public function create_order(Request $request){
 
@@ -338,6 +376,11 @@ class OrderController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
+      	$orderdata = Order::where(['id' => $request['order_id']])->get();
+      	$delivery_address_id = $orderdata[0]->delivery_address_id;
+        $addressData = DB::table('customer_addresses')->where('id', $delivery_address_id)->get();
+      	//echo '<pre />'; print_r($addressData);
+      
         $details = OrderDetail::where(['order_id' => $request['order_id']])->get();
 
         if ($details->count() > 0) {
@@ -350,6 +393,8 @@ class OrderController extends Controller
           
           	$response['status'] = 'success';
             $response['message'] = 'Order detail fetched successfully!';
+          	$response['order_data'] = $orderdata;
+          	$response['address_data'] = $addressData;
             $response['data'] = $details;
           	return response()->json($response, 200);
           
@@ -363,43 +408,126 @@ class OrderController extends Controller
         }
     }
 
-    public function cancel_order(Request $request)
-    {
-        if (Order::where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->first()) {
 
-            $order = Order::with(['details'])->where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->first();
+    public function cancel_order(Request $request){
 
-            foreach ($order->details as $detail) {
-                if ($detail['is_stock_decreased'] == 1) {
-                    $product = Product::find($detail['product_id']);
-                    $type = json_decode($detail['variation'])[0]->type;
-                    $var_store = [];
-                    foreach (json_decode($product['variations'], true) as $var) {
-                        if ($type == $var['type']) {
-                            $var['stock'] += $detail['quantity'];
-                        }
-                        array_push($var_store, $var);
-                    }
-                    Product::where(['id' => $product['id']])->update([
-                        'variations'  => json_encode($var_store),
-                        'total_stock' => $product['total_stock'] + $detail['quantity'],
-                    ]);
-                    OrderDetail::where(['id' => $detail['id']])->update([
-                        'is_stock_decreased' => 0,
-                    ]);
-                }
-            }
-            Order::where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->update([
-                'order_status' => 'canceled',
-            ]);
-            return response()->json(['message' => 'Order canceled'], 200);
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required',
+            'user_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all input';
+            $response['data'] = [];
+          	return response()->json($response, 200);
         }
-        return response()->json([
-            'errors' => [
-                ['code' => 'order', 'message' => 'not found!'],
-            ],
-        ], 401);
+
+        $userId = $request['user_id'];
+        $orderId = $request['order_id'];
+
+        if (Order::where(['user_id' => $userId, 'id' => $orderId])->first()) {
+
+            $order = Order::with(['details'])->where(['user_id' => $userId, 'id' => $orderId])->first();
+            $orderStatus = $order['order_status'];
+
+            $resOrderStatus[] = 'out_for_delivery'; $resOrderStatus[] = 'delivered';
+            $resOrderStatus[] = 'returned'; $resOrderStatus[] = 'failed'; $resOrderStatus[] = 'canceled';
+            
+            if(in_array($orderStatus, $resOrderStatus)){
+
+                $response['status'] = 'fail';
+                $response['message'] = 'Order not eligible for cancel request, Order out for delivery or deliverd.';
+                $response['data'] = [];
+                return response()->json($response, 200);
+            } else {
+
+                foreach ($order->details as $detail) {
+                    if ($detail['is_stock_decreased'] == 1) {
+                        $product = Product::find($detail['product_id']);
+                        $type = json_decode($detail['variation'])[0]->type;
+                        $var_store = [];
+                        foreach (json_decode($product['variations'], true) as $var) {
+                            if ($type == $var['type']) {
+                                $var['stock'] += $detail['quantity'];
+                            }
+                            array_push($var_store, $var);
+                        }
+                        Product::where(['id' => $product['id']])->update([
+                            'variations'  => json_encode($var_store),
+                            'total_stock' => $product['total_stock'] + $detail['quantity'],
+                        ]);
+                        OrderDetail::where(['id' => $detail['id']])->update([
+                            'is_stock_decreased' => 0,
+                        ]);
+                    }
+                }
+                Order::where(['user_id' => $userId, 'id' => $orderId])->update([
+                    'order_status' => 'canceled',
+                ]);
+
+                $orderHistoryData = OrderHistory::create([
+                    'order_id' => $orderId,
+                    'user_id' => $userId,
+                    'user_type' => 'user',
+                    'status_captured' => 'canceled',
+                    'status_reason' => "user cancel request"
+                ]);
+
+                $response['status'] = 'success';
+                $response['message'] = 'Order canceled';
+                $response['data'] = [];
+                return response()->json($response, 200);
+
+                //return response()->json(['message' => 'Order canceled'], 200);
+
+            }
+        }
+        $response['status'] = 'fail';
+        $response['message'] = 'Order Not Found.';
+        $response['data'] = [];
+        return response()->json($response, 200);
     }
+
+
+    // public function cancel_order(Request $request)
+    // {
+    //     if (Order::where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->first()) {
+
+    //         $order = Order::with(['details'])->where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->first();
+
+    //         foreach ($order->details as $detail) {
+    //             if ($detail['is_stock_decreased'] == 1) {
+    //                 $product = Product::find($detail['product_id']);
+    //                 $type = json_decode($detail['variation'])[0]->type;
+    //                 $var_store = [];
+    //                 foreach (json_decode($product['variations'], true) as $var) {
+    //                     if ($type == $var['type']) {
+    //                         $var['stock'] += $detail['quantity'];
+    //                     }
+    //                     array_push($var_store, $var);
+    //                 }
+    //                 Product::where(['id' => $product['id']])->update([
+    //                     'variations'  => json_encode($var_store),
+    //                     'total_stock' => $product['total_stock'] + $detail['quantity'],
+    //                 ]);
+    //                 OrderDetail::where(['id' => $detail['id']])->update([
+    //                     'is_stock_decreased' => 0,
+    //                 ]);
+    //             }
+    //         }
+    //         Order::where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->update([
+    //             'order_status' => 'canceled',
+    //         ]);
+    //         return response()->json(['message' => 'Order canceled'], 200);
+    //     }
+    //     return response()->json([
+    //         'errors' => [
+    //             ['code' => 'order', 'message' => 'not found!'],
+    //         ],
+    //     ], 401);
+    // }
 
     public function update_payment_method(Request $request)
     {

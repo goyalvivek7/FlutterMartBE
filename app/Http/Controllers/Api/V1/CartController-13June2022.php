@@ -11,136 +11,14 @@ use App\Model\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use Razorpay\Api\Api;
 
 class CartController extends Controller
 {
 
-    public function order_update(Request $request){
-
-        $validator = Validator::make($request->all(), [
-            'order_id' => 'required',
-            'orser_status' => 'required'
-        ]);
-
-        if ($validator->fails()) {
-            $response['status'] = 'fail';
-            $response['message'] = 'Please send all required fields.';
-            $response['data'] = [];
-
-            return response()->json($response, 200);
-        }
-
-        $orderId = $request['order_id'];
-        $orserStatus = $request['orser_status'];
-        $memberOrder = DB::table('memberships')->where('order_id', $orderId)->get();
-
-        if(count($memberOrder) > 0){
-            
-        } else {
-            $response['status'] = 'fail';
-            $response['message'] = 'Order Not Found';
-            $response['data'] = [];
-            return response()->json($response, 200);
-        }
-
-
-    }
-
-
-    public function create_membership_order(Request $request){
-
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
-            'amount' => 'required',
-            'package_id' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            $response['status'] = 'fail';
-            $response['message'] = 'Please send all required fields.';
-            $response['data'] = [];
-
-            return response()->json($response, 200);
-        }
-        
-        if($request['user_id'] != ""){
-
-            $userId = $request['user_id'];
-            $amount = $request['amount'];
-            $packageId = $request['package_id'];
-
-            $lastWallet = DB::table('memberships')->whereNotNull('receipt_id')->limit(1)->orderBy('id', 'DESC')->get();
-            if(count($lastWallet) > 0){
-                $receiptId = (($lastWallet[0]->receipt_id) + 1);
-            } else {
-                $receiptId = 1;
-            }
-
-          	$amount = ($amount * 100);
-          
-            $api = new Api(config('razor.razor_key'), config('razor.razor_secret'));
-            $orderData = $api->order->create(
-                array(
-                    'receipt' => $receiptId, 
-                    'amount' => $amount, 
-                    'currency' => 'INR', 
-                    'notes'=> array(
-                        'user_id'=> $userId,
-                        'order_type'=> "membership"
-                    )
-                )
-            );
-            
-            if(isset($orderData) && $orderData['status'] == "created"){
-
-                $orderId = $orderData['id'];
-                $orderAmount = ($orderData['amount']/100);
-                $orderReceipt = $orderData['receipt'];
-                $orderNotes = $orderData['notes'];
-                $orderUserId = $orderNotes->user_id;
-                $orderOrderType = $orderNotes->order_type;
-                
-                
-                $walletOrders = [
-                    'user_id' => $orderUserId,
-                    'order_id' => $orderId,
-                    'package_id' => $packageId,
-                    'amount' => $orderAmount,
-                    'receipt_id' => $orderReceipt,
-                    'order_status' => $orderData['status']
-                ];
-                
-                DB::table('memberships')->insert($walletOrders);
-
-                $orderAray['order_id'] = $orderId;
-                $orderAray['user_id'] = $orderUserId;
-                $orderAray['amount'] = $orderAmount;
-                $orderAray['receipt_id'] = $orderReceipt;
-                $orderAray['status'] = $orderData['status'];
-                $orderAray['order_type'] = $orderOrderType;
-
-                $response['status'] = 'success';
-                $response['message'] = 'Order Created';
-                $response['data'][] = $orderAray;
-                return response()->json($response, 200);
-
-            } else {
-
-                $response['status'] = 'fail';
-                $response['message'] = 'Getting some error in generating order';
-                $response['data'] = [];
-                return response()->json($response, 200);
-
-            }
-        }
-    }
-
-
     public function final_cart(Request $request){
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
-            'is_wallet' => 'required'
+            'payment_type' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -151,225 +29,272 @@ class CartController extends Controller
         }
 
         $userId = $request['user_id'];
-        $couponDiscount = 0;
+        $paymentType = $request['payment_type'];
+
+        $cartOrder = DB::table('cart')->where('user_id', $userId)->where('status', 'pending')->get();
+        if(!empty($cartOrder) && isset($cartOrder[0])){
+
+            $cartTotal = 0; $cartIdArray = array(); $productArray = array(); $basicPrice = 0;
+            $fDiscount = 0;
+            foreach($cartOrder as $cart){
+                $cartTotal += $cart->total_price;
+                $productId = $cart->product_id;
+                $quantity = $cart->quantity;
+                $productPrice = $cart->product_price;
+                $cartIdArray[] = $cart->id;
+                $discount = $cart->discount;
+                $discountType = $cart->discount_type;
+
+                $productArray[] = $productId;
+                $basicPrice += ($productPrice * $quantity);
+
+                if($discount != 0){
+                    if($discountType == "amount"){
+                        $fDiscount += ($basicPrice-$discount);
+                    }
+                    if($discountType == "percent"){
+                        $fDiscount += ($basicPrice - (($basicPrice*$discount)/100));
+                    }
+                }
+            }
+
+            $cartArray['cart_total'] = $cartTotal;
+            $finalTotal = $cartTotal;
+
+            $paymentSettings = DB::table('payment_settings')->where('status', 1)->get();
+            if(!empty($paymentSettings) && isset($paymentSettings[0])){
+                foreach($paymentSettings as $setting){
+                    $chargeTitle = $setting->setting_title;
+                    $chargeType = $setting->charge_type;
+                    $chargeValue = $setting->charge_value;
+                    $cartValue = 0;
+                    if($chargeType == "percentage"){
+                        $cartValue = (($cartTotal * $chargeValue) / 100);
+                    }
+                    if($chargeType == "amount"){
+                        $cartValue = $chargeValue;
+                    }
+                    $cartArray[$chargeTitle] = $cartValue;
+                    $finalTotal += $cartValue;
+                }
+            }
+
+
+            if($paymentType == "full"){
+                $finalAmount = $finalTotal;
+                $remainingBalance = 0;
+            }
+
+            $paymentOption = 0;
+            if($paymentType == "partial"){
+                $paymentOption = $request['payment_option'];
+                $paymentOptions = DB::table('payment_options')->where('id', $paymentOption)->get();
+                if(!empty($paymentOptions) && isset($paymentOptions[0])){
+                    foreach($paymentOptions as $pOptions){
+                        $paymentPricePercentage = $pOptions->payment_price_percentage;
+                        $finalAmount = (($finalTotal * $paymentPricePercentage) / 100);
+                        $remainingBalance = ($finalTotal - $finalAmount);
+                    }
+                }
+
+            }
+            
+            $finalCart = CartFinal::where('user_id', $userId)->where('cart_status', 'pending')->get();
+            if(!empty($finalCart) && isset($finalCart[0])){
+
+                CartFinal::where(['user_id' => $userId, 'cart_status' => 'pending'])->update([
+                    'cart_list'  => json_encode($cartIdArray),
+                    'product_list'  => json_encode($productArray),
+                    'order_charges' => json_encode($cartArray),
+                    'total_amount'  => round($cartTotal, 2),
+                    'basic_amount'  => round($basicPrice, 2),
+                    'total_discount'  => round($fDiscount, 2),
+                    'sub_total'  => round($finalTotal, 2),
+                    'remaining_sub_total' => round($remainingBalance, 2),
+                    'final_amount' => round($finalAmount),
+                    'payment_type' => $paymentType,
+                    'payment_option' => $paymentOption
+                ]);
+
+            } else {
+                $cartFinal = new CartFinal();
+                $cartFinal->user_id = $userId;
+
+                $cartFinal->cart_list  = json_encode($cartIdArray);
+                $cartFinal->product_list  = json_encode($productArray);
+                $cartFinal->order_charges  = json_encode($cartArray);
+                $cartFinal->total_amount  = round($cartTotal, 2);
+                $cartFinal->basic_amount  = round($basicPrice, 2);
+                $cartFinal->total_discount = round($fDiscount, 2);
+                $cartFinal->sub_total  = round($finalTotal, 2);
+                $cartFinal->remaining_sub_total  = round($remainingBalance, 2);
+                $cartFinal->final_amount  = round($finalAmount);
+                $cartFinal->payment_type  = $paymentType;
+                $cartFinal->payment_option  = $paymentOption;
+                $cartFinal->save();
+            }
+
+            $rData['amount_pay'] = $finalAmount;
+            $rData['user_id'] = $userId;
+            
+            $response['status'] = 'success';
+            $response['message'] = 'Order Updated';
+            $response['data'][] = $rData;
+            return response()->json($response, 200);
+        } else {
+            $response['status'] = 'fail';
+            $response['message'] = 'Cart Not Found';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+    }
+
+
+
+    public function check_cart(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required'
+        ]);
+        
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+        $userId = $request['user_id'];
 
         $cartOrder = DB::table('cart')->where('user_id', $userId)->where('status', 'pending')->get();
 
         if(!empty($cartOrder) && isset($cartOrder[0])){
 
-            $basicCart['total_items'] = count($cartOrder);
-            $totalPrice = 0.00; $basicPrice = 0.00; $taxAmount = 0.00; $catName = ""; $remainingBalance = 0.00;
-            $cartArray = array(); $productArray = array();
+            $cartTotal = 0;
             foreach($cartOrder as $cart){
-                $productId = $cart->product_id;
-                $cartArray[] = $cart->id;
-                $productArray[] = $productId;
-
-                $productData = DB::table('products')->where('id', $productId)->get();
-                $deliveryManagement = DB::table('business_settings')->where('key', 'delivery_management')->get();
-                $deliveryCharge = DB::table('business_settings')->where('key', 'delivery_charge')->get();
-
-                //$totalPrice += ($cart->quantity * $cart->total_price);
-                $totalPrice += $cart->total_price;
-                $basicPrice += ($cart->quantity * $cart->product_price);
-
-                if(isset($productData) && !empty($productData[0])){
-                    $tax = $productData[0]->tax;
-                    $taxType = $productData[0]->tax_type;
-                    $categoryArray = json_decode($productData[0]->category_ids);
-                    foreach($categoryArray as $category){
-                        $catPosition = $category->position;
-                        $catId = $category->id;
-
-                        if($catPosition == 1){
-                            $catArray = DB::table('categories')->where('id', $catId)->get();
-                            //echo '<pre />'; print_r($catArray[0]->name);
-                            if(isset($catArray)){
-                                $catName = $catArray[0]->name;
-                            }
-                        }
-
-                    }
-                    //echo '<pre />'; print_r($categoryArray);
-
-                    //echo $productData[0]->name.'----'.$taxType.'---'.$tax.'<br />';
-                    if($taxType == "percent"){
-                        //$taxAmount += ($cart->quantity * (($tax * $cart->total_price)/100));
-                        $taxAmount += ($cart->quantity * (($tax * $cart->product_price)/100));
-                        //echo "percent--".$taxAmount.'<br />';
-                    }
-                    if($taxType == "amount"){
-                        $taxAmount += ($cart->quantity * $tax);
-                        //echo "amount--".$taxAmount.'<br />';
-                    }
-                }
-
-                //echo '<pre />'; print_r(json_decode($deliveryManagement->value));
-                $deliveryArray = json_decode($deliveryManagement[0]->value);
-                $deliveryStatus = $deliveryArray->status;
-
-                if($deliveryStatus == 0){
-                    $delCharge = $deliveryCharge[0]->value;
-                } else {
-                    $delCharge = $deliveryArray->min_shipping_charge;
-                }
-
-                $cart->category_name = $catName;
-
-                //echo '<pre />'; print_r($deliveryArray);
-                //echo '<pre />'; print_r($deliveryCharge);
-            }
-            
-
-            if(isset($request['coupon_code']) && $request['coupon_code'] != ""){
-                $couponCode = $request['coupon_code'];
-
-                $coupon = Coupon::active()->where(['code' => $couponCode])->first();
-                
-                if (isset($coupon)) {
-                    if ($coupon['limit'] != null) {
-                        $total = Order::where(['user_id' => $request['user_id'], 'coupon_code' => $couponCode])->count();
-                        if ($total < $coupon['limit']) {
-                            
-                            $cMinPurchase = $coupon['min_purchase'];
-                            $cMaxDiscount = (float) $coupon['max_discount'];
-                            $cDiscount = $coupon['discount'];
-                            $cDiscountType = $coupon['discount_type'];
-                            //echo "In Final Cart"."!!!!";
-                            if($cDiscountType == "amount"){
-                                //echo $totalPrice."@@@@@";
-                                if($totalPrice >= $cMinPurchase){
-                                    $totalPrice = $totalPrice - $cDiscount;
-                                    if($totalPrice<0){
-                                        $totalPrice = 0;
-                                    }
-                                    $couponDiscount = $cDiscount;
-                                }
-                            }
-
-                            if($cDiscountType == "percent"){
-                              
-                                if($totalPrice >= $cMinPurchase){
-                                    $couponDiscount = (($cDiscount * $totalPrice)/100);
-                                    if($couponDiscount <= $cMaxDiscount){
-                                        $totalPrice = $totalPrice - $couponDiscount;
-                                    } else {
-                                        $totalPrice = $totalPrice - $coupon['max_discount'];
-                                      	$couponDiscount = $coupon['max_discount'];
-                                    }
-                                  	
-                                }
-                            }
-                            
-                        }
-                    }
-
-                }
-            } else {
-                $couponCode = "";
+                $cartTotal += $cart->total_price;
             }
 
-            $basicCart['total_amount'] = $totalPrice;
-            $basicCart['basic_amount'] = $basicPrice;
+            $cartArray['cart_total'] = $cartTotal;
+            $finalTotal = $cartTotal;
 
-            $fDiscount = ($basicPrice - $totalPrice);
-
-            $basicCart['total_discount'] = ($basicPrice - $totalPrice);
-            $basicCart['tax_amount'] = $taxAmount;
-            $basicCart['delivery_charge'] = $delCharge;
-            $basicCart['coupon_discount'] = $couponDiscount;
-
-            $sTotal = round(($totalPrice + $taxAmount + $delCharge), 2);
-
-            $basicCart['sub_total'] =  round(($totalPrice + $taxAmount + $delCharge), 2);
-            $basicCart['wallet_balance'] =  0;
-          	$basicCart['wallet_remaining'] = 0;
-
-            $remainingBalance = $basicCart['sub_total'];
-
-            if($request['is_wallet'] == 1){
-                $wallet = DB::table('wallet')->where('user_id', $request['user_id'])->get();
-                if(isset($wallet) && isset($wallet[0]) && $wallet[0]->balance){
-                    $walletBalance = $wallet[0]->balance;
-                    
-                  	if($basicCart['sub_total']<=$walletBalance){
-                      	$remainingBalance = 0;
-                      	$basicCart['wallet_balance'] = $basicCart['sub_total'];
-                      	$basicCart['wallet_remaining'] = $walletBalance - $basicCart['sub_total'];
-                    } else {
-                      	$remainingBalance = $basicCart['sub_total'] - $walletBalance;
-                      	$basicCart['wallet_balance'] = $walletBalance;
-                      	$basicCart['wallet_remaining'] = 0;
+            $paymentSettings = DB::table('payment_settings')->where('status', 1)->get();
+            if(!empty($paymentSettings) && isset($paymentSettings[0])){
+                foreach($paymentSettings as $setting){
+                    $chargeTitle = $setting->setting_title;
+                    $chargeType = $setting->charge_type;
+                    $chargeValue = $setting->charge_value;
+                    $cartValue = 0;
+                    if($chargeType == "percentage"){
+                        $cartValue = (($cartTotal * $chargeValue) / 100);
                     }
+                    if($chargeType == "amount"){
+                        $cartValue = $chargeValue;
+                    }
+                    $cartArray[$chargeTitle] = $cartValue;
+                    $finalTotal += $cartValue;
                 }
             }
+            $cartArray['final_total'] = $finalTotal;
 
-            $walletBalance = $basicCart['wallet_balance'];
-            $walletRemaining = $basicCart['wallet_remaining'];
-
-
-            $basicCart['remaining_sub_total'] =  round($remainingBalance, 2);
-
-            $finalCart = CartFinal::where('user_id', $userId)->where('cart_status', 'pending')->get();
-            if(!empty($finalCart) && isset($finalCart[0])){
-
-                CartFinal::where(['user_id' => $userId, 'cart_status' => 'pending'])->update([
-                    'cart_list'  => json_encode($cartArray),
-                    'product_list'  => json_encode($productArray),
-                    'total_amount'  => $totalPrice,
-                    'basic_amount'  => $basicPrice,
-                    'total_discount'  => $fDiscount,
-                    'coupon_code' => $couponCode,
-                    'tax_amount'  => $taxAmount,
-                    'delivery_charge'  => $delCharge,
-                    'coupon_discount'  => $couponDiscount,
-                    'sub_total'  => $sTotal,
-                    'wallet_balance'  => $walletBalance,
-                    'wallet_remaining'  => $walletRemaining,
-                    'remaining_sub_total' => round($remainingBalance, 2),
-                    'final_amount' => round($remainingBalance)
-                ]);
-
-            } else {
-
-                $cartFinal = new CartFinal();
-                $cartFinal->user_id = $userId;
-                $cartFinal->cart_list  = json_encode($cartArray);
-                $cartFinal->product_list  = json_encode($productArray);
-                $cartFinal->total_amount  = $totalPrice;
-                $cartFinal->basic_amount  = $basicPrice;
-                $cartFinal->total_discount  = $fDiscount;
-                $cartFinal->coupon_code = $couponCode;
-                $cartFinal->tax_amount  = $taxAmount;
-                $cartFinal->delivery_charge  = $delCharge;
-                $cartFinal->coupon_discount  = $couponDiscount;
-                $cartFinal->sub_total  = $sTotal;
-                $cartFinal->wallet_balance  = $walletBalance;
-                $cartFinal->wallet_remaining  = $walletRemaining;
-                $cartFinal->remaining_sub_total = round($remainingBalance, 2);
-                $cartFinal->cart_status = 'pending';
-                $cartFinal->final_amount = round($remainingBalance);
-                $cartFinal->save();
-
-            }
-
-
-            //$tax = $cart->total_price
             $response['status'] = 'success';
-            $response['message'] = 'Cart List';
-            $response['details'][] = $basicCart;
-            $response['items'] = $cartOrder;
+            $response['message'] = 'Cart Details';
+            $response['data'][] = $cartArray; 
             return response()->json($response, 200);
 
         } else {
-
             $response['status'] = 'fail';
             $response['message'] = 'Cart Not Found';
-            $response['items'] = [];
+            $response['data'] = []; 
             return response()->json($response, 200);
-
         }
+
+    }
+
+    public function payment_options(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+        $userId = $request['user_id'];
+        $cartOrder = DB::table('cart')->where('user_id', $userId)->where('status', 'pending')->get();
         
+        $cartTotal = 0; $finalTotal = 0;
+        if(!empty($cartOrder) && isset($cartOrder[0])){
+            foreach($cartOrder as $cart){
+                $cartTotal += $cart->total_price;
+            }
+            $finalTotal = $cartTotal;
+            $paymentSettings = DB::table('payment_settings')->where('status', 1)->get();
+            if(!empty($paymentSettings) && isset($paymentSettings[0])){
+                foreach($paymentSettings as $setting){
+                    $chargeTitle = $setting->setting_title;
+                    $chargeType = $setting->charge_type;
+                    $chargeValue = $setting->charge_value;
+                    $cartValue = 0;
+                    if($chargeType == "percentage"){
+                        $cartValue = (($cartTotal * $chargeValue) / 100);
+                    }
+                    if($chargeType == "amount"){
+                        $cartValue = $chargeValue;
+                    }
+                    $finalTotal += $cartValue;
+                }
+            }
+            $paymentOptions = DB::table('payment_options')->where('status', 1)->get();
+            if(!empty($paymentOptions) && isset($paymentOptions[0])){
+                foreach($paymentOptions as $options){
+                    $advancedRate = $options->payment_price_percentage;
+
+                    $options->total_price = (($finalTotal * $advancedRate) / 100);
+                }
+                $response['status'] = 'success';
+                $response['message'] = 'Payment Options With Details';
+                $response['data'] = $paymentOptions; 
+                return response()->json($response, 200);
+            } else {
+                $response['status'] = 'fail';
+                $response['message'] = 'Payment Options Not Found';
+                $response['data'] = []; 
+                return response()->json($response, 200);
+            }
+
+        } else {
+            $response['status'] = 'fail';
+            $response['message'] = 'Cart Not Found';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+    }
+
+    public function delete_cart(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'product_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+        $userId = $request['user_id'];
+        $productId = $request['product_id'];
+        DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('status', 'pending')->delete();
+
+        $response['status'] = 'success';
+        $response['message'] = 'Cart Updated';
+        $response['data'] = []; 
+        return response()->json($response, 200);
+
     }
 
 
@@ -379,6 +304,7 @@ class CartController extends Controller
             'user_id' => 'required',
             'product_id' => 'required',
             'quantity' => 'required',
+            'variations-type' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -391,12 +317,7 @@ class CartController extends Controller
         $userId = $request['user_id'];
         $productId = $request['product_id'];
         $quantity = $request['quantity'];
-
-        if(isset($request['variations-type']) && $request['variations-type'] != ""){
-            $variationsType = $request['variations-type'];
-        } else {
-            $variationsType = "";
-        }
+        $variationsType = $request['variations-type'];
         
         if($quantity <= 0){
             DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('status', 'pending')->delete();
@@ -449,7 +370,7 @@ class CartController extends Controller
                         if($discount != 0){
                             if($discountType == "amount"){
                                 //$productPrice = ($productPrice-$discount);
-                                $totalCartPrice = ($totalCartPrice-($discount * $quantity));
+                                $totalCartPrice = ($totalCartPrice-$discount);
                             }
                             if($discountType == "percent"){
                                 //$productPrice = (($productPrice*$discount)/100);
@@ -463,6 +384,18 @@ class CartController extends Controller
                         }
 
 
+                        // Cart::where(['user_id' => $request['user_id'], 'product_id' => $productId])->update([
+                        //     'product_price'  => $productOrgPrice,
+                        //     'product_image'  => $productImage,
+                        //     'quantity'  => $quantity,
+                        //     'variations'  => $variationsType,
+                        //     'discount'  => $discount,
+                        //     'discount_type'  => $discountType,
+                        //     'total_price'  => $productPrice,
+                        //     'product_code'  => $productCode,
+                        //     'variations'  => $productCode,
+                        // ]);
+                        //echo $variationsType; die;
                         Cart::where(['user_id' => $request['user_id'], 'product_id' => $productId])->update([
                             'product_price'  => $productPrice,
                             'product_image'  => $productImage,
@@ -471,7 +404,7 @@ class CartController extends Controller
                             'discount'  => $discount,
                             'discount_type'  => $discountType,
                             'total_price'  => $totalCartPrice,
-                            'product_code'  => $productCode,
+                            'product_code'  => $productCode
                         ]);
 
                     }
@@ -506,24 +439,23 @@ class CartController extends Controller
                         }
                         $totalCartPrice = $productPrice * $quantity;
                     }
+                    
                 } else {
                     if($quantity > $totalStock){
                         $response['status'] = 'fail';
                         $response['message'] = 'This product quantity is out of stock.';
                         $response['data'] = [];
                         return response()->json($response, 200);
-                    } else {
-                        $totalCartPrice = $productPrice * $quantity;
                     }
                 }
 
                 if($discount != 0){
                     if($discountType == "amount"){
                         //$productPrice = ($productPrice-$discount);
-                        $totalCartPrice = ($totalCartPrice-($discount * $quantity));
+                        $totalCartPrice = ($totalCartPrice-$discount);
                     }
                     if($discountType == "percent"){
-                        //$productPrice = (($productPrice*$discount)/100);
+                        //$productPrice = ($productPrice - (($productPrice*$discount)/100));
                         $totalCartPrice = ($totalCartPrice - (($totalCartPrice*$discount)/100));
                     }
                 }
@@ -537,12 +469,14 @@ class CartController extends Controller
                 $cart->user_id = $request['user_id'];
                 $cart->product_id = $request['product_id'];
                 $cart->product_name = $productName;
+                //$cart->product_price = $productOrgPrice;
                 $cart->product_price = $productPrice;
                 $cart->product_image = $productImage;
                 $cart->quantity = $quantity;
                 $cart->variations = $variationsType;
                 $cart->discount = $discount;
                 $cart->discount_type = $discountType;
+                //$cart->total_price = $productPrice;
                 $cart->total_price = $totalCartPrice;
                 $cart->product_code = $productCode;
                 $cart->save();
@@ -561,8 +495,8 @@ class CartController extends Controller
         $basicCart['total_items'] = count($cartOrder);
         $totalPrice = 0;
         foreach($cartOrder as $cart){
-            //$totalPrice += ($cart->quantity * $cart->total_price);
-            $totalPrice += $cart->total_price;
+            //echo '<pre />'; print_r($cart);
+            $totalPrice += ($cart->quantity * $cart->total_price);
         }
         $basicCart['total_amount'] = $totalPrice;
 
@@ -648,7 +582,10 @@ class CartController extends Controller
                 $deliveryManagement = DB::table('business_settings')->where('key', 'delivery_management')->get();
                 $deliveryCharge = DB::table('business_settings')->where('key', 'delivery_charge')->get();
 
-                $totalPrice += ($cart->quantity * $cart->total_price);
+                //$totalPrice += ($cart->quantity * $cart->total_price);
+                //$basicPrice += ($cart->quantity * $cart->product_price);
+
+                $totalPrice += $cart->total_price;
                 $basicPrice += ($cart->quantity * $cart->product_price);
 
                 if(isset($productData) && !empty($productData[0])){
@@ -715,29 +652,6 @@ class CartController extends Controller
 
             $response['status'] = 'fail';
             $response['message'] = 'Cart Not Found';
-            $response['items'] = [];
-            return response()->json($response, 200);
-
-        }
-        
-    }
-
-
-    public function membership_package(){
-
-        $membershipPackages = DB::table('membership_package')->where('status', 1)->get();
-
-        if(!empty($membershipPackages) && isset($membershipPackages[0])){
-
-            $response['status'] = 'success';
-            $response['message'] = 'Membership Package List';
-            $response['data'] = $membershipPackages;
-            return response()->json($response, 200);
-
-        } else {
-
-            $response['status'] = 'fail';
-            $response['message'] = 'Membership Package Not Found';
             $response['items'] = [];
             return response()->json($response, 200);
 

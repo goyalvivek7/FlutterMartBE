@@ -357,7 +357,7 @@
                         </li>
 
                         <!-- Pages -->
-                        <!-- <li class="navbar-vertical-aside-has-menu {{Request::is('admin/branch*')?'active':''}}">
+                        <li class="navbar-vertical-aside-has-menu {{Request::is('admin/branch*')?'active':''}}">
                             <a class="js-navbar-vertical-aside-menu-link nav-link"
                                href="{{route('admin.branch.add-new')}}"
                             >
@@ -366,7 +366,7 @@
                                     {{\App\CentralLogics\translate('branch')}}
                                 </span>
                             </a>
-                        </li> -->
+                        </li>
                         <!-- End Pages -->
 
                         <!-- Pages -->

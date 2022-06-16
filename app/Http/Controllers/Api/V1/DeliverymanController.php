@@ -15,6 +15,29 @@ use Illuminate\Support\Facades\Validator;
 class DeliverymanController extends Controller
 {
 
+    public function notifications(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'delivery_man_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Plese send all inputs.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $userId = $request['delivery_man_id'];
+
+        //$cancalReasons = DB::table('delivery_man_notifications')->where('status', 1)->orWhere('delivery_man_id', $userId)->orWhere('delivery_man_id', NULL)->get();
+        $cancalReasons = DB::table('delivery_man_notifications')->orWhere('delivery_man_id', '=', $userId)->orWhere('delivery_man_id', '=', NULL)->get();
+        $response['status'] = 'success';
+        $response['data'] = $cancalReasons;
+        $response['message'] = 'Delivery Notifications.';
+        return response()->json($response, 200);
+    }
+
     public function cancel_reasons(Request $request){
         $cancalReasons = DB::table('cancel_resons')->where('status', 1)->get();
         $response['status'] = 'success';
@@ -232,11 +255,7 @@ class DeliverymanController extends Controller
         if (!empty($request->file('signature'))) {
             $signature = Helpers::upload('order/', 'png', $request->file('signature'));
         }
-        if(isset($request['reason_id']) && $request['reason_id'] != ""){
-            $reasonId = $request['reason_id'];
-        } else {
-            $reasonId = "";
-        }
+        
         $statusReason = $request['status_reason'];
         $dm = DeliveryMan::where(['id' => $request['deliveryman_id']])->first();
         if (isset($dm) == false) {
@@ -260,16 +279,34 @@ class DeliverymanController extends Controller
         }elseif ($request['status']=='canceled'){
             $value=Helpers::order_status_update_message('canceled');
         }
-        
-        $complaint = OrderHistory::create([
+      
+      	
+      	if(isset($request['reason_id']) && $request['reason_id'] != "" && $request['reason_id'] != NULL  && $request['reason_id'] != "null"  && $request['reason_id'] != " "){
+            $reasonId = $request['reason_id'];
+          
+            $complaint = OrderHistory::create([
+              'order_id' => $request['order_id'],
+              'user_id' => $dm['id'],
+              'user_type' => 'delivery_man',
+              'status_captured' => $request['status'],
+              'reason_id' => $reasonId,
+              'status_reason' => $statusReason,
+              'signature' => $signature
+            ]);
+        } else {
+            
+        	$complaint = OrderHistory::create([
             'order_id' => $request['order_id'],
             'user_id' => $dm['id'],
             'user_type' => 'delivery_man',
             'status_captured' => $request['status'],
-            'reason_id' => $reasonId,
             'status_reason' => $statusReason,
             'signature' => $signature
         ]);
+          
+        }
+        
+        
 
         try {
             if ($value){

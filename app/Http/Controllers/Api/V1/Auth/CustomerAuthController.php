@@ -30,7 +30,7 @@ class CustomerAuthController extends Controller{
 
         if ($validator->fails()) {
             $response['status'] = 'fail';
-            $response['message'] = 'Plese send all inputs.';
+            $response['message'] = 'Plese send all inputs....';
             $response['data'] = [];
             return response()->json($response, 200);
             //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
@@ -41,63 +41,29 @@ class CustomerAuthController extends Controller{
         $userRow = DB::table('users')->where('id', $userId)->get();
         
         if(isset($userRow) && isset($userRow[0])){
-
-            $registrationCertificate = $userRow[0]->registration_certificate;
-            $gstCertificate = $userRow[0]->gst_certificate;
-            $panCertificate = $userRow[0]->pan_certificate;
+            
             $image = $userRow[0]->image;
 
             if (!empty($request->file('image'))) {
-                $image = Helpers::upload('distributor/', 'png', $request->file('image'));
+                $image = Helpers::upload('users/', 'png', $request->file('image'));
             }
-
-            if (!empty($request->file('registration_certificate'))) {
-                //foreach ($request->images as $img) {
-                    $registrationCertificate = Helpers::upload('distributor/', 'png', $request->file('registration_certificate'));
-                //}
-            }
-
-            if (!empty($request->file('gst_certificate'))) {
-                //foreach ($request->images as $img) {
-                    $gstCertificate = Helpers::upload('distributor/', 'png', $request->file('gst_certificate'));
-                //}
-            }
-
-            if (!empty($request->file('pan_certificate'))) {
-                //foreach ($request->images as $img) {
-                    $panCertificate = Helpers::upload('distributor/', 'png', $request->file('pan_certificate'));
-                //}
-            }
-
-            //echo $registrationCertificate."-----".$gstCertificate."-----".$panCertificate; die;
 
             $users = [
                 'f_name' => $request['f_name'],
                 'l_name' => $request['l_name'],
                 'email' => $request['email'],
                 'phone' => $request['phone'],
-                'company_name' => $request['company_name'],
-                'company_type' => $request['company_type'],
-                'address' => $request['address'],
-                'district' => $request['district'],
-                'city' => $request['city'],
-                'state' => $request['state'],
-                'bank_name' => $request['bank_name'],
-                'account_type' => $request['account_type'],
-                'account_no' => $request['account_no'],
-                'ifsc' => $request['ifsc'],
-                'branch' => $request['branch'],
-                'registration_certificate' => $registrationCertificate,
-                'gst_certificate' => $gstCertificate,
-                'image' => $image,
-                'pan_certificate' => $panCertificate
+                'image' => $image
             ];
 
-            DB::table('users')->where('id',$userId)->update($users);
+            DB::table('users')->where('id', $userId)->update($users);
             $response['status'] = 'success';
             $response['message'] = 'successfully updated.';
-            $response['data'] = [];
-            return response()->json($response, 200);
+            $userData = DB::table('users')->where('id', $userId)->get();
+            //$response['data'] = DB::table('users')->where('id', $userId)->get();
+            $response['data'] = $userData[0];
+            return response()->json(['message' => 'successfully updated.', 'status' => 'success', 'data' => $userData], 200);
+            //return response()->json($response, 200);
             // return response()->json(['message' => 'successfully updated!'], 200);
 
         } else {
@@ -110,6 +76,90 @@ class CustomerAuthController extends Controller{
         }        
 
     }
+
+
+    // public function profile_update(Request $request){
+
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required',
+    //         'f_name' => 'required',
+    //         'l_name' => 'required',
+    //         'email' =>  'required',
+    //         'phone' =>  'required'
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         $response['status'] = 'fail';
+    //         $response['message'] = 'Plese send all inputs.';
+    //         $response['data'] = [];
+    //         return response()->json($response, 200);
+    //     }
+
+    //     $userId = $request['user_id'];
+
+    //     $userRow = DB::table('users')->where('id', $userId)->get();
+        
+    //     if(isset($userRow) && isset($userRow[0])){
+
+    //         $registrationCertificate = $userRow[0]->registration_certificate;
+    //         $gstCertificate = $userRow[0]->gst_certificate;
+    //         $panCertificate = $userRow[0]->pan_certificate;
+    //         $image = $userRow[0]->image;
+
+    //         if (!empty($request->file('image'))) {
+    //             $image = Helpers::upload('distributor/', 'png', $request->file('image'));
+    //         }
+
+    //         if (!empty($request->file('registration_certificate'))) {
+    //             $registrationCertificate = Helpers::upload('distributor/', 'png', $request->file('registration_certificate'));
+    //         }
+
+    //         if (!empty($request->file('gst_certificate'))) {
+    //             $gstCertificate = Helpers::upload('distributor/', 'png', $request->file('gst_certificate'));
+    //         }
+
+    //         if (!empty($request->file('pan_certificate'))) {
+    //             $panCertificate = Helpers::upload('distributor/', 'png', $request->file('pan_certificate'));
+    //         }
+
+    //         $users = [
+    //             'f_name' => $request['f_name'],
+    //             'l_name' => $request['l_name'],
+    //             'email' => $request['email'],
+    //             'phone' => $request['phone'],
+    //             'company_name' => $request['company_name'],
+    //             'company_type' => $request['company_type'],
+    //             'address' => $request['address'],
+    //             'district' => $request['district'],
+    //             'city' => $request['city'],
+    //             'state' => $request['state'],
+    //             'bank_name' => $request['bank_name'],
+    //             'account_type' => $request['account_type'],
+    //             'account_no' => $request['account_no'],
+    //             'ifsc' => $request['ifsc'],
+    //             'branch' => $request['branch'],
+    //             'registration_certificate' => $registrationCertificate,
+    //             'gst_certificate' => $gstCertificate,
+    //             'image' => $image,
+    //             'pan_certificate' => $panCertificate
+    //         ];
+
+    //         DB::table('users')->where('id',$userId)->update($users);
+    //         $response['status'] = 'success';
+    //         $response['message'] = 'successfully updated.';
+    //         $response['data'] = [];
+    //         return response()->json($response, 200);
+
+    //     } else {
+
+    //         $response['status'] = 'fail';
+    //         $response['message'] = 'User not found.';
+    //         $response['data'] = [];
+    //         return response()->json($response, 200);
+
+    //     }        
+
+    // }
 
     public function get_profile(Request $request){
         $validator = Validator::make($request->all(), [
