@@ -20,7 +20,43 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
 
-    
+    public function popular_product(){
+        try {
+            $popularSearch = DB::table('custome_searches')->where('title', 'popular_search')->where('status', 1)->get();
+            
+            if(isset($popularSearch) && isset($popularSearch[0])){
+
+                $popular = $popularSearch[0];
+                $searchType = $popular->search_type;
+                $searchIds = json_decode($popular->search_ids);
+                $products = array();
+                //echo '<pre />'; print_r(json_decode($searchIds)); die;
+                
+                if($searchType == "products"){
+                    // for($i=0; $i<count($searchIds); $i++){
+                    //     $productId = $searchIds[$i];
+                    //     $products[] = Product::where('id', $productId)->where('status', 1)->get();
+                    // }
+                    $products = Product::whereIn('id', $searchIds)->where('status', 1)->get();
+                }
+
+                $response['status'] = 'success';
+                $response['message'] = 'Popular search found.';
+                $response['data'] = $products;
+                return response()->json($response, 200);
+            } else {
+                $response['status'] = 'fail';
+                $response['message'] = 'Popular search not found.';
+                $response['data'] = [];
+                return response()->json($response, 200);
+            }
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'errors' => ["status" => "fail", 'message' => "Popular search not found!", 'data' => []],
+            ], 200);
+        }
+    }
     
     public function smart_deals(){
         try {

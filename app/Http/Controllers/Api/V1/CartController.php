@@ -15,40 +15,9 @@ use Razorpay\Api\Api;
 
 class CartController extends Controller
 {
-
-    public function order_update(Request $request){
-
-        $validator = Validator::make($request->all(), [
-            'order_id' => 'required',
-            'orser_status' => 'required'
-        ]);
-
-        if ($validator->fails()) {
-            $response['status'] = 'fail';
-            $response['message'] = 'Please send all required fields.';
-            $response['data'] = [];
-
-            return response()->json($response, 200);
-        }
-
-        $orderId = $request['order_id'];
-        $orserStatus = $request['orser_status'];
-        $memberOrder = DB::table('memberships')->where('order_id', $orderId)->get();
-
-        if(count($memberOrder) > 0){
-            
-        } else {
-            $response['status'] = 'fail';
-            $response['message'] = 'Order Not Found';
-            $response['data'] = [];
-            return response()->json($response, 200);
-        }
-
-
-    }
-
-
-    public function create_membership_order(Request $request){
+  
+  
+  	public function create_membership_order(Request $request){
 
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
@@ -135,7 +104,8 @@ class CartController extends Controller
             }
         }
     }
-
+  
+  
 
     public function final_cart(Request $request){
         $validator = Validator::make($request->all(), [
@@ -391,15 +361,21 @@ class CartController extends Controller
         $userId = $request['user_id'];
         $productId = $request['product_id'];
         $quantity = $request['quantity'];
-
-        if(isset($request['variations-type']) && $request['variations-type'] != ""){
+        
+      	if(isset($request['variations-type']) && $request['variations-type'] != ""){
             $variationsType = $request['variations-type'];
         } else {
             $variationsType = "";
         }
         
         if($quantity <= 0){
-            DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('status', 'pending')->delete();
+          	//echo $quantity."---".$userId."---".$productId;
+          	//echo DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('status', 'pending')->delete();
+          	DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('status', 'pending')->delete();
+          	$response['status'] = 'success';
+            $response['message'] = 'Cart Updated';
+            $response['data'] = []; 
+            return response()->json($response, 200);
         }
 
         $cartOrder = DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('status', 'pending')->get();
@@ -443,6 +419,8 @@ class CartController extends Controller
                                 $response['message'] = 'This product quantity is out of stock.';
                                 $response['data'] = [];
                                 return response()->json($response, 200);
+                            } else {
+                                $totalCartPrice = $productPrice * $quantity;
                             }
                         }
 
@@ -516,7 +494,8 @@ class CartController extends Controller
                         $totalCartPrice = $productPrice * $quantity;
                     }
                 }
-
+				
+              	//echo $totalCartPrice.'---';
                 if($discount != 0){
                     if($discountType == "amount"){
                         //$productPrice = ($productPrice-$discount);
@@ -721,9 +700,9 @@ class CartController extends Controller
         }
         
     }
-
-
-    public function membership_package(){
+  
+  
+  	public function membership_package(){
 
         $membershipPackages = DB::table('membership_package')->where('status', 1)->get();
 

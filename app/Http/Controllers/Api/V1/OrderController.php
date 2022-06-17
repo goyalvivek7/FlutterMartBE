@@ -23,7 +23,8 @@ use Session;
 class OrderController extends Controller
 {
   
-    public function order_history(Request $request){
+  
+  	public function order_history(Request $request){
 
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
@@ -60,6 +61,7 @@ class OrderController extends Controller
         }
 
     }
+  
   	
   	public function create_order(Request $request){
 
@@ -208,7 +210,33 @@ class OrderController extends Controller
             //return response()->json(OrderLogic::track_order($request['order_id']), 200);
             $response['status'] = 'success';
             $response['message'] = 'Order tracked successfully!';
-            $response['data'][] = OrderLogic::track_order($request['order_id']);
+
+            $trackOrder = OrderLogic::track_order($request['order_id']);
+
+            if(isset($trackOrder)){
+                $delivery_address_id = $trackOrder['delivery_address_id'];
+                $addressData = DB::table('customer_addresses')->where('id', $delivery_address_id)->get();
+                
+                $orderData = Order::withCount('details')->where(['id' => $request['order_id']])->get();
+                if(isset($orderData) && !empty($orderData) && isset($orderData[0]) && !empty($orderData[0])){
+                    $itemCount = $orderData[0]->details_count;
+                } else {
+                    $itemCount = 0;
+                }
+                $response['item_count'] = $itemCount;
+
+                $response['address_data'] = $addressData;
+                $response['data'][] = $trackOrder;
+            } else {
+
+                $response['status'] = 'fail';
+                $response['message'] = 'No Order Found';
+                $response['data'] = [];
+
+            }
+
+          	
+          	
         }
       	
       	return response()->json($response, 200);
@@ -408,7 +436,6 @@ class OrderController extends Controller
         }
     }
 
-
     public function cancel_order(Request $request){
 
         $validator = Validator::make($request->all(), [
@@ -489,45 +516,6 @@ class OrderController extends Controller
         $response['data'] = [];
         return response()->json($response, 200);
     }
-
-
-    // public function cancel_order(Request $request)
-    // {
-    //     if (Order::where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->first()) {
-
-    //         $order = Order::with(['details'])->where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->first();
-
-    //         foreach ($order->details as $detail) {
-    //             if ($detail['is_stock_decreased'] == 1) {
-    //                 $product = Product::find($detail['product_id']);
-    //                 $type = json_decode($detail['variation'])[0]->type;
-    //                 $var_store = [];
-    //                 foreach (json_decode($product['variations'], true) as $var) {
-    //                     if ($type == $var['type']) {
-    //                         $var['stock'] += $detail['quantity'];
-    //                     }
-    //                     array_push($var_store, $var);
-    //                 }
-    //                 Product::where(['id' => $product['id']])->update([
-    //                     'variations'  => json_encode($var_store),
-    //                     'total_stock' => $product['total_stock'] + $detail['quantity'],
-    //                 ]);
-    //                 OrderDetail::where(['id' => $detail['id']])->update([
-    //                     'is_stock_decreased' => 0,
-    //                 ]);
-    //             }
-    //         }
-    //         Order::where(['user_id' => $request->user()->id, 'id' => $request['order_id']])->update([
-    //             'order_status' => 'canceled',
-    //         ]);
-    //         return response()->json(['message' => 'Order canceled'], 200);
-    //     }
-    //     return response()->json([
-    //         'errors' => [
-    //             ['code' => 'order', 'message' => 'not found!'],
-    //         ],
-    //     ], 401);
-    // }
 
     public function update_payment_method(Request $request)
     {
