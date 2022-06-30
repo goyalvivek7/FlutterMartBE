@@ -206,9 +206,13 @@ class CustomerAuthController extends Controller{
         $otp = random_int(100000, 999999);
 
         $user = User::where(['phone' => $request->phone])->first();
+        
         if (isset($user)) {
             $user->phone_otp = $otp;
             $user->save();
+
+            $smsData = file_get_contents('https://api.msg91.com/api/sendhttp.php?authkey=378531A3SYlMChc0qI62b1a431P1&mobiles=91'.$request->phone.'&message=Dear%20user%2C%20'.$otp.'%20is%20your%20OTP%20for%20registration%20at%20TESMART.%20Happy%20shopping%21&sender=TESMAT&route=4&DLT_TE_ID=1307164908009671091');
+
             return response()->json(['status' => 'success', 'token' => $temporary_token, 'otp' => $otp, 'state' => 'login', 'message'=>'Login Successfully'], 200);
         } else {
             $user = User::create([
@@ -216,6 +220,7 @@ class CustomerAuthController extends Controller{
                 'phone_otp' => $otp,
                 'temporary_token' => $temporary_token,
             ]);
+            $smsData = file_get_contents('https://api.msg91.com/api/sendhttp.php?authkey=378531A3SYlMChc0qI62b1a431P1&mobiles=91'.$request->phone.'&message=Dear%20user%2C%20'.$otp.'%20is%20your%20OTP%20for%20registration%20at%20TESMART.%20Happy%20shopping%21&sender=TESMAT&route=4&DLT_TE_ID=1307164908009671091');
             return response()->json(['status' => 'success', 'token' => $temporary_token, 'otp' => $otp, 'state' => 'register', 'message'=>'Register Successfully'], 200);
         }
     }

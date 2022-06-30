@@ -356,178 +356,300 @@ class ProductController extends Controller
 
 
         // Main Category API
-        $categoryResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute2?TokenId=TESMART');
-        $categoryResponseArray = json_decode($categoryResponse,TRUE);
-        if(is_array($categoryResponseArray) && !empty($categoryResponseArray)){
+        // $categoryResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute2?TokenId=TESMART');
+        // $categoryResponseArray = json_decode($categoryResponse,TRUE);
+        // if(is_array($categoryResponseArray) && !empty($categoryResponseArray)){
 
-            Category::where('id', '!=', null)->update(['status' => 0]);
+        //     Category::where('id', '!=', null)->update(['status' => 0]);
 
-            foreach($categoryResponseArray as $categoryArray){
-                foreach($categoryArray as $catArray){
+        //     foreach($categoryResponseArray as $categoryArray){
+        //         foreach($categoryArray as $catArray){
 
-                    $catCode = $catArray['category_id'];
-                    $catName = $catArray['category_name'];
-                    $catSubtitle = $catArray['category_subtitle'];
-                    $catApiStatus = $catArray['status'];
-                    $parentCompanyId = $catArray['parent_company_id'];
-                    $dateTime = $catArray['date_time'];
+        //             $catCode = $catArray['category_id'];
+        //             $catName = $catArray['category_name'];
+        //             $catSubtitle = $catArray['category_subtitle'];
+        //             $catApiStatus = $catArray['status'];
+        //             $parentCompanyId = $catArray['parent_company_id'];
+        //             $dateTime = $catArray['date_time'];
 
-                    if($catApiStatus == "N"){
-                        $catStatus = 0;
-                    } elseif($catApiStatus == "Y"){
-                        $catStatus = 1;
-                    }
+        //             if($catApiStatus == "N"){
+        //                 $catStatus = 0;
+        //             } elseif($catApiStatus == "Y"){
+        //                 $catStatus = 1;
+        //             }
 
-                    $checkCategory = DB::table('categories')->where('code', $catCode)->limit(1)->get();
+        //             $checkCategory = DB::table('categories')->where('code', $catCode)->limit(1)->get();
 
-                    if($parentCompanyId == ""){
-                        $parentCompanyId = 0;
-                    }
+        //             if($parentCompanyId == ""){
+        //                 $parentCompanyId = 0;
+        //             }
 
-                    if($checkCategory && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
+        //             if($checkCategory && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
 
-                        Category::where(['code' => $catCode])->update([
-                            'name' => $catName,
-                            'sub_title' => $catSubtitle,
-                            'status' => $catStatus,
-                            'parent_id' => $parentCompanyId,
-                        ]);
+        //                 Category::where(['code' => $catCode])->update([
+        //                     'name' => $catName,
+        //                     'sub_title' => $catSubtitle,
+        //                     'status' => $catStatus,
+        //                     'parent_id' => $parentCompanyId,
+        //                 ]);
 
-                    } else {    
+        //             } else {    
 
-                        $catData = [
-                            'code' => $catCode,
-                            'name' => $catName,
-                            'sub_title' => $catSubtitle,
-                            'status' => $catStatus,
-                            'parent_id' => $parentCompanyId,
-                            'position' => 0,
-                        ];
-                        DB::table('categories')->insert($catData);
+        //                 $catData = [
+        //                     'code' => $catCode,
+        //                     'name' => $catName,
+        //                     'sub_title' => $catSubtitle,
+        //                     'status' => $catStatus,
+        //                     'parent_id' => $parentCompanyId,
+        //                     'position' => 0,
+        //                 ];
+        //                 DB::table('categories')->insert($catData);
 
-                    }
-                }
-            }
+        //             }
+        //         }
+        //     }
 
-        }
+        // }
 
 
 
         // Sub Category API
-        $categoryResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute3?TokenId=TESMART');
-        $categoryResponseArray = json_decode($categoryResponse,TRUE);
-        if(is_array($categoryResponseArray) && !empty($categoryResponseArray)){
+        // $categoryResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute3?TokenId=TESMART');
+        // $categoryResponseArray = json_decode($categoryResponse,TRUE);
+        // if(is_array($categoryResponseArray) && !empty($categoryResponseArray)){
 
-            Category::where('id', '!=', null)->update(['status' => 0]);
+        //     Category::where('id', '!=', null)->update(['status' => 0]);
 
-            foreach($categoryResponseArray as $categoryArray){
-                foreach($categoryArray as $catArray){
+        //     foreach($categoryResponseArray as $categoryArray){
+        //         foreach($categoryArray as $catArray){
 
-                    $catCode = $catArray['category_id'];
-                    $catName = $catArray['category_name'];
-                    $catSubtitle = $catArray['category_subtitle'];
-                    $catApiStatus = $catArray['status'];
-                    $parentCompanyId = $catArray['parent_company_id'];
-                    $dateTime = $catArray['date_time'];
+        //             $catCode = $catArray['category_id'];
+        //             $catName = $catArray['category_name'];
+        //             $catSubtitle = $catArray['category_subtitle'];
+        //             $catApiStatus = $catArray['status'];
+        //             $parentCompanyId = $catArray['parent_company_id'];
+        //             $dateTime = $catArray['date_time'];
 
-                    if($catApiStatus == "N"){
-                        $catStatus = 0;
-                    } elseif($catApiStatus == "Y"){
-                        $catStatus = 1;
-                    }
+        //             if($catApiStatus == "N"){
+        //                 $catStatus = 0;
+        //             } elseif($catApiStatus == "Y"){
+        //                 $catStatus = 1;
+        //             }
 
-                    $checkCategory = DB::table('categories')->where('code', $catCode)->limit(1)->get();
+        //             $checkCategory = DB::table('categories')->where('code', $catCode)->limit(1)->get();
 
-                    if($parentCompanyId == ""){
-                        $parentCompanyId = 0;
-                    }
+        //             if($parentCompanyId == ""){
+        //                 $parentCompanyId = 0;
+        //             }
 
-                    if($checkCategory && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
+        //             if($checkCategory && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
 
-                        Category::where(['code' => $catCode])->update([
-                            'name' => $catName,
-                            'sub_title' => $catSubtitle,
-                            'status' => $catStatus,
-                            'parent_id' => $parentCompanyId,
-                        ]);
+        //                 Category::where(['code' => $catCode])->update([
+        //                     'name' => $catName,
+        //                     'sub_title' => $catSubtitle,
+        //                     'status' => $catStatus,
+        //                     'parent_id' => $parentCompanyId,
+        //                 ]);
 
-                    } else {    
+        //             } else {    
 
-                        $catData = [
-                            'code' => $catCode,
-                            'name' => $catName,
-                            'sub_title' => $catSubtitle,
-                            'status' => $catStatus,
-                            'parent_id' => $parentCompanyId,
-                            'position' => 1,
-                        ];
-                        DB::table('categories')->insert($catData);
+        //                 $catData = [
+        //                     'code' => $catCode,
+        //                     'name' => $catName,
+        //                     'sub_title' => $catSubtitle,
+        //                     'status' => $catStatus,
+        //                     'parent_id' => $parentCompanyId,
+        //                     'position' => 1,
+        //                 ];
+        //                 DB::table('categories')->insert($catData);
 
-                    }
-                }
-            }
-        }
+        //             }
+        //         }
+        //     }
+        // }
         
 
         // Child Category API
-        $categoryResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute4?TokenId=TESMART');
-        $categoryResponseArray = json_decode($categoryResponse,TRUE);
-        if(is_array($categoryResponseArray) && !empty($categoryResponseArray)){
+        // $categoryResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute4?TokenId=TESMART');
+        // $categoryResponseArray = json_decode($categoryResponse,TRUE);
+        // if(is_array($categoryResponseArray) && !empty($categoryResponseArray)){
 
-            Category::where('id', '!=', null)->update(['status' => 0]);
+        //     Category::where('id', '!=', null)->update(['status' => 0]);
 
-            foreach($categoryResponseArray as $categoryArray){
-                foreach($categoryArray as $catArray){
+        //     foreach($categoryResponseArray as $categoryArray){
+        //         foreach($categoryArray as $catArray){
 
-                    $catCode = $catArray['category_id'];
-                    $catName = $catArray['category_name'];
-                    $catSubtitle = $catArray['category_subtitle'];
-                    $catApiStatus = $catArray['status'];
-                    $parentCompanyId = $catArray['parent_company_id'];
-                    $dateTime = $catArray['date_time'];
+        //             $catCode = $catArray['category_id'];
+        //             $catName = $catArray['category_name'];
+        //             $catSubtitle = $catArray['category_subtitle'];
+        //             $catApiStatus = $catArray['status'];
+        //             $parentCompanyId = $catArray['parent_company_id'];
+        //             $dateTime = $catArray['date_time'];
 
-                    if($catApiStatus == "N"){
-                        $catStatus = 0;
-                    } elseif($catApiStatus == "Y"){
-                        $catStatus = 1;
-                    }
+        //             if($catApiStatus == "N"){
+        //                 $catStatus = 0;
+        //             } elseif($catApiStatus == "Y"){
+        //                 $catStatus = 1;
+        //             }
 
-                    $checkCategory = DB::table('categories')->where('code', $catCode)->limit(1)->get();
+        //             $checkCategory = DB::table('categories')->where('code', $catCode)->limit(1)->get();
 
-                    if($parentCompanyId == ""){
-                        $parentCompanyId = 0;
-                    }
+        //             if($parentCompanyId == ""){
+        //                 $parentCompanyId = 0;
+        //             }
 
-                    if($checkCategory && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
+        //             if($checkCategory && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
 
-                        Category::where(['code' => $catCode])->update([
-                            'name' => $catName,
-                            'sub_title' => $catSubtitle,
-                            'status' => $catStatus,
-                            'parent_id' => $parentCompanyId,
-                        ]);
+        //                 Category::where(['code' => $catCode])->update([
+        //                     'name' => $catName,
+        //                     'sub_title' => $catSubtitle,
+        //                     'status' => $catStatus,
+        //                     'parent_id' => $parentCompanyId,
+        //                 ]);
 
-                    } else {
+        //             } else {
 
-                        $catData = [
-                            'code' => $catCode,
-                            'name' => $catName,
-                            'sub_title' => $catSubtitle,
-                            'status' => $catStatus,
-                            'parent_id' => $parentCompanyId,
-                            'position' => 2,
-                        ];
-                        DB::table('categories')->insert($catData);
+        //                 $catData = [
+        //                     'code' => $catCode,
+        //                     'name' => $catName,
+        //                     'sub_title' => $catSubtitle,
+        //                     'status' => $catStatus,
+        //                     'parent_id' => $parentCompanyId,
+        //                     'position' => 2,
+        //                 ];
+        //                 DB::table('categories')->insert($catData);
 
-                    }
-                }
-            }
+        //             }
+        //         }
+        //     }
 
-        }
-
-
+        // }
 
 
+
+        $bnpResponse = file_get_contents('http://103.234.185.42:50/API/ItemAttribute5?TokenId=TESMART');
+        $productGroupResponseArray = json_decode($bnpResponse,TRUE);
+        echo '<pre />'; print_r($productGroupResponseArray);
+        // if(is_array($productResponseArray) && !empty($productResponseArray)){
+        //     if(is_array($productResponseArray[0]) && !empty($productResponseArray[0])){
+        //         $productArray = $productResponseArray[0];
+        //         foreach($productArray as $product){
+        //             $productSku = $product['product_sku'];
+        //             $productCategory = $product['category'];
+        //             $productSubCategory = $product['sub_category'];
+        //             $productChildCategory = $product['child_category'];
+
+        //             $checkCategory = DB::table('categories')->where('name', $productCategory)->limit(1)->get();
+        //             if(isset($checkCategory) && !empty($checkCategory) && isset($checkCategory[0]) && !empty($checkCategory[0])){
+        //                 $catId = $checkCategory[0]->id;
+        //             } else {
+        //                 $category = new Category();
+        //                 $categoryCount = $category->count();
+                        
+        //                 $category->name = $productCategory;
+        //                 $category->parent_id = 0;
+        //                 $category->position = 0;
+        //                 $category->status = 1;
+        //                 $category->save();
+        //                 $catId = $category->id;
+        //             }
+
+        //             $checkSubCategory = DB::table('categories')->where('name', $productSubCategory)->limit(1)->get();
+        //             if(isset($checkSubCategory) && !empty($checkSubCategory) && isset($checkSubCategory[0]) && !empty($checkSubCategory[0])){
+        //                 $subCatId = $checkSubCategory[0]->id;
+        //             } else {
+        //                 $category = new Category();
+        //                 $categoryCount = $category->count();
+                        
+        //                 $category->name = $productSubCategory;
+        //                 $category->parent_id = $catId;
+        //                 $category->position = 1;
+        //                 $category->status = 1;
+        //                 $category->save();
+        //                 $subCatId = $category->id;
+        //             }
+
+        //             $checkChildCategory = DB::table('categories')->where('name', $productChildCategory)->limit(1)->get();
+        //             if(isset($checkChildCategory) && !empty($checkChildCategory) && isset($checkChildCategory[0]) && !empty($checkChildCategory[0])){
+        //                 $childCatId = $checkChildCategory[0]->id;
+        //             } else {
+        //                 $category = new Category();
+        //                 $categoryCount = $category->count();
+                        
+        //                 $category->name = $productChildCategory;
+        //                 $category->parent_id = $subCatId;
+        //                 $category->position = 2;
+        //                 $category->status = 1;
+        //                 $category->save();
+        //                 $childCatId = $category->id;
+        //             }
+
+        //             $checkProduct = DB::table('products')->where('sku', $productSku)->limit(1)->get();
+                    
+        //             if($checkProduct && !empty($checkProduct) && isset($checkProduct[0]) && !empty($checkProduct[0])){
+
+        //                 $productSku = $product['product_sku'];
+                        
+        //                 Product::where(['sku' => $productSku])->update([
+        //                     'name' => $product['product_name'],
+        //                     'sub_title' => $product['product_subtitle'],
+        //                     'description' => $product['description'],
+        //                     'bar_code' => $product['bar/qr_code'],
+        //                     'unit' => $product['unit'],
+        //                     'cat_id' => $catId,
+        //                     'sub_cat_id' => $subCatId,
+        //                     'child_cat_id' => $childCatId,
+        //                     'weight' => $product['weight'],
+        //                     'org_price' => $product['mrp'],
+        //                     'price' => $product['offer_price'],
+        //                     'total_stock' => $product['stock'],
+        //                 ]);
+
+        //             } else {
+
+        //                 $p = new Product;
+        //                 $p->sku = $product['product_sku'];
+        //                 $p->name = $product['product_name'];
+        //                 $p->sub_title = $product['product_subtitle'];
+        //                 $p->description = $product['description'];
+        //                 $p->bar_code = $product['bar/qr_code'];
+        //                 $p->unit = $product['unit'];
+        //                 $p->cat_id = $catId;
+        //                 $p->sub_cat_id = $subCatId;
+        //                 $p->child_cat_id = $childCatId;
+        //                 $p->weight = $product['weight'];
+        //                 $p->org_price = $product['mrp'];
+        //                 $p->price = $product['offer_price'];
+        //                 $p->total_stock = $product['stock'];
+
+        //                 $category = [];
+        //                 if ($catId != null) {
+        //                     array_push($category, ['id' => $catId, 'position' => 1,]);
+        //                 }
+        //                 if ($subCatId != null) {
+        //                     array_push($category, ['id' => $subCatId, 'position' => 2,]);
+        //                 }
+        //                 if ($childCatId != null) {
+        //                     array_push($category, ['id' => $childCatId, 'position' => 3,]);
+        //                 }
+
+        //                 $p->category_ids = json_encode($category);
+        //                 $p->image =json_encode([]);
+
+
+        //                 $choice_options = [];
+        //                 $p->choice_options = json_encode($choice_options);
+        //                 $variations = [];
+        //                 $options = [];
+        //                 $combinations = Helpers::combinations($options);
+        //                 $p->variations = json_encode($variations);
+        //                 $p->save();
+
+
+        //             }
+        //         }
+        //     }
+        // }
 
 
 
@@ -705,18 +827,21 @@ class ProductController extends Controller
                 'id' => $request->category_id,
                 'position' => 1,
             ]);
+            $p->cat_id = $request->category_id;
         }
         if ($request->sub_category_id != null) {
             array_push($category, [
                 'id' => $request->sub_category_id,
                 'position' => 2,
             ]);
+            $p->sub_cat_id = $request->sub_category_id;
         }
         if ($request->sub_sub_category_id != null) {
             array_push($category, [
                 'id' => $request->sub_sub_category_id,
                 'position' => 3,
             ]);
+            $p->child_cat_id = $request->sub_sub_category_id;
         }
 
         $p->category_ids = json_encode($category);

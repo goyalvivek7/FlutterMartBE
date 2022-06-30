@@ -351,4 +351,5 @@
   'of' => 'Of',
   'variations' => 'Variations',
   'reviewer' => 'Reviewer',
+  'category_icon' => 'Category icon',
 );

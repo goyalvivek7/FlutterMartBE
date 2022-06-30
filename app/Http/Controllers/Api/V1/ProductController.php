@@ -20,6 +20,71 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
 
+    public function popular_search(){
+        try {
+            $popularSearch = DB::table('custome_searches')->where('title', 'popular_search')->where('status', 1)->get();
+            
+            if(isset($popularSearch) && isset($popularSearch[0])){
+
+                $popular = $popularSearch[0];
+                $searchType = $popular->search_type;
+                $searchIds = json_decode($popular->search_ids);
+                $products = array();
+                
+                if($searchType == "products"){
+                    $products = Product::select('categories.*')->whereIn('products.id', $searchIds)->leftJoin('categories', 'categories.id', '=', 'products.child_cat_id')->where('products.status', 1)->distinct()->get();
+                }
+
+                $response['status'] = 'success';
+                $response['message'] = 'Popular search found.';
+                $response['data'] = $products;
+                return response()->json($response, 200);
+            } else {
+                $response['status'] = 'fail';
+                $response['message'] = 'Popular search not found.';
+                $response['data'] = [];
+                return response()->json($response, 200);
+            }
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'errors' => ["status" => "fail", 'message' => "Popular search not found!", 'data' => []],
+            ], 200);
+        }
+    }
+
+    public function save_search(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'search_term' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Search term not found.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $searchTerm = $request->search_term;
+    
+        $searches = new Search();
+        $searches->search_term = $searchTerm;
+        if($request['user_id'] && $request['user_id'] != ""){
+            $searches->user_id = $request['user_id'];
+        }
+        if($request['product_id'] && $request['product_id'] != ""){
+            $searches->product_id = $request['product_id'];
+        }
+        $searches->save();
+    
+        $response['status'] = 'success';
+        $response['message'] = 'Search Updated.';
+        $response['data'] = [];
+        return response()->json($response, 200);
+      	
+    }
+
     public function popular_product(){
         try {
             $popularSearch = DB::table('custome_searches')->where('title', 'popular_search')->where('status', 1)->get();
@@ -41,12 +106,12 @@ class ProductController extends Controller
                 }
 
                 $response['status'] = 'success';
-                $response['message'] = 'Popular search found.';
+                $response['message'] = 'Popular products found.';
                 $response['data'] = $products;
                 return response()->json($response, 200);
             } else {
                 $response['status'] = 'fail';
-                $response['message'] = 'Popular search not found.';
+                $response['message'] = 'Popular products not found.';
                 $response['data'] = [];
                 return response()->json($response, 200);
             }
@@ -190,12 +255,12 @@ class ProductController extends Controller
                 'products' => $paginator->items()
             ];
 
-            $searches = new Search();
-            $searches->search_term = $request['name'];
-            if($request['user_id'] && $request['user_id'] != ""){
-            $searches->user_id = $request['user_id'];
-            }
-            $searches->save();
+            // $searches = new Search();
+            // $searches->search_term = $request['name'];
+            // if($request['user_id'] && $request['user_id'] != ""){
+            // $searches->user_id = $request['user_id'];
+            // }
+            // $searches->save();
         
             $products['products'] = Helpers::product_data_formatting($products['products'], true);
             return response()->json($products, 200);
@@ -281,9 +346,20 @@ class ProductController extends Controller
             'rating' => 'required|numeric|max:5',
         ]);
 
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please Send All Inputs.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
         $product = Product::find($request->product_id);
         if (isset($product) == false) {
-            $validator->errors()->add('product_id', 'There is no such product');
+            //$validator->errors()->add('product_id', 'There is no such product');
+            $response['status'] = 'fail';
+            $response['message'] = 'There is no such product';
+            $response['data'] = [];
+            return response()->json($response, 200);
         }
 
         $multi_review = Review::where(['product_id' => $request->product_id, 'user_id' => $request->user()->id])->first();
@@ -294,7 +370,11 @@ class ProductController extends Controller
         }
 
         if ($validator->errors()->count() > 0) {
-            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+            $response['status'] = 'fail';
+            $response['message'] = Helpers::error_processor($validator);
+            $response['data'] = [];
+            return response()->json($response, 200);
+            //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
         $image_array = [];
@@ -317,7 +397,12 @@ class ProductController extends Controller
         $review->attachment = json_encode($image_array);
         $review->save();
 
-        return response()->json(['message' => 'successfully review submitted!'], 200);
+        $response['status'] = 'succcess';
+        $response['message'] = 'successfully review submitted!';
+        $response['data'] = [];
+        return response()->json($response, 200);
+
+        //return response()->json(['message' => 'successfully review submitted!'], 200);
     }
 
     public function get_discounted_products()

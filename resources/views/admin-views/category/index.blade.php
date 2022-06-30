@@ -48,41 +48,62 @@
                                     <input type="hidden" name="lang[]" value="{{ $lang }}">
                                 @endforeach
                                 @else
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <div class="form-group lang_form" id="{{ $default_lang }}-form">
-                                                <label class="input-label"
-                                                       for="exampleFormControlInput1">{{ \App\CentralLogics\translate('name') }}
-                                                    ({{ strtoupper($lang) }})</label>
-                                                <input type="text" name="name[]" class="form-control"
-                                                       placeholder="New Category" required>
-                                            </div>
-                                            <input type="hidden" name="lang[]" value="{{ $default_lang }}">
-                                            @endif
-                                            <input name="position" value="0" style="display: none">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group lang_form" id="{{ $default_lang }}-form">
+                                            <label class="input-label"
+                                                    for="exampleFormControlInput1">{{ \App\CentralLogics\translate('name') }}
+                                                ({{ strtoupper($lang) }})</label>
+                                            <input type="text" name="name[]" class="form-control"
+                                                    placeholder="New Category" required>
                                         </div>
-                                        <div class="col-6 from_part_2">
-                                            <label>{{ \App\CentralLogics\translate('image') }}</label><small style="color: red">* ( {{ \App\CentralLogics\translate('ratio') }}
-                                                3:1 )</small>
-                                            <div class="custom-file">
-                                                <input type="file" name="image" id="customFileEg1" class="custom-file-input"
-                                                       accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
-                                                <label class="custom-file-label" for="customFileEg1">{{ \App\CentralLogics\translate('choose') }}
-                                                    {{ \App\CentralLogics\translate('file') }}</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 from_part_2">
-                                            <div class="form-group">
-                                                <hr>
-                                                <center>
-                                                    <img style="width: 30%;border: 1px solid; border-radius: 10px;" id="viewer"
-                                                         src="{{ asset('public/assets/admin/img/900x400/img1.jpg') }}" alt="image" />
-                                                </center>
-                                            </div>
+                                        <input type="hidden" name="lang[]" value="{{ $default_lang }}">
+                                        @endif
+                                        <input name="position" value="0" style="display: none">
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-6 from_part_1">
+                                        <label>{{ \App\CentralLogics\translate('image') }}</label><small style="color: red">* ( {{ \App\CentralLogics\translate('ratio') }}
+                                            3:1 )</small>
+                                        <div class="custom-file">
+                                            <input type="file" name="image" id="customFileEg1" class="custom-file-input"
+                                                    accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
+                                            <label class="custom-file-label" for="customFileEg1">{{ \App\CentralLogics\translate('choose') }}
+                                                {{ \App\CentralLogics\translate('file') }}</label>
                                         </div>
                                     </div>
-
-                                    <hr>
+                                    <div class="col-6 from_part_2">
+                                        <div class="form-group">
+                                            <center>
+                                                <img style="width: 30%;border: 1px solid; border-radius: 10px;" id="viewer"
+                                                        src="{{ asset('public/assets/admin/img/900x400/img1.jpg') }}" alt="image" />
+                                            </center>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="col-6 from_part_1">
+                                        <label>{{ \App\CentralLogics\translate('category_icon') }}</label><small style="color: red"> ( {{ \App\CentralLogics\translate('ratio') }} 64x64px)</small>
+                                        <div class="custom-file">
+                                            <input type="file" name="cat_icon" id="customFileEg2" class="custom-file-input"
+                                                    accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                            <label class="custom-file-label" for="customFileEg2">{{ \App\CentralLogics\translate('choose') }}
+                                                {{ \App\CentralLogics\translate('file') }}</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 from_part_2">
+                                        <div class="form-group">
+                                            <center>
+                                                <img style="width: 30%;border: 1px solid; border-radius: 10px;" id="viewer2"
+                                                        src="{{ asset('public/assets/admin/img/900x400/img1.jpg') }}" alt="image" />
+                                            </center>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
                     <button type="submit" class="btn btn-primary">{{\App\CentralLogics\translate('submit')}}</button>
                 </form>
             </div>
@@ -120,7 +141,9 @@
                             <thead class="thead-light">
                             <tr>
                                 <th>{{\App\CentralLogics\translate('#')}}</th>
-                                <th style="width: 50%">{{\App\CentralLogics\translate('name')}}</th>
+                                <th style="width: 30%">{{\App\CentralLogics\translate('name')}}</th>
+                                <th style="width: 20%">Image</th>
+                                <th style="width: 20%">Icon</th>
                                 <th style="width: 20%">{{\App\CentralLogics\translate('status')}}</th>
                                 <th style="width: 10%">{{\App\CentralLogics\translate('action')}}</th>
                             </tr>
@@ -134,6 +157,20 @@
                                     <span class="d-block font-size-sm text-body">
                                         {{$category['name']}}
                                     </span>
+                                    </td>
+                                    <td>
+                                        @if($category['image'] != "" && $category['image'] != NULL)
+                                            <img src="{{asset('storage/app/public/category')}}/{{$category['image']}}" width="100px" />
+                                        @else
+                                        <img src="{{asset('storage/app/public/category')}}/def.png" width="100px" />
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($category['cat_icon'] != "" && $category['cat_icon'] != NULL)
+                                            <img src="{{asset('storage/app/public/category')}}/{{$category['cat_icon']}}" width="48px" />
+                                        @else
+                                        <img src="{{asset('storage/app/public/category')}}/def.png" width="48px" />
+                                        @endif
                                     </td>
                                     <td>
                                         @if($category['status']==1)
@@ -226,8 +263,23 @@
             }
         }
 
+        function readURL2(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#viewer2').attr('src', e.target.result);
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
         $("#customFileEg1").change(function () {
             readURL(this);
+        });
+        $("#customFileEg2").change(function () {
+            readURL2(this);
         });
     </script>
 @endpush

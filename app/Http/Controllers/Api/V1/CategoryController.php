@@ -14,6 +14,57 @@ use Illuminate\Support\Facades\DB;
 class CategoryController extends Controller
 {
 
+
+  public function get_product_with_cat_id(Request $request){
+
+    $validator = Validator::make($request->all(), [
+        'cat_id' => 'required'
+    ]);
+
+    if ($validator->fails()) {
+        $response['status'] = 'fail';
+        $response['message'] = 'Plese send all inputs.';
+        $response['data'] = [];
+        return response()->json($response, 200);
+    }
+
+    $catId = $request['cat_id'];
+    try {
+      $categories = Category::where(['id'=>$catId,'status'=>1])->get();
+      if(isset($categories) && !empty($categories) && isset($categories[0]) && !empty($categories[0])){
+        $catArray = $categories[0];
+        $catPosition = $catArray['position'];
+        if($catPosition == 0){
+          $catDbField = "cat_id";
+        }
+        if($catPosition == 1){
+          $catDbField = "sub_cat_id";
+        }
+        if($catPosition == 2){
+          $catDbField = "child_cat_id";
+        }
+
+        $products = Product::where($catDbField, $catId)->where('status', 1)->get();
+        
+        $response['status'] = 'success';
+        $response['message'] = 'Category Products';
+        $response['cat_data'] = $catArray;
+        $response['data'] = $products;
+      } else {
+        $response['status'] = 'fail';
+        $response['message'] = 'Category not found.';
+        $response['data'] = [];
+      }
+      return response()->json($response, 200);
+    } catch (\Exception $e) {
+      $response['status'] = 'fail';
+      $response['message'] = 'Getting error in fetching category.';
+      $response['data'] = [];
+      return response()->json($response, 200);
+    }
+  }
+
+
   public function get_product_with_child_id(Request $request){
     if(isset($request['child_cat_id']) && $request['child_cat_id'] != NULL && $request['child_cat_id'] != ""){
       $childCatId = $request['child_cat_id'];

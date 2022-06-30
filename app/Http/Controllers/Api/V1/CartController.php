@@ -110,7 +110,11 @@ class CartController extends Controller
     public function final_cart(Request $request){
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
-            'is_wallet' => 'required'
+            'is_wallet' => 'required',
+            'delivery_address_id' => 'required',
+            'time_slot_id' => 'required',
+            'same_day_delievery' => 'required',
+            'order_type' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -297,7 +301,11 @@ class CartController extends Controller
                     'wallet_balance'  => $walletBalance,
                     'wallet_remaining'  => $walletRemaining,
                     'remaining_sub_total' => round($remainingBalance, 2),
-                    'final_amount' => round($remainingBalance)
+                    'final_amount' => round($remainingBalance),
+                    'delivery_address_id' => $request['delivery_address_id'],
+                    'time_slot_id' => $request['time_slot_id'],
+                    'same_day_delievery' => $request['same_day_delievery'],
+                    'order_type' => $request['order_type']
                 ]);
 
             } else {
@@ -319,6 +327,10 @@ class CartController extends Controller
                 $cartFinal->remaining_sub_total = round($remainingBalance, 2);
                 $cartFinal->cart_status = 'pending';
                 $cartFinal->final_amount = round($remainingBalance);
+                $cartFinal->delivery_address_id = $request['delivery_address_id'];
+                $cartFinal->time_slot_id = $request['time_slot_id'];
+                $cartFinal->same_day_delievery = $request['same_day_delievery'];
+                $cartFinal->order_type = $request['order_type'];
                 $cartFinal->save();
 
             }
@@ -627,7 +639,8 @@ class CartController extends Controller
                 $deliveryManagement = DB::table('business_settings')->where('key', 'delivery_management')->get();
                 $deliveryCharge = DB::table('business_settings')->where('key', 'delivery_charge')->get();
 
-                $totalPrice += ($cart->quantity * $cart->total_price);
+                //$totalPrice += ($cart->quantity * $cart->total_price);
+                $totalPrice += $cart->total_price;
                 $basicPrice += ($cart->quantity * $cart->product_price);
 
                 if(isset($productData) && !empty($productData[0])){

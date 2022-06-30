@@ -21,7 +21,7 @@
         <!-- End Page Header -->
         <div class="row gx-2 gx-lg-3">
             <div class="col-sm-12 col-lg-12 mb-3 mb-lg-2">
-                <form action="{{route('admin.category.store')}}" method="post">
+                <form action="{{route('admin.category.store')}}" method="post" enctype="multipart/form-data">
                     @csrf
                     @php($language=\App\Model\BusinessSetting::where('key','language')->first())
                     @php($language = $language->value ?? null)
@@ -68,6 +68,49 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="row">
+                                        <div class="col-6 from_part_1">
+                                            <label>{{ \App\CentralLogics\translate('image') }}</label><small style="color: red">* ( {{ \App\CentralLogics\translate('ratio') }}
+                                                3:1 )</small>
+                                            <div class="custom-file">
+                                                <input type="file" name="image" id="customFileEg1" class="custom-file-input"
+                                                        accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*" required>
+                                                <label class="custom-file-label" for="customFileEg1">{{ \App\CentralLogics\translate('choose') }}
+                                                    {{ \App\CentralLogics\translate('file') }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 from_part_2">
+                                            <div class="form-group">
+                                                <center>
+                                                    <img style="width: 30%;border: 1px solid; border-radius: 10px;" id="viewer"
+                                                            src="{{ asset('public/assets/admin/img/900x400/img1.jpg') }}" alt="image" />
+                                                </center>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr />
+                                    <div class="row">
+                                        <div class="col-6 from_part_1">
+                                            <label>{{ \App\CentralLogics\translate('category_icon') }}</label><small style="color: red"> ( {{ \App\CentralLogics\translate('ratio') }} 64x64px)</small>
+                                            <div class="custom-file">
+                                                <input type="file" name="cat_icon" id="customFileEg2" class="custom-file-input"
+                                                        accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                                <label class="custom-file-label" for="customFileEg2">{{ \App\CentralLogics\translate('choose') }}
+                                                    {{ \App\CentralLogics\translate('file') }}</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 from_part_2">
+                                            <div class="form-group">
+                                                <center>
+                                                    <img style="width: 30%;border: 1px solid; border-radius: 10px;" id="viewer2"
+                                                            src="{{ asset('public/assets/admin/img/900x400/img1.jpg') }}" alt="image" />
+                                                </center>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr />
+
                             </div>
                         </div>
                     <button type="submit" class="btn btn-primary">{{\App\CentralLogics\translate('submit')}}</button>
@@ -105,14 +148,15 @@
                     <div class="table-responsive datatable-custom">
                         <table class="table table-borderless table-thead-bordered table-nowrap table-align-middle card-table">
                             <thead class="thead-light">
-                            <tr>
-                                <th>{{\App\CentralLogics\translate('#')}}</th>
-                                <th style="width: 50%">{{\App\CentralLogics\translate('main')}} {{\App\CentralLogics\translate('category')}}</th>
-                                <th style="width: 50%">{{\App\CentralLogics\translate('sub_category')}}</th>
-                                <th style="width: 20%">{{\App\CentralLogics\translate('status')}}</th>
-                                <th style="width: 10%">{{\App\CentralLogics\translate('action')}}</th>
-                            </tr>
-
+                                <tr>
+                                    <th>{{\App\CentralLogics\translate('#')}}</th>
+                                    <th style="width: 15%">{{\App\CentralLogics\translate('main')}} {{\App\CentralLogics\translate('category')}}</th>
+                                    <th style="width: 15%">{{\App\CentralLogics\translate('sub_category')}}</th>
+                                    <th style="width: 20%">Image</th>
+                                    <th style="width: 20%">Category Icon</th>
+                                    <th style="width: 20%">{{\App\CentralLogics\translate('status')}}</th>
+                                    <th style="width: 10%">{{\App\CentralLogics\translate('action')}}</th>
+                                </tr>
                             </thead>
 
                             <tbody id="set-rows">
@@ -129,6 +173,22 @@
                                         <span class="d-block font-size-sm text-body">
                                             {{$category['name']}}
                                         </span>
+                                    </td>
+
+                                    <td>
+                                        @if($category['image'] != "" && $category['image'] != NULL)
+                                            <img src="{{asset('storage/app/public/category')}}/{{$category['image']}}" width="100px" />
+                                        @else
+                                        <img src="{{asset('storage/app/public/category')}}/def.png" width="100px" />
+                                        @endif
+                                    </td>
+
+                                    <td>
+                                        @if($category['cat_icon'] != "" && $category['cat_icon'] != NULL)
+                                            <img src="{{asset('storage/app/public/category')}}/{{$category['cat_icon']}}" width="48px" />
+                                        @else
+                                        <img src="{{asset('storage/app/public/category')}}/def.png" width="48" />
+                                        @endif
                                     </td>
 
                                     <td>
@@ -235,6 +295,39 @@
                     $('#loading').hide();
                 },
             });
+        });
+    </script>
+
+    <script>
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#viewer').attr('src', e.target.result);
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function readURL2(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#viewer2').attr('src', e.target.result);
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $("#customFileEg1").change(function () {
+            readURL(this);
+        });
+        $("#customFileEg2").change(function () {
+            readURL2(this);
         });
     </script>
 @endpush

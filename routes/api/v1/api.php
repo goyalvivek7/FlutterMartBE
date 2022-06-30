@@ -58,8 +58,10 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
     });
 
     Route::group(['prefix' => 'products'], function () {
+        Route::get('popular-search', 'ProductController@popular_search');
         Route::get('popular-product', 'ProductController@popular_product');
       	Route::get('recent-search', 'ProductController@recent_search');
+        Route::post('save-search', 'ProductController@save_search');
         Route::get('latest', 'ProductController@get_latest_products');
         Route::get('discounted', 'ProductController@get_discounted_products');
         Route::get('search', 'ProductController@get_searched_products');
@@ -68,7 +70,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('reviews/{product_id}', 'ProductController@get_product_reviews');
         Route::get('rating/{product_id}', 'ProductController@get_product_rating');
         Route::get('daily-needs', 'ProductController@get_daily_need_products');
-        Route::post('reviews/submit', 'ProductController@submit_product_review')->middleware('auth:api');
+        //Route::post('reviews/submit', 'ProductController@submit_product_review')->middleware('auth:api');
+        Route::post('reviews/submit', 'ProductController@submit_product_review');
       	Route::get('homepagesales', 'ProductController@homepage_sales');
         Route::get('smart-deals', 'ProductController@smart_deals');
         Route::get('barcode/{barcode}', 'ProductController@barcode_product');
@@ -99,6 +102,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('childes/{category_id}', 'CategoryController@get_childes');
         Route::get('products/{category_id}', 'CategoryController@get_products');
         Route::get('products/{category_id}/all', 'CategoryController@get_all_products');
+        Route::post('get-product-with-cat-id', 'CategoryController@get_product_with_cat_id');
     });
   
   	Route::group(['prefix' => 'address'], function () {

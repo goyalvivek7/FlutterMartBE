@@ -10,6 +10,7 @@ use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
@@ -95,9 +96,16 @@ class CategoryController extends Controller
             $image_name = 'def.png';
         }
 
+        if (!empty($request->file('cat_icon'))) {
+            $icon_name =  Helpers::upload('category/', 'png', $request->file('cat_icon'));
+        } else {
+            $icon_name = 'def.png';
+        }
+
         $category = new Category();
-        $category->name = $request->name[array_search('en', $request->lang)];
+        $category->name = $request->name[0];
         $category->image = $image_name;
+        $category->cat_icon = $icon_name;
         $category->parent_id = $request->parent_id == null ? 0 : $request->parent_id;
         $category->position = $request->position;
         $category->save();
@@ -127,7 +135,26 @@ class CategoryController extends Controller
     public function edit($id)
     {
         $category = category::withoutGlobalScopes()->with('translations')->find($id);
-        return view('admin-views.category.edit', compact('category'));
+        if(isset($category) && !empty($category)){
+            $catPosition = $category['position'];
+            if($catPosition == 1){ $catFList=Category::where('position', 0)->get(); }
+            if($catPosition == 2){ $catFList=Category::where('position', 1)->get(); }
+
+            $catDropDown = [];
+            if(isset($catFList) && !empty($catFList)){
+                
+                foreach($catFList as $catL){
+                    $catId = $catL['id'];
+                    $catName = $catL['name'];
+                    $catDropDown[$catId] = $catName;
+                }
+            }
+            
+        } else {
+            $catDropDown = [];
+        }
+        
+        return view('admin-views.category.edit', compact('category', 'catDropDown'));
     }
 
     public function status(Request $request)
@@ -147,8 +174,12 @@ class CategoryController extends Controller
             'name.required' => 'Name is required!',
         ]);
         $category = category::find($id);
+        if($request->parent_id && $request->parent_id != ""){
+            $category->parent_id = $request->parent_id;
+        }
         $category->name = $request->name[array_search('en', $request->lang)];
         $category->image = $request->has('image') ? Helpers::update('category/', $category->image, 'png', $request->file('image')) : $category->image;
+        $category->cat_icon = $request->has('cat_icon') ? Helpers::update('category/', $category->cat_icon, 'png', $request->file('cat_icon')) : $category->cat_icon;
         $category->save();
         foreach($request->lang as $index=>$key)
         {
@@ -184,9 +215,9 @@ class CategoryController extends Controller
 
     function subsearch(Request $request){
         //$query_param = [];
-        echo 'post---'; print_r($request['search']); echo '<br />';
-        echo 'post!!!'; print_r($request->search); echo '<br />';
-        echo '<pre />'; print_r($request->input('search')); echo '<br />';
+        // echo 'post---'; print_r($request['search']); echo '<br />';
+        // echo 'post!!!'; print_r($request->search); echo '<br />';
+        // echo '<pre />'; print_r($request->input('search')); echo '<br />';
         //$categoryParam = $request['search'];
         $categoryParam = $request['search'];
 
@@ -197,7 +228,7 @@ class CategoryController extends Controller
             //echo 'key---'; print_r($key); echo '<br />';
             $categoryArray = Category::where(['position'=>1, 'status'=>1])->where(function ($q) use ($key) {
                 foreach ($categoryParam as $value) {
-                    echo "key---".$value.'<br />';
+                    //echo "key---".$value.'<br />';
                     $q->orWhere('parent_id', "$value");
                 }
             })->get();
@@ -227,7 +258,6 @@ class CategoryController extends Controller
             $key = explode(',', $categoryParam);
             $categoryArray = Category::where(['position'=>2, 'status'=>1])->where(function ($q) use ($key) {
                 foreach ($key as $value) {
-                    echo "key---".$value.'<br />';
                     $q->orWhere('name', 'like', "%{$value}%");
                 }
             })->get();

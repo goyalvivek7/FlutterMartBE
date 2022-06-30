@@ -64,7 +64,24 @@
                                             @endif
                                             <input name="position" value="0" style="display: none">
                                         </div>
-                                        <div class="col-6 from_part_2">
+                                    </div>
+                                    <?php if(isset($catDropDown) && $catDropDown != []){ ?>
+                                        <div class="row">
+                                            <div class="col-6 from_part_1">
+                                                <div class="form-group">
+                                                <label>Parent Category</label><small style="color: red">*</small>
+                                                    <select id="exampleFormControlSelect1" name="parent_id" class="form-control" required>
+                                                        <?php foreach($catDropDown as $catId => $catName){ ?>
+                                                            <option value="{{$catId}}" <?php if($catId == $category['parent_id']){ echo "selected"; } ?> >{{$catName}}</option>
+                                                        <?php } ?>
+                                                    </select>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                    <div class="row">
+                                        <div class="col-6 from_part_1">
                                             <div class="form-group">
                                                 <label>{{\App\CentralLogics\translate('image')}}</label><small style="color: red">* ( {{\App\CentralLogics\translate('ratio')}} 3:1 )</small>
                                                 <div class="custom-file">
@@ -72,13 +89,31 @@
                                                            accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
                                                     <label class="custom-file-label" for="customFileEg1">{{\App\CentralLogics\translate('choose')}} {{\App\CentralLogics\translate('file')}}</label>
                                                 </div>
-                                                <hr>
                                             </div>
                                         </div>
-                                        <div class="col-12 from_part_2">
+                                        <div class="col-6 from_part_2">
                                             <center>
                                                 <img style="width: 30%;border: 1px solid; border-radius: 10px;" id="viewer"
                                                      src="{{asset('storage/app/public/category')}}/{{$category['image']}}" alt=""/>
+                                            </center>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row">
+                                        <div class="col-6 from_part_1">
+                                            <div class="form-group">
+                                                <label>Category Icon</label><small style="color: red"> ( {{\App\CentralLogics\translate('ratio')}} 64x64px )</small>
+                                                <div class="custom-file">
+                                                    <input type="file" name="cat_icon" id="customFileEg2" class="custom-file-input"
+                                                           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
+                                                    <label class="custom-file-label" for="customFileEg2">{{\App\CentralLogics\translate('choose')}} {{\App\CentralLogics\translate('file')}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 from_part_2">
+                                            <center>
+                                                <img style="width: 30%;border: 1px solid; border-radius: 10px;" id="viewer2"
+                                                     src="{{asset('storage/app/public/category')}}/{{$category['cat_icon']}}" alt=""/>
                                             </center>
                                         </div>
                                     </div>
@@ -129,6 +164,22 @@
 
         $("#customFileEg1").change(function () {
             readURL(this);
+        });
+
+        function readURL2(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#viewer2').attr('src', e.target.result);
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $("#customFileEg2").change(function () {
+            readURL2(this);
         });
     </script>
 @endpush

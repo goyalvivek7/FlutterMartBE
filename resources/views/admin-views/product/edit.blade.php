@@ -221,6 +221,19 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="col-md-4 col-4">
+                                <div class="form-group">
+                                    <label class="input-label"
+                                           for="exampleFormControlSelect1">Child Category<span
+                                            class="input-label-secondary"></span></label>
+                                    <select name="sub_sub_category_id" id="sub-sub-categories"
+                                            data-id="{{count($product_category)>=3?$product_category[2]->id:''}}"
+                                            class="form-control js-select2-custom">
+
+                                    </select>
+                                </div>
+                            </div>
+                            <?php //echo '<pre />'; print_r($product_category); ?>
                         </div>
 
                         <div class="row"
