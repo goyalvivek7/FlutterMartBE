@@ -55,6 +55,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
 
     Route::group(['prefix' => 'config'], function () {
         Route::get('/', 'ConfigController@configuration');
+        Route::get('app-version', 'ConfigController@app_version');
     });
 
     Route::group(['prefix' => 'products'], function () {
@@ -128,6 +129,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('/', 'WishlistController@wish_list');
         Route::post('add', 'WishlistController@add_to_wishlist');
         Route::post('remove', 'WishlistController@remove_from_wishlist');
+        Route::post('check', 'WishlistController@check');
     });
 
 

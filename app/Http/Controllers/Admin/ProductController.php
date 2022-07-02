@@ -21,6 +21,42 @@ use GuzzleHttp\Client;
 
 class ProductController extends Controller
 {
+
+    public function search_update(Request $request, $id)
+    {
+        //echo $id."@@@@@@".$request['selected_product']."######";
+        if(isset($request['selected_product']) && !empty($request['selected_product']) && $request['selected_product'] != ""){
+            //echo "@@@@"; die;
+            $search_ids = json_encode($request['selected_product']);
+        } else {
+            $search_ids = null;
+        }
+        
+        $category = DB::table('custome_searches')->where('id', $request->id)->update(['search_ids'=>$search_ids]);
+        Toastr::success('Search updated!');
+        return back();
+    }
+
+    public function popular_product(Request $request)
+    {
+        $popularSearch = DB::table('custome_searches')->where('title', 'popular_search')->where('status', 1)->get();
+        //$products = $query->paginate(Helpers::getPagination())->appends($query_param);
+        $allProducts = DB::table('products')->where('status', 1)->get();
+        $popular = $popularSearch[0];
+        $searchType = $popular->search_type;
+        $products = array();
+        
+        if($popular->search_ids != null && $popular->search_ids != ""){
+            $searchIds = json_decode($popular->search_ids);
+            if($searchType == "products"){
+                $products = Product::whereIn('id', $searchIds)->where('status', 1)->get();
+            }
+        } else {
+            $searchIds = "";
+        }
+        return view('admin-views.product.popular-product', compact('popularSearch', 'products', 'allProducts', 'searchIds'));
+    }
+
     public function variant_combination(Request $request)
     {
         $options = [];

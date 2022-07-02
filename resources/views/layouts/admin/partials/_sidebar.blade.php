@@ -346,6 +346,12 @@
                                         <span class="text-truncate">{{\App\CentralLogics\translate('bulk_export')}}</span>
                                     </a>
                                 </li>
+                                <li class="nav-item {{Request::is('admin/product/popular-product')?'active':''}}">
+                                    <a class="nav-link " href="{{route('admin.product.popular-product')}}" title="popular-product">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">Popular Product</span>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         <!-- End Pages -->

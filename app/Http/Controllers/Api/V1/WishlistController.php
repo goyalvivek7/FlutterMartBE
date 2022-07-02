@@ -10,6 +10,35 @@ use Illuminate\Support\Facades\Validator;
 
 class WishlistController extends Controller
 {
+
+    public function check(Request $request){
+        $validator = Validator::make($request->all(), [
+            'product_id' => 'required',
+            'user_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $wishlist = Wishlist::where('user_id', $request->user_id)->where('product_id', $request->product_id)->first();
+        if (empty($wishlist)) {
+            $response['status'] = 'fail';
+            $response['message'] = 'wishlist not added!';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        } else {
+            $response['status'] = 'success';
+            $response['message'] = 'wishlist added!';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+    }
+
+
     public function add_to_wishlist(Request $request)
     {
         $validator = Validator::make($request->all(), [

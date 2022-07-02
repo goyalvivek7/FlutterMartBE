@@ -7,9 +7,19 @@ use App\Http\Controllers\Controller;
 use App\Model\Branch;
 use App\Model\BusinessSetting;
 use App\Model\Currency;
+use Illuminate\Support\Facades\DB;
 
 class ConfigController extends Controller
 {
+
+    public function app_version(){
+        $appVersions = DB::table('app_version')->limit(1)->get();
+        $response['status'] = 'success';
+        $response['message'] = 'App Version';
+        $response['data'] = $appVersions; 
+        return response()->json($response, 200);
+    }
+
     public function configuration()
     {
         $currency_symbol = Currency::where(['currency_code' => Helpers::currency_code()])->first()->currency_symbol;

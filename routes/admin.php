@@ -118,6 +118,8 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             //ajax request
             Route::get('get-categories', 'ProductController@get_categories')->name('get-categories');
             Route::post('daily-needs', 'ProductController@daily_needs')->name('daily-needs');
+            Route::get('popular-product', 'ProductController@popular_product')->name('popular-product');
+            Route::post('search-update/{id}', 'ProductController@search_update')->name('search-update');
         });
 
         Route::group(['prefix' => 'orders', 'as' => 'orders.'], function () {

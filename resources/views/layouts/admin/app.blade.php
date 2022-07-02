@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{{asset('public/assets/admin')}}/vendor/icon-set/style.css">
     <!-- CSS Front Template -->
     <link rel="stylesheet" href="{{asset('public/assets/admin')}}/css/theme.minc619.css?v=1.0">
+    <link rel="stylesheet" href="{{asset('public/assets/admin')}}/css/bootstrap-multiselect.css" type="text/css"/>
     @stack('css_or_js')
 
     <style>
@@ -132,6 +133,7 @@
 <script src="{{asset('public/assets/admin')}}/js/theme.min.js"></script>
 <script src="{{asset('public/assets/admin')}}/js/sweet_alert.js"></script>
 <script src="{{asset('public/assets/admin')}}/js/toastr.js"></script>
+<script src="{{asset('public/assets/admin')}}/js/bootstrap-multiselect.js"></script>
 {!! Toastr::message() !!}
 
 @if ($errors->any())
@@ -260,6 +262,14 @@
         $('.js-clipboard').each(function () {
             var clipboard = $.HSCore.components.HSClipboard.init(this);
         });
+
+        $('#multiselect').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...'
+        }); 
+        
     });
 </script>
 
