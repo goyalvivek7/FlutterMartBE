@@ -23,6 +23,149 @@ use Session;
 class OrderController extends Controller
 {
   
+    public function captured(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'orderId' => 'required',
+            'sigId' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $orderId = $request['orderId'];
+        $sigId = $request['sigId'];
+
+        $paymentId = "";
+        if(isset($request['paymentId'])){
+            $paymentId = $request['paymentId'];
+        }
+
+        $orderData = DB::table('orders')->where('order_id', $orderId)->get();
+        if(isset($orderData) && !empty($orderData) && !empty($orderData[0])){
+
+            if($orderData[0]->order_status == "created"){
+
+                $finalCartId = $orderData[0]->cart_id;
+                $orderstatus = DB::table('orders')->where('order_id', $orderId)->update([
+                    'signature_id' => $sigId,
+                    'payment_id' => $paymentId,
+                    'order_status' => 'pending',
+                    'payment_status' => 'paid'
+                ]);
+
+
+                $fCartStatus = DB::table('cart_final')->where('id', $finalCartId)->update([
+                    'cart_status' => 'success'
+                ]);
+
+                $finalCart = DB::table('cart_final')->where('id', $finalCartId)->get();
+                $cartArray = json_decode($finalCart[0]->cart_list);
+                $walletBalance = $finalCart[0]->wallet_balance;
+                $userId = $finalCart[0]->user_id;
+
+                for($i=0; $i<count($cartArray); $i++){
+                    $cartId = $cartArray[$i];
+                    $fCartStatus = DB::table('cart')->where('id', $cartId)->update([
+                        'status' => 'sucess'
+                    ]);
+                }
+
+                if($walletBalance != 0){
+
+                    $historyArray = [
+                        'user_id' => $userId,
+                        'amount' => $walletBalance,
+                        'status' => 'debit',
+                        'recharge_id' => $orderId
+                    ];
+                    DB::table('wallet_histories')->insert($historyArray);
+
+                    $walletData = DB::table('wallet')->where('user_id', $userId)->get();
+                    $previousAmount = $walletData[0]->balance;
+                    $newAmount = $previousAmount - $orderAmount;
+                    $walletUpdate = DB::table('wallet')->where('user_id', $userId)->update([
+                        'balance' => $newAmount
+                    ]);
+
+                }
+
+                $orderUpdate = DB::table('orders')->where('order_id', $orderId)->get();
+                $response['status'] = 'success';
+                $response['message'] = 'Order successfully placed.';
+                $response['order_type'] = 'cart';
+                $response['data'] = $orderUpdate;
+                return response()->json($response, 200);
+
+            } else {
+
+                $response['status'] = 'fail';
+                $response['message'] = 'Order already placed';
+                $response['data'] = [];
+                return response()->json($response, 200);
+
+            }
+        }
+
+
+        $orderData = DB::table('wallet_orders')->where('order_id', $orderId)->get();
+        if(isset($orderData) && !empty($orderData) && !empty($orderData[0])){
+            $orderStatus = $orderData[0]->status;
+
+            if($orderStatus == "created"){
+                $orderAmount = $orderData[0]->amount;
+                $userId = $orderData[0]->user_id;
+                
+                $walletStatus = DB::table('wallet_orders')->where('order_id', $orderId)->update([
+                    'signature_id' => $sigId,
+                    'payment_id' => $paymentId,
+                    'status' => 'captured'
+                ]);
+
+                $historyArray = [
+                    'user_id' => $userId,
+                    'amount' => $orderAmount,
+                    'status' => 'credit',
+                    'recharge_id' => $orderId
+                ];
+                DB::table('wallet_histories')->insert($historyArray);
+
+                $walletData = DB::table('wallet')->where('user_id', $userId)->get();
+                if(isset($walletData) && !empty($walletData) && !empty($walletData[0])){
+                    $previousAmount = $walletData[0]->balance;
+                    $newAmount = $previousAmount + $orderAmount;
+
+                    $walletUpdate = DB::table('wallet')->where('user_id', $userId)->update([
+                        'balance' => $newAmount
+                    ]);
+
+                } else {
+                    $walletArray = [
+                        'user_id' => $userId,
+                        'balance' => $orderAmount
+                    ];
+                    DB::table('wallet')->insert($walletArray);
+                }
+
+                $orderUpdate = DB::table('wallet_orders')->where('order_id', $orderId)->get();
+                $response['status'] = 'success';
+                $response['message'] = 'Order successfully placed.';
+                $response['order_type'] = 'wallet';
+                $response['data'] = $orderUpdate;
+                return response()->json($response, 200);
+
+            } else {
+                $response['status'] = 'fail';
+                $response['message'] = 'Already recharged';
+                $response['data'] = [];
+                return response()->json($response, 200);
+            }
+        }
+    }
   
   	public function order_history(Request $request){
 

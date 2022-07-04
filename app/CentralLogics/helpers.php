@@ -146,28 +146,50 @@ class Helpers
         $header = array("authorization: key=" . $key . "",
             "content-type: application/json"
         );
-
-        $postdata = '{
-            "to" : "' . $fcm_token . '",
-            "mutable-content": "true",
-            "data" : {
-                "title":"' . $data['title'] . '",
-                "body" : "' . $data['description'] . '",
-                "image" : "' . $data['image'] . '",
-                "order_id":"' . $data['order_id'] . '",
-                "is_read": 0
-              },
-             "notification" : {
-                "title" :"' . $data['title'] . '",
-                "body" : "' . $data['description'] . '",
-                "image" : "' . $data['image'] . '",
-                "order_id":"' . $data['order_id'] . '",
-                "title_loc_key":"' . $data['order_id'] . '",
-                "is_read": 0,
-                "icon" : "new",
-                "sound" : "default"
-              }
-        }';
+        //echo '<pre />'; print_r($postdata);
+        if(isset($data['order_id']) && $data['order_id'] != ""){
+            $postdata = '{
+                "to" : "' . $fcm_token . '",
+                "mutable-content": "true",
+                "data" : {
+                    "title":"' . $data['title'] . '",
+                    "body" : "' . $data['description'] . '",
+                    "image" : "' . $data['image'] . '",
+                    "order_id":"' . $data['order_id'] . '",
+                    "is_read": 0
+                  },
+                 "notification" : {
+                    "title" :"' . $data['title'] . '",
+                    "body" : "' . $data['description'] . '",
+                    "image" : "' . $data['image'] . '",
+                    "order_id":"' . $data['order_id'] . '",
+                    "title_loc_key":"' . $data['order_id'] . '",
+                    "is_read": 0,
+                    "icon" : "new",
+                    "sound" : "default"
+                  }
+            }';
+        } else {
+            $postdata = '{
+                "to" : "' . $fcm_token . '",
+                "mutable-content": "true",
+                "data" : {
+                    "title":"' . $data['title'] . '",
+                    "body" : "' . $data['description'] . '",
+                    "image" : "' . $data['image'] . '",
+                    "is_read": 0
+                  },
+                 "notification" : {
+                    "title" :"' . $data['title'] . '",
+                    "body" : "' . $data['description'] . '",
+                    "image" : "' . $data['image'] . '",
+                    "is_read": 0,
+                    "icon" : "new",
+                    "sound" : "default"
+                  }
+            }';
+        }
+        
 
         $ch = curl_init();
         $timeout = 120;
@@ -182,7 +204,7 @@ class Helpers
         $result = curl_exec($ch);
         // close handle to release resources
         curl_close($ch);
-
+        //echo '<pre />'; print_r($result);
         return $result;
     }
 

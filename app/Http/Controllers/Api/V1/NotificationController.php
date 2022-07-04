@@ -10,7 +10,7 @@ class NotificationController extends Controller
 {
     public function get_notifications(){
         try {
-            $notifications = Notification::active()->get();
+            $notifications = Notification::active()->latest()->get();
             //echo '<pre />'; print_r($notifications);
             $response['status'] = 'success';
             if(count($notifications) > 0){

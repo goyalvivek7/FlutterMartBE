@@ -304,7 +304,7 @@ class CartController extends Controller
                     'final_amount' => round($remainingBalance),
                     'delivery_address_id' => $request['delivery_address_id'],
                     'time_slot_id' => $request['time_slot_id'],
-                    'same_day_delievery' => $request['same_day_delievery'],
+                    'same_day_delievery' => (int)$request['same_day_delievery'],
                     'order_type' => $request['order_type']
                 ]);
 

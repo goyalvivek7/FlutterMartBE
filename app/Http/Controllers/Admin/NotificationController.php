@@ -8,6 +8,7 @@ use App\Model\Notification;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class NotificationController extends Controller
 {
@@ -53,11 +54,24 @@ class NotificationController extends Controller
         $notification->status = 1;
         $notification->save();
 
-        try {
-            Helpers::send_push_notif_to_topic($notification);
-        } catch (\Exception $e) {
-            Toastr::warning('Push notification failed!');
+        $activeUsers = DB::table('users')->where('status', 1)->where('cm_firebase_token', '!=', null)->get();
+        //echo '<pre />'; print_r($activeUsers); die;
+
+        foreach($activeUsers as $user){
+            $cmFirebaseToken = $user->cm_firebase_token;
+            //echo $cmFirebaseToken.'<br />';
+            try {
+                Helpers::send_push_notif_to_device($cmFirebaseToken, $notification);
+            } catch (\Exception $e) {
+                Toastr::warning('Push notification failed!');
+            }
         }
+        
+        // try {
+        //     Helpers::send_push_notif_to_topic($notification);
+        // } catch (\Exception $e) {
+        //     Toastr::warning('Push notification failed!');
+        // }
 
         Toastr::success('Notification sent successfully!');
         return back();

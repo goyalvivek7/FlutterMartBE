@@ -114,15 +114,15 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
     });
   
   	Route::group(['prefix' => 'order'], function () {
-      Route::get('list', 'OrderController@get_order_list');
-      Route::get('details', 'OrderController@get_order_details');
-      Route::post('place', 'OrderController@place_order');
-      Route::post('cancel', 'OrderController@cancel_order');
-      Route::post('order-history', 'OrderController@order_history');
-      Route::get('track', 'OrderController@track_order');
-      Route::put('payment-method', 'OrderController@update_payment_method');
-      Route::post('create-order', 'OrderController@create_order');
-      
+        Route::get('list', 'OrderController@get_order_list');
+        Route::get('details', 'OrderController@get_order_details');
+        Route::post('place', 'OrderController@place_order');
+        Route::post('cancel', 'OrderController@cancel_order');
+        Route::post('order-history', 'OrderController@order_history');
+        Route::get('track', 'OrderController@track_order');
+        Route::put('payment-method', 'OrderController@update_payment_method');
+        Route::post('create-order', 'OrderController@create_order');
+        Route::post('captured', 'OrderController@captured');
     });
 
     Route::group(['prefix' => 'wish-list'], function () {
