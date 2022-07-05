@@ -195,6 +195,11 @@ class CustomerAuthController extends Controller{
         $verify = User::where(['phone' => $request['phone'], 'phone_otp' => $request['otp']])->first();
 			
         if (isset($verify)) {
+
+            $userStatus = DB::table('users')->where('phone', $request['phone'])->update([
+                'status' => 1
+            ]);
+
             return response()->json(['message' => 'OTP verified!', 'status' => 'success', 'data' => $verify], 200);
         }
 
@@ -208,6 +213,7 @@ class CustomerAuthController extends Controller{
         $user = User::where(['phone' => $request->phone])->first();
         
         if (isset($user)) {
+            //die("!!!!!!");
             $user->phone_otp = $otp;
             $user->save();
 
@@ -215,11 +221,43 @@ class CustomerAuthController extends Controller{
 
             return response()->json(['status' => 'success', 'token' => $temporary_token, 'otp' => $otp, 'state' => 'login', 'message'=>'Login Successfully'], 200);
         } else {
-            $user = User::create([
+            //die("@@@@@@");
+            if(isset($request->firbase_token) && $request->firbase_token != ""){
+                $firebaseToken = $request->firbase_token;
+            } else {
+                $firebaseToken = NULL;
+            }
+            if(isset($request->device_id) && $request->device_id != ""){
+                $device_id = $request->device_id;
+            } else {
+                $device_id = NULL;
+            }
+            if(isset($request->app_version) && $request->app_version != ""){
+                $appVersion = $request->app_version;
+            } else {
+                $appVersion = NULL;
+            }
+            //echo "!!!!".$firebaseToken."@@@@".$device_id."####".$appVersion; die;
+            // $user = User::create([
+            //     'phone' => $request->phone,
+            //     'phone_otp' => $otp,
+            //     'temporary_token' => $temporary_token,
+            //     'cm_firebase_token' => $firebaseToken,
+            //     'device_id' => $device_id,
+            //     'app_version' => $appVersion
+            // ]);
+
+            $or_d = [
                 'phone' => $request->phone,
                 'phone_otp' => $otp,
                 'temporary_token' => $temporary_token,
-            ]);
+                'cm_firebase_token' => $firebaseToken,
+                'device_id' => $device_id,
+                'app_version' => $appVersion
+            ];
+
+            DB::table('users')->insert($or_d);
+
             $smsData = file_get_contents('https://api.msg91.com/api/sendhttp.php?authkey=378531A3SYlMChc0qI62b1a431P1&mobiles=91'.$request->phone.'&message=Dear%20user%2C%20'.$otp.'%20is%20your%20OTP%20for%20registration%20at%20TESMART.%20Happy%20shopping%21&sender=TESMAT&route=4&DLT_TE_ID=1307164908009671091');
             return response()->json(['status' => 'success', 'token' => $temporary_token, 'otp' => $otp, 'state' => 'register', 'message'=>'Register Successfully'], 200);
         }

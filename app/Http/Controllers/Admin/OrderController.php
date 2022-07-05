@@ -61,6 +61,7 @@ class OrderController extends Controller
 
 
         $orders = $query->where('order_type', '!=', 'pos')->latest()->paginate(Helpers::getPagination())->appends($query_param);
+        echo '<pre />'; print_r($orders); die;
         return view('admin-views.order.list', compact('orders', 'status', 'search', 'date', 'time'));
     }
 

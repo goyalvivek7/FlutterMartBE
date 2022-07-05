@@ -23,7 +23,8 @@ use Session;
 class OrderController extends Controller
 {
   
-    public function captured(Request $request){
+  	
+  	public function captured(Request $request){
 
         $validator = Validator::make($request->all(), [
             'orderId' => 'required',
@@ -49,8 +50,9 @@ class OrderController extends Controller
         if(isset($orderData) && !empty($orderData) && !empty($orderData[0])){
 
             if($orderData[0]->order_status == "created"){
-
+				$customeOrderID = $orderData[0]->id;
                 $finalCartId = $orderData[0]->cart_id;
+              	$orderAmount = $orderData[0]->order_amount;
                 $orderstatus = DB::table('orders')->where('order_id', $orderId)->update([
                     'signature_id' => $sigId,
                     'payment_id' => $paymentId,
@@ -63,16 +65,86 @@ class OrderController extends Controller
                     'cart_status' => 'success'
                 ]);
 
-                $finalCart = DB::table('cart_final')->where('id', $finalCartId)->get();
+                // $finalCart = DB::table('cart_final')->where('id', $finalCartId)->get();
+                // $cartArray = json_decode($finalCart[0]->cart_list);
+                // $walletBalance = $finalCart[0]->wallet_balance;
+                // $userId = $finalCart[0]->user_id;
+
+                // for($i=0; $i<count($cartArray); $i++){
+                //     $cartId = $cartArray[$i];
+                //     $fCartStatus = DB::table('cart')->where('id', $cartId)->update([
+                //         'status' => 'sucess'
+                //     ]);
+                // }
+              
+              
+              	$finalCart = DB::table('cart_final')->where('id', $finalCartId)->get();
                 $cartArray = json_decode($finalCart[0]->cart_list);
+                $productArray = json_decode($finalCart[0]->product_list);
                 $walletBalance = $finalCart[0]->wallet_balance;
                 $userId = $finalCart[0]->user_id;
+                $time_slot_id = $finalCart[0]->time_slot_id;
+                $same_day_delievery = $finalCart[0]->same_day_delievery;
+                if($same_day_delievery == 1){
+                    $o_delivery = date("Y-m-d");
+                } else {
+                    $o_delivery = NULL;
+                }
 
                 for($i=0; $i<count($cartArray); $i++){
                     $cartId = $cartArray[$i];
                     $fCartStatus = DB::table('cart')->where('id', $cartId)->update([
                         'status' => 'sucess'
                     ]);
+
+                    $cartData = $fCartStatus = DB::table('cart')->where('id', $cartId)->get();
+                    $productId = $cartData[0]->product_id;
+                    $product = Product::find($productId);
+                    $variationArray = [];
+                    $variationArray[0]['type'] = $cartData[0]->variations;
+                    if (count(json_decode($product['variations'], true)) > 0) {
+                        //$price = Helpers::variation_price($product, json_encode($cartData[0]->variations));
+                        $price = Helpers::variation_price($product, json_encode($variationArray));
+                    } else {
+                        $price = $product['price'];
+                    }
+
+                    $or_d = [
+                        'order_id'            => $customeOrderID,
+                        'product_id'          => $productId,
+                        'time_slot_id'        => $time_slot_id,
+                        'delivery_date'       => $o_delivery,
+                        'product_details'     => $product,
+                        'quantity'            => $cartData[0]->quantity,
+                        'price'               => $price,
+                        'unit'                => $product['unit'],
+                        'tax_amount'          => Helpers::tax_calculate($product, $price),
+                        'discount_on_product' => Helpers::discount_calculate($product, $price),
+                        'discount_type'       => 'discount_on_product',
+                        'variant'             => json_encode($cartData[0]->variations),
+                        'variation'           => json_encode($variationArray),
+                        'is_stock_decreased'  => $cartData[0]->quantity,
+    
+                        'created_at'          => now(),
+                        'updated_at'          => now(),
+                    ];
+
+                    $type = $cartData[0]->variations;
+                    $var_store = [];
+
+                    foreach (json_decode($product['variations'], true) as $var) {
+                        if ($type == $var['type']) {
+                            $var['stock'] -= $cartData[0]->quantity;
+                        }
+                        array_push($var_store, $var);
+                    }
+
+                    Product::where(['id' => $product['id']])->update([
+                        'variations'  => json_encode($var_store),
+                        'total_stock' => $product['total_stock'] - $cartData[0]->quantity,
+                    ]);
+
+                    DB::table('order_details')->insert($or_d);
                 }
 
                 if($walletBalance != 0){
@@ -87,7 +159,7 @@ class OrderController extends Controller
 
                     $walletData = DB::table('wallet')->where('user_id', $userId)->get();
                     $previousAmount = $walletData[0]->balance;
-                    $newAmount = $previousAmount - $orderAmount;
+                    $newAmount = $previousAmount - $walletBalance;
                     $walletUpdate = DB::table('wallet')->where('user_id', $userId)->update([
                         'balance' => $newAmount
                     ]);
@@ -166,6 +238,7 @@ class OrderController extends Controller
             }
         }
     }
+  
   
   	public function order_history(Request $request){
 
@@ -353,8 +426,8 @@ class OrderController extends Controller
             //return response()->json(OrderLogic::track_order($request['order_id']), 200);
             $response['status'] = 'success';
             $response['message'] = 'Order tracked successfully!';
-
-            $trackOrder = OrderLogic::track_order($request['order_id']);
+          	
+          	$trackOrder = OrderLogic::track_order($request['order_id']);
 
             if(isset($trackOrder)){
                 $delivery_address_id = $trackOrder['delivery_address_id'];
@@ -377,9 +450,7 @@ class OrderController extends Controller
                 $response['data'] = [];
 
             }
-
-          	
-          	
+          
         }
       	
       	return response()->json($response, 200);
