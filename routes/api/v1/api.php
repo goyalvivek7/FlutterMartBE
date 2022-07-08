@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function () {
 
     Route::group(['prefix' => 'auth', 'namespace' => 'Auth'], function () {
+
+        Route::post('social-login', 'CustomerAuthController@social_login');
+
       	Route::post('verify-otp', 'CustomerAuthController@verify_otp');
       	Route::post('login-register', 'CustomerAuthController@login_register');
         Route::post('profile', 'CustomerAuthController@get_profile');

@@ -90,6 +90,15 @@ class OrderController extends Controller
                 } else {
                     $o_delivery = NULL;
                 }
+              
+              	$orderAgainStatus = DB::table('orders')->where('order_id', $orderId)->update([
+                    'time_slot_id' => $time_slot_id,
+                    'same_day_delievery' => $finalCart[0]->same_day_delievery,
+                    'delivery_date' => $o_delivery,
+                    'order_type' => $finalCart[0]->order_type,
+                  	'delivery_address_id' => $finalCart[0]->delivery_address_id,
+                  	'delivery_charge' => $finalCart[0]->delivery_charge
+                ]);
 
                 for($i=0; $i<count($cartArray); $i++){
                     $cartId = $cartArray[$i];
@@ -100,14 +109,22 @@ class OrderController extends Controller
                     $cartData = $fCartStatus = DB::table('cart')->where('id', $cartId)->get();
                     $productId = $cartData[0]->product_id;
                     $product = Product::find($productId);
-                    $variationArray = [];
-                    $variationArray[0]['type'] = $cartData[0]->variations;
-                    if (count(json_decode($product['variations'], true)) > 0) {
+                    //$variationArray = [];
+                    //$variationArray[0]['type'] = $cartData[0]->variations;
+                  
+                  	$variationArray = [];
+                  	//echo "!!!".$cartData[0]->variations."@@@@";
+                    if($cartData[0]->variations != NULL && $cartData[0]->variations != ""){
+                        $variationArray[0]['type'] = $cartData[0]->variations;
+                    }
+                  
+                    if (count(json_decode($product['variations'], true)) > 0 && $cartData[0]->variations != NULL && $cartData[0]->variations != "") {
                         //$price = Helpers::variation_price($product, json_encode($cartData[0]->variations));
                         $price = Helpers::variation_price($product, json_encode($variationArray));
                     } else {
                         $price = $product['price'];
                     }
+                  	//echo $price.'##### <pre />'; print_r($variationArray); die;
 
                     $or_d = [
                         'order_id'            => $customeOrderID,
@@ -123,7 +140,7 @@ class OrderController extends Controller
                         'discount_type'       => 'discount_on_product',
                         'variant'             => json_encode($cartData[0]->variations),
                         'variation'           => json_encode($variationArray),
-                        'is_stock_decreased'  => $cartData[0]->quantity,
+                        'is_stock_decreased'  => 1,
     
                         'created_at'          => now(),
                         'updated_at'          => now(),
@@ -590,7 +607,7 @@ class OrderController extends Controller
     public function get_order_list(Request $request)
     {
         //$orders = Order::with(['customer', 'delivery_man.rating'])->withCount('details')->where(['user_id' => $request->user()->id])->get();
-      	$orders = Order::with(['customer', 'delivery_man.rating'])->withCount('details')->where(['user_id' => $request['user_id']])->get();
+      	$orders = Order::with(['customer', 'delivery_man.rating', 'time_slot', 'delivery_address'])->withCount('details')->where(['user_id' => $request['user_id']])->latest()->get();
 
         $orders->map(function ($data) {
             $data['deliveryman_review_count'] = DMReview::where(['delivery_man_id' => $data['delivery_man_id'], 'order_id' => $data['id']])->count();
@@ -618,7 +635,7 @@ class OrderController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-      	$orderdata = Order::where(['id' => $request['order_id']])->get();
+      	$orderdata = Order::with(['customer', 'delivery_man.rating', 'time_slot', 'delivery_address', 'final_cart'])->where(['id' => $request['order_id']])->get();
       	$delivery_address_id = $orderdata[0]->delivery_address_id;
         $addressData = DB::table('customer_addresses')->where('id', $delivery_address_id)->get();
       	//echo '<pre />'; print_r($addressData);
@@ -675,30 +692,40 @@ class OrderController extends Controller
 
             $resOrderStatus[] = 'out_for_delivery'; $resOrderStatus[] = 'delivered';
             $resOrderStatus[] = 'returned'; $resOrderStatus[] = 'failed'; $resOrderStatus[] = 'canceled';
-            
+            //echo "@@@@@".$orderStatus."####";
+          	//echo '<pre />'; print_r($resOrderStatus);
             if(in_array($orderStatus, $resOrderStatus)){
-
+				//echo "In True Condition"; die;
                 $response['status'] = 'fail';
                 $response['message'] = 'Order not eligible for cancel request, Order out for delivery or deliverd.';
                 $response['data'] = [];
                 return response()->json($response, 200);
             } else {
-
+              	//echo '<pre />'; print_r($order->details);
+				//echo "In False Condition"; die;
                 foreach ($order->details as $detail) {
                     if ($detail['is_stock_decreased'] == 1) {
                         $product = Product::find($detail['product_id']);
-                        $type = json_decode($detail['variation'])[0]->type;
-                        $var_store = [];
-                        foreach (json_decode($product['variations'], true) as $var) {
-                            if ($type == $var['type']) {
-                                $var['stock'] += $detail['quantity'];
-                            }
-                            array_push($var_store, $var);
+                      	
+                      	//echo "%%%%".$detail['variation']; die;
+                      	if($detail['variation'] != "" && $detail['variation'] != "[]"){
+                          $type = json_decode($detail['variation'])[0]->type;
+                          $var_store = [];
+                          foreach (json_decode($product['variations'], true) as $var) {
+                              if ($type == $var['type']) {
+                                  $var['stock'] += $detail['quantity'];
+                              }
+                              array_push($var_store, $var);
+                          }
+                          Product::where(['id' => $product['id']])->update([
+                              'variations'  => json_encode($var_store),
+                              'total_stock' => $product['total_stock'] + $detail['quantity'],
+                          ]);
+                        } else {
+                          Product::where(['id' => $product['id']])->update([
+                              'total_stock' => $product['total_stock'] + $detail['quantity'],
+                          ]);
                         }
-                        Product::where(['id' => $product['id']])->update([
-                            'variations'  => json_encode($var_store),
-                            'total_stock' => $product['total_stock'] + $detail['quantity'],
-                        ]);
                         OrderDetail::where(['id' => $detail['id']])->update([
                             'is_stock_decreased' => 0,
                         ]);

@@ -55,4 +55,8 @@ class Order extends Model
     {
         return $query->where('order_type', '=' , 'pos');
     }
+    public function final_cart()
+    {
+        return $this->belongsTo(CartFinal::class, 'cart_id');
+    }
 }

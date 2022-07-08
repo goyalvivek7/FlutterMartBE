@@ -27,15 +27,15 @@ class OrderController extends Controller
         Order::where(['checked' => 0])->update(['checked' => 1]);
         if (session('branch_filter') == 0) {
             if ($status != 'all') {
-                $query = Order::with(['customer', 'branch'])->where(['order_status' => $status]);
+                $query = Order::with(['customer', 'branch', 'final_cart'])->where(['order_status' => $status]);
             } else {
-                $query = Order::with(['customer', 'branch']);
+                $query = Order::with(['customer', 'branch', 'final_cart']);
             }
         } else {
             if ($status != 'all') {
-                $query = Order::with(['customer', 'branch'])->where(['order_status' => $status, 'branch_id' => session('branch_filter')]);
+                $query = Order::with(['customer', 'branch', 'final_cart'])->where(['order_status' => $status, 'branch_id' => session('branch_filter')]);
             } else {
-                $query = Order::with(['customer', 'branch'])->where(['branch_id' => session('branch_filter')]);
+                $query = Order::with(['customer', 'branch', 'final_cart'])->where(['branch_id' => session('branch_filter')]);
             }
         }
         if ($request->has('search')) {
@@ -59,18 +59,18 @@ class OrderController extends Controller
             $query_param = ['time' => $request['time']];
         }
 
-
-        $orders = $query->where('order_type', '!=', 'pos')->latest()->paginate(Helpers::getPagination())->appends($query_param);
-        echo '<pre />'; print_r($orders); die;
+        $orders = $query->where('order_type', '!=', 'pos')->where('order_status', '!=', 'created')->latest()->paginate(Helpers::getPagination())->appends($query_param);
+        //echo '<pre />'; print_r($orders); die;
+        
         return view('admin-views.order.list', compact('orders', 'status', 'search', 'date', 'time'));
     }
 
     public function details($id)
     {
         $order = Order::with('details')->where(['id' => $id])->first();
-
+        $deliveryOptions = DB::table('delivery_options')->get();
         if (isset($order)) {
-            return view('admin-views.order.order-view', compact('order'));
+            return view('admin-views.order.order-view', compact('order', 'deliveryOptions'));
         } else {
             Toastr::info('No more orders!');
             return back();

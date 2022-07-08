@@ -18,6 +18,100 @@ use Illuminate\Support\Str;
 
 class CustomerAuthController extends Controller{
 
+
+    public function social_login(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'access_token' => 'required',
+            'username' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Plese send all inputs.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $temporary_token = Str::random(40);
+
+        $user = User::where(['access_token' => $request->access_token, 'username' => $request->username])->get();
+        
+        if (isset($user) && isset($user[0]) && !empty($user[0])) {
+            return response()->json(['status' => 'success', 'state' => 'login', 'message'=>'Login Successfully', 'data' => $user], 200);
+        } else {
+            //die("@@@@@@");
+            if(isset($request->firbase_token) && $request->firbase_token != ""){
+                $firebaseToken = $request->firbase_token;
+            } else {
+                $firebaseToken = NULL;
+            }
+            if(isset($request->device_id) && $request->device_id != ""){
+                $device_id = $request->device_id;
+            } else {
+                $device_id = NULL;
+            }
+            if(isset($request->app_version) && $request->app_version != ""){
+                $appVersion = $request->app_version;
+            } else {
+                $appVersion = NULL;
+            }
+
+            if(isset($request->phone) && $request->phone != ""){
+                $phone = $request->phone;
+            } else {
+                $phone = NULL;
+            }
+            if(isset($request->email) && $request->email != ""){
+                $email = $request->email;
+            } else {
+                $email = NULL;
+            }
+            if(isset($request->access_plateform) && $request->access_plateform != ""){
+                $access_plateform = $request->access_plateform;
+            } else {
+                $access_plateform = NULL;
+            }
+            if(isset($request->device_model) && $request->device_model != ""){
+                $device_model = $request->device_model;
+            } else {
+                $device_model = NULL;
+            }
+            if(isset($request->device_plateform) && $request->device_plateform != ""){
+                $device_plateform = $request->device_plateform;
+            } else {
+                $device_plateform = NULL;
+            }
+            if(isset($request->imeinumber) && $request->imeinumber != ""){
+                $imeinumber = $request->imeinumber;
+            } else {
+                $imeinumber = NULL;
+            }
+
+            $or_d = [
+                'access_token' => $request->access_token,
+                'username' => $request->username,
+                'phone' => $phone,
+                'email' => $email,
+                'temporary_token' => $temporary_token,
+                'cm_firebase_token' => $firebaseToken,
+                'device_id' => $device_id,
+                'app_version' => $appVersion,
+                'access_plateform' => $access_plateform,
+                'device_model' => $device_model,
+                'device_plateform' => $device_plateform,
+                'imeinumber' => $imeinumber,
+                'status' => 1
+            ];
+
+            $lastId = DB::table('users')->insertGetId($or_d);
+            //$lastId = DB::table('users')->lastInsertId();
+            $user = User::where(['id' => $lastId])->get();
+            return response()->json(['status' => 'success', 'state' => 'register', 'message'=>'Register Successfully', 'data' => $user], 200);
+        }
+    }
+
+
     public function profile_update(Request $request){
 
         $validator = Validator::make($request->all(), [
@@ -237,6 +331,21 @@ class CustomerAuthController extends Controller{
             } else {
                 $appVersion = NULL;
             }
+            if(isset($request->device_model) && $request->device_model != ""){
+                $device_model = $request->device_model;
+            } else {
+                $device_model = NULL;
+            }
+            if(isset($request->device_plateform) && $request->device_plateform != ""){
+                $device_plateform = $request->device_plateform;
+            } else {
+                $device_plateform = NULL;
+            }
+            if(isset($request->imeinumber) && $request->imeinumber != ""){
+                $imeinumber = $request->imeinumber;
+            } else {
+                $imeinumber = NULL;
+            }
             //echo "!!!!".$firebaseToken."@@@@".$device_id."####".$appVersion; die;
             // $user = User::create([
             //     'phone' => $request->phone,
@@ -253,7 +362,10 @@ class CustomerAuthController extends Controller{
                 'temporary_token' => $temporary_token,
                 'cm_firebase_token' => $firebaseToken,
                 'device_id' => $device_id,
-                'app_version' => $appVersion
+                'app_version' => $appVersion,
+                'device_model' => $device_model,
+                'device_plateform' => $device_plateform,
+                'imeinumber' => $imeinumber
             ];
 
             DB::table('users')->insert($or_d);

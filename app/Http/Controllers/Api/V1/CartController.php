@@ -304,7 +304,7 @@ class CartController extends Controller
                     'final_amount' => round($remainingBalance),
                     'delivery_address_id' => $request['delivery_address_id'],
                     'time_slot_id' => $request['time_slot_id'],
-                    'same_day_delievery' => (int)$request['same_day_delievery'],
+                    'same_day_delievery' => $request['same_day_delievery'],
                     'order_type' => $request['order_type']
                 ]);
 
@@ -329,7 +329,7 @@ class CartController extends Controller
                 $cartFinal->final_amount = round($remainingBalance);
                 $cartFinal->delivery_address_id = $request['delivery_address_id'];
                 $cartFinal->time_slot_id = $request['time_slot_id'];
-                $cartFinal->same_day_delievery = $request['same_day_delievery'];
+                $cartFinal->same_day_delievery = (string)$request['same_day_delievery'];
                 $cartFinal->order_type = $request['order_type'];
                 $cartFinal->save();
 
@@ -638,9 +638,9 @@ class CartController extends Controller
                 $productData = DB::table('products')->where('id', $productId)->get();
                 $deliveryManagement = DB::table('business_settings')->where('key', 'delivery_management')->get();
                 $deliveryCharge = DB::table('business_settings')->where('key', 'delivery_charge')->get();
-
+				
+              	$totalPrice += $cart->total_price;
                 //$totalPrice += ($cart->quantity * $cart->total_price);
-                $totalPrice += $cart->total_price;
                 $basicPrice += ($cart->quantity * $cart->product_price);
 
                 if(isset($productData) && !empty($productData[0])){
@@ -691,7 +691,8 @@ class CartController extends Controller
             $basicCart['total_discount'] = ($basicPrice - $totalPrice);
             $basicCart['tax_amount'] = $taxAmount;
             $basicCart['delivery_charge'] = $delCharge;
-            $basicCart['sub_total'] =  round(($totalPrice + $taxAmount + $delCharge), 2);
+            //$basicCart['sub_total'] =  round(($totalPrice + $taxAmount + $delCharge), 2);
+          	$basicCart['sub_total'] =  round(($totalPrice), 2);
 
             //$tax = $cart->total_price
 

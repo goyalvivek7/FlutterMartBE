@@ -352,4 +352,6 @@
   'variations' => 'Variations',
   'reviewer' => 'Reviewer',
   'category_icon' => 'Category icon',
+  'joined_at' => 'Joined at',
+  'addresses' => 'Addresses',
 );

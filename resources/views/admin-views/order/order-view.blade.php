@@ -280,9 +280,19 @@
                                         @endif
                                     </h6>
                                     <h6 class="text-capitalize"
-                                        style="color: #8a8a8a;">{{\App\CentralLogics\translate('order')}} {{\App\CentralLogics\translate('type')}}
-                                        : <label style="font-size: 10px"
-                                                 class="badge badge-soft-primary">{{str_replace('_',' ',$order['order_type'])}}</label>
+                                        style="color: #8a8a8a;">{{\App\CentralLogics\translate('order')}} {{\App\CentralLogics\translate('type')}} : 
+                                        <!-- : <label style="font-size: 10px"
+                                                 class="badge badge-soft-primary">{{str_replace('_',' ',$order['order_type'])}}</label> -->
+                                        <?php if($order['order_type'] == 4){
+                                            echo "Scan & Pay";
+                                        }
+                                        foreach($deliveryOptions as $delOptions){
+                                            $delOtopnId = $delOptions->id;
+                                            $delOtopnText = $delOptions->text;
+                                            if($delOtopnId == $order['order_type']){
+                                                echo $delOtopnText;
+                                            }
+                                        } ?>
                                     </h6>
                                 </div>
                             </div>
@@ -331,9 +341,9 @@
                                                 <h5>{{$detail['quantity']}} </h5>
                                             </div>
 
-                                            <div class="col col-md-2 align-self-center">
+                                            <!-- <div class="col col-md-2 align-self-center">
                                                 <h5>{{$detail->product['capacity']}} {{$detail['unit']}}</h5>
-                                            </div>
+                                            </div> -->
 
 
                                             <div class="col col-md-3 align-self-center text-right">

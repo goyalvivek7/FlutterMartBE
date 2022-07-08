@@ -31,7 +31,8 @@ class CustomerController extends Controller
         }else{
             $customers = User::with(['orders']);
         }
-        $customers = $customers->latest()->paginate(Helpers::getPagination())->appends($query_param);
+        //$customers = $customers->latest()->paginate(Helpers::getPagination())->appends($query_param);
+        $customers = $customers->orderBy('users.id', 'DESC')->paginate(Helpers::getPagination())->appends($query_param);
         
         return view('admin-views.customer.list', compact('customers','search'));
     }

@@ -218,6 +218,19 @@
                                 <hr>
                             @endforeach
 
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5>Device Data</h5>
+                            </div>
+                            
+                            <ul class="list-unstyled list-unstyled-py-2">
+                                <li>
+                                    APP Version: {{$customer['app_version']}}
+                                </li>
+                                <li>
+                                    Device ID: {{$customer['device_id']}}
+                                </li>
+                            </ul>
+
                         </div>
                 @endif
                 <!-- End Body -->

@@ -148,7 +148,7 @@
 
                     <tbody id="set-rows">
                     @foreach($orders as $key=>$order)
-
+                        <?php //echo '<pre />'; print_r($order); ?>
                         <tr class="status-{{$order['order_status']}} class-all">
                             <td class="">
                                 {{$orders->firstItem()+$key}}
@@ -156,7 +156,13 @@
                             <td class="table-column-pl-0">
                                 <a href="{{route('admin.orders.details',['id'=>$order['id']])}}">{{$order['id']}}</a>
                             </td>
-                            <td>{{date('d M Y',strtotime($order['delivery_date']))}}</td>
+                            <td>
+                                <?php if(isset($order['delivery_date']) && $order['delivery_date'] != NULL){ ?>
+                                    {{date('d M Y',strtotime($order['delivery_date']))}}
+                                <?php } else { ?>
+                                    Date Not Assigned
+                                <?php } ?>
+                            </td>
                             <td>
                                 <span>{{$order->time_slot?$order->time_slot['start_time'].' - ' .$order->time_slot['end_time'] :'No Time Slot'}}</span>
 
