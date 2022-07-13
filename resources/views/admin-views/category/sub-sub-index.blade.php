@@ -138,7 +138,7 @@
                             </thead>
 
                             <tbody>
-                            @foreach(\App\Model\Category::with(['parent'])->where(['position'=>2])->latest()->get() as $key=>$category)
+                            @foreach(\App\Model\Category::with(['parent'])->where(['position'=>2])->orderBy('id', 'DESC')->get() as $key=>$category)
                                 <tr>
                                     <td>{{$key+1}}</td>
                                     <td>

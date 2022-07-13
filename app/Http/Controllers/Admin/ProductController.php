@@ -192,18 +192,21 @@ class ProductController extends Controller
                 'id' => $request->category_id,
                 'position' => 1,
             ]);
+            $p->cat_id = $request->category_id;
         }
         if ($request->sub_category_id != null) {
             array_push($category, [
                 'id' => $request->sub_category_id,
                 'position' => 2,
             ]);
+            $p->sub_cat_id = $request->sub_category_id;
         }
         if ($request->sub_sub_category_id != null) {
             array_push($category, [
                 'id' => $request->sub_sub_category_id,
                 'position' => 3,
             ]);
+            $p->child_cat_id = $request->sub_sub_category_id;
         }
 
         $p->category_ids = json_encode($category);
@@ -252,6 +255,7 @@ class ProductController extends Controller
                 $item['type'] = $str;
                 $item['price'] = abs($request['price_' . str_replace('.', '_', $str)]);
                 $item['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
+                $item['barcode'] = $request['barcode_' . str_replace('.', '_', $str)];
                 array_push($variations, $item);
                 $stock_count += $item['stock'];
             }
@@ -267,9 +271,24 @@ class ProductController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)]);
         }
 
+        if(isset($request->barcode) && $request->barcode != ""){
+            $barcode = $request->barcode;
+        } else {
+            $barcode = NULL;
+        }
+
+        if(isset($request->sku) && $request->sku != ""){
+            $sku = $request->sku;
+        } else {
+            $sku = NULL;
+        }
+
         //combinations end
         $p->variations = json_encode($variations);
         $p->price = $request->price;
+        $p->org_price = $request->org_price;
+        $p->bar_code = $barcode;
+        $p->sku = $sku;
         $p->unit = $request->unit;
         $p->image = $image_data;
         $p->capacity = $request->capacity;
@@ -925,6 +944,7 @@ class ProductController extends Controller
                 $item['type'] = $str;
                 $item['price'] = abs($request['price_' . str_replace('.', '_', $str)]);
                 $item['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
+                $item['barcode'] = $request['barcode_' . str_replace('.', '_', $str)];
                 array_push($variations, $item);
                 $stock_count += $item['stock'];
             }
@@ -940,9 +960,24 @@ class ProductController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)]);
         }
 
+        if(isset($request->barcode) && $request->barcode != ""){
+            $barcode = $request->barcode;
+        } else {
+            $barcode = NULL;
+        }
+        
+        if(isset($request->sku) && $request->sku != ""){
+            $sku = $request->sku;
+        } else {
+            $sku = NULL;
+        }
+
         //combinations end
         $p->variations = json_encode($variations);
         $p->price = $request->price;
+        $p->org_price = $request->org_price;
+        $p->bar_code = $barcode;
+        $p->sku = $sku;
         $p->capacity = $request->capacity;
         $p->unit = $request->unit;
         // $p->image = json_encode(array_merge(json_decode($p['image'], true), json_decode($image_data, true)));

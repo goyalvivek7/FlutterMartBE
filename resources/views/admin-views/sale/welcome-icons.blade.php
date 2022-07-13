@@ -35,7 +35,7 @@
                             <div class="row">
                                 <div class="col-6">
                                     <div class="form-group">
-                                        <label>{{\App\CentralLogics\translate('product')}} {{\App\CentralLogics\translate('image')}}</label><small
+                                        <label>Welcome Icon</label><small
                                             style="color: red">* ( {{\App\CentralLogics\translate('ratio')}} 1:1 )</small>
                                         <div>
                                             <div class="row coba" id="coba<?php echo $i; ?>"></div>

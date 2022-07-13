@@ -30,7 +30,9 @@ class CategoryController extends Controller
         }else{
             $categories=Category::where(['position'=>0]);
         }
-        $categories=$categories->latest()->paginate(Helpers::getPagination())->appends($query_param);
+        
+        $categories=$categories->orderBy('id', 'DESC')->paginate(Helpers::getPagination())->appends($query_param);
+        //$categories=$categories->latest()->paginate(Helpers::getPagination())->appends($query_param);
         return view('admin-views.category.index',compact('categories','search'));
     }
 
@@ -51,7 +53,8 @@ class CategoryController extends Controller
         }else{
             $categories=Category::with(['parent'])->where(['position'=>1]);
         }
-        $categories=$categories->latest()->paginate(Helpers::getPagination())->appends($query_param);
+        $categories=$categories->orderBy('id', 'DESC')->paginate(Helpers::getPagination())->appends($query_param);
+        //$categories=$categories->latest()->paginate(Helpers::getPagination())->appends($query_param);
         return view('admin-views.category.sub-index',compact('categories' ,'search'));
     }
 

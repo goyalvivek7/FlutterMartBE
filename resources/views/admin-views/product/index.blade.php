@@ -82,7 +82,14 @@
                     @endif
                     <div id="from_part_2">
                         <div class="row">
-                            <div class="col-6">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="input-label"
+                                           for="exampleFormControlInput1">Regular Price</label>
+                                    <input type="number" min="1" max="100000000" step="0.01" value="1" name="org_price" class="form-control"placeholder="Ex : 100" required>
+                                </div>
+                            </div>
+                            <div class="col-4">
                                 <div class="form-group">
                                     <label class="input-label"
                                            for="exampleFormControlInput1">{{\App\CentralLogics\translate('price')}}</label>
@@ -91,7 +98,14 @@
                                            placeholder="Ex : 100" required>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label class="input-label"
+                                           for="exampleFormControlInput1">SKU</label>
+                                    <input type="number" min="1" max="100000000" step="0.01" value="1" name="sku" class="form-control" placeholder="Ex : 100" required>
+                                </div>
+                            </div>
+                            <div class="col-4">
                                 <div class="form-group">
                                     <label class="input-label"
                                            for="exampleFormControlInput1">{{\App\CentralLogics\translate('unit')}}</label>
@@ -103,7 +117,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4">
                                 <div class="form-group">
                                     <label class="input-label"
                                            for="exampleFormControlInput1">{{\App\CentralLogics\translate('tax')}}</label>
@@ -112,7 +126,7 @@
                                            placeholder="Ex : 7" required>
                                 </div>
                             </div>
-                            <div class="col-6">
+                            <div class="col-4">
                                 <div class="form-group">
                                     <label class="input-label"
                                            for="exampleFormControlInput1">{{\App\CentralLogics\translate('tax')}} {{\App\CentralLogics\translate('type')}}</label>
@@ -125,6 +139,12 @@
                         </div>
 
                         <div class="row">
+                            <div class="ol-md-4 col-4">
+                                <div class="form-group">
+                                    <label class="input-label" for="exampleFormControlInput1">Barcode</label>
+                                    <input type="text" value="" name="barcode" class="form-control" placeholder="Barcode" required>
+                                </div>
+                            </div>
                             <div class="ol-md-4 col-4">
                                 <div class="form-group">
                                     <label class="input-label"
@@ -152,9 +172,7 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row">
+                            
                             <div class="col-md-4 col-12">
                                 <div class="form-group">
                                     <label class="input-label"
@@ -189,7 +207,7 @@
                                     </select>
                                 </div>
                             </div>
-                            {{--<div class="col-md-4 col-6">
+                            <div class="col-md-4 col-6">
                                 <div class="form-group">
                                     <label class="input-label" for="exampleFormControlSelect1">Sub Sub Category<span
                                             class="input-label-secondary"></span></label>
@@ -198,7 +216,7 @@
 
                                     </select>
                                 </div>
-                            </div>--}}
+                            </div>
                         </div>
 
                         <div class="row"

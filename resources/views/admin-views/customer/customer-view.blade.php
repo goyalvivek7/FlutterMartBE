@@ -150,7 +150,7 @@
                                     <img
                                         class="avatar-img"
                                         onerror="this.src='{{asset('public/assets/admin/img/160x160/img1.jpg')}}'"
-                                        src="{{asset('storage/app/public/profile/'.$customer->image)}}"
+                                        src="{{asset('storage/app/public/users/'.$customer->image)}}"
                                         alt="Image Description">
                                 </div>
                                 <div class="media-body">
@@ -206,7 +206,7 @@
                                     </li>
                                     <li>
                                         <i class="tio-android-phone-vs mr-2"></i>
-                                        {{$address['contact_person_umber']}}
+                                        {{$address['contact_person_name']}} - {{$address['contact_person_number']}}
                                     </li>
                                     <li style="cursor: pointer">
                                         <a target="_blank" href="http://maps.google.com/maps?z=12&t=m&q=loc:{{$address['latitude']}}+{{$address['longitude']}}">
