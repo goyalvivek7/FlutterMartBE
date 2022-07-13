@@ -51,9 +51,11 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
         Route::group(['prefix' => 'sale', 'as' => 'sale.'], function () {
             Route::get('add-new', 'SaleController@index')->name('add-new');
             Route::post('store', 'SaleController@store')->name('store');
+            Route::post('storeicons', 'SaleController@storeicons')->name('storeicons');
             Route::get('edit/{id}', 'SaleController@edit')->name('edit');
             Route::put('update/{id}', 'SaleController@update')->name('update');
             Route::get('list', 'SaleController@list')->name('list');
+            Route::get('welcome-icons', 'SaleController@welcome_icons')->name('welcome-icons');
             Route::get('status/{id}/{status}', 'SaleController@status')->name('status');
             Route::delete('delete/{id}', 'SaleController@delete')->name('delete');
         });

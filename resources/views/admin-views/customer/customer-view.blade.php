@@ -229,6 +229,21 @@
                                 <li>
                                     Device ID: {{$customer['device_id']}}
                                 </li>
+                                <li>
+                                    IMEI Number: {{$customer['imeinumber']}}
+                                </li>
+                                <li>
+                                    Username: {{$customer['username']}}
+                                </li>
+                                <li>
+                                    Access Plateform: {{$customer['access_plateform']}}
+                                </li>
+                                <li>
+                                    Device Model: {{$customer['device_model']}}
+                                </li>
+                                <li>
+                                    Device Plateform: {{$customer['device_plateform']}}
+                                </li>
                             </ul>
 
                         </div>

@@ -254,6 +254,12 @@
                                         <span class="text-truncate">Sale</span>
                                     </a>
                                 </li>
+                                <li class="nav-item {{Request::is('admin/sale/welcome-icons')?'active':''}}">
+                                    <a class="nav-link " href="{{route('admin.sale.welcome-icons')}}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">Welcome Icons</span>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         <!-- End Pages -->
@@ -334,7 +340,7 @@
                                         <span class="text-truncate">{{\App\CentralLogics\translate('list')}}</span>
                                     </a>
                                 </li>
-                                <li class="nav-item {{Request::is('admin/product/bulk-import')?'active':''}}">
+                                <!-- <li class="nav-item {{Request::is('admin/product/bulk-import')?'active':''}}">
                                     <a class="nav-link " href="{{route('admin.product.bulk-import')}}" title="bulk import">
                                         <span class="tio-circle nav-indicator-icon"></span>
                                         <span class="text-truncate">{{\App\CentralLogics\translate('bulk_import')}}</span>
@@ -345,7 +351,7 @@
                                         <span class="tio-circle nav-indicator-icon"></span>
                                         <span class="text-truncate">{{\App\CentralLogics\translate('bulk_export')}}</span>
                                     </a>
-                                </li>
+                                </li> -->
                                 <li class="nav-item {{Request::is('admin/product/popular-product')?'active':''}}">
                                     <a class="nav-link " href="{{route('admin.product.popular-product')}}" title="popular-product">
                                         <span class="tio-circle nav-indicator-icon"></span>

@@ -11,9 +11,16 @@ use App\Model\Product;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
+
+    function welcome_icons(){
+        $welcomeIcons = DB::table('miscellaneous')->where(['setting_type' => 'welcome_icons'])->get();
+        return view('admin-views.sale.welcome-icons',compact('welcomeIcons'));
+    }
+
     function index()
     {
         $products = Product::orderBy('name')->get();
@@ -47,6 +54,50 @@ class SaleController extends Controller
         $banner->save();
         Toastr::success('Banner added successfully!');
         return redirect('admin/banner/list');
+    }
+
+
+    public function storeicons(Request $request)
+    {
+
+        $request->validate([
+            'title' => 'required',
+            'sub_title' => 'required',
+        ], [
+            'title.required' => 'Title is required!',
+            'sub_title.required' => 'Title is required!',
+        ]);
+
+        $wId = $request->form_id;
+        $wTitle = $request->title;
+        $wSubTitle = $request->sub_title;
+        if(isset($request->status) && $request->status == 1){
+            $wStatus = '1';
+        } else {
+            $wStatus = '0';
+        }
+        $wPriorty = $request->priorty;
+
+        if($request->has('images')){
+            //die("in right");
+            $image = Helpers::upload('settings/', 'png', $request->file('images'));
+        } else {
+            //die("in else");
+            $image = $request->old_image;
+        }
+        
+        $welcomData = [
+            'setting_title' => $wTitle,
+            'setting_val_second' => $wSubTitle,
+            'status' => $wStatus,
+            'priorty' => $wPriorty,
+            'setting_val_first' => $image
+        ];
+
+        DB::table('miscellaneous')->where('id', $wId)->update($welcomData);
+
+        Toastr::success('Welcome Icons updated successfully!');
+        return redirect('admin/sale/welcome-icons');
     }
 
     public function edit($id)

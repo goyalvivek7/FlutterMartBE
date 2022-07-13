@@ -143,6 +143,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('final-cart', 'CartController@final_cart');
         Route::get('membership-package', 'CartController@membership_package');
         Route::post('create-membership-order', 'CartController@create_membership_order');
+        Route::post('id-list', 'CartController@id_list');
     });
 
     Route::get('pages', 'TimeSlotController@all_pages');

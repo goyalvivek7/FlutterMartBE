@@ -11,6 +11,9 @@
             <td class="text-center">
                 <label for="" class="control-label">Variant Stock</label>
             </td>
+            <td class="text-center">
+                <label for="" class="control-label">Bar Code</label>
+            </td>
         </tr>
         </thead>
         <tbody>
@@ -39,6 +42,9 @@
                     <td>
                         <input type="number" name="stock_{{ $str }}" value="0" min="0" max="1000000"
                                class="form-control" onkeyup="update_qty()" required>
+                    </td>
+                    <td>
+                        <input type="text" name="barcode_{{ $str }}" value="" class="form-control" required>
                     </td>
                 </tr>
             @endif

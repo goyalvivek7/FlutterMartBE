@@ -16,6 +16,40 @@ use Razorpay\Api\Api;
 class CartController extends Controller
 {
   
+    public function id_list(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+        $userId = $request['user_id'];
+        //echo $userId;
+        $cartIdArray = DB::table('cart')->where('user_id', $userId)->where('status', 'pending')->select('product_id')->get();
+        //echo '<pre />'; print_r($cartIdArray);
+        if(!empty($cartIdArray) && isset($cartIdArray[0])){
+            $idArray = array();
+            foreach($cartIdArray as $cartArray){
+                $idArray[] = $cartArray->product_id;
+            }
+
+            $response['status'] = 'success';
+            $response['message'] = 'Cart List';
+            $response['data'] = $idArray;
+            return response()->json($response, 200);
+        } else {
+            $response['status'] = 'fail';
+            $response['message'] = 'Cart Not Found';
+            $response['items'] = [];
+            return response()->json($response, 200);
+        }
+        
+    }
   
   	public function create_membership_order(Request $request){
 

@@ -35,9 +35,20 @@ class CustomerAuthController extends Controller{
 
         $temporary_token = Str::random(40);
 
-        $user = User::where(['access_token' => $request->access_token, 'username' => $request->username])->get();
-        
-        if (isset($user) && isset($user[0]) && !empty($user[0])) {
+        if(isset($request->phone) && $request->phone != "" && $request->phone != NULL){
+            $condition['phone'] = $request->phone;
+        }
+
+        if(isset($request->email) && $request->email != "" && $request->email != NULL){
+            $condition['email'] = $request->email;
+        }
+
+        //$user = User::where(['access_token' => $request->access_token, 'username' => $request->username])->first();
+      	//echo '<pre />'; print_r($condition);
+        $user = User::where($condition)->first();
+        //echo '<pre />'; print_r($user); die;
+      	
+        if (isset($user)) {
             return response()->json(['status' => 'success', 'state' => 'login', 'message'=>'Login Successfully', 'data' => $user], 200);
         } else {
             //die("@@@@@@");
@@ -91,6 +102,7 @@ class CustomerAuthController extends Controller{
             $or_d = [
                 'access_token' => $request->access_token,
                 'username' => $request->username,
+              	'f_name' => $request->username,
                 'phone' => $phone,
                 'email' => $email,
                 'temporary_token' => $temporary_token,
@@ -101,12 +113,13 @@ class CustomerAuthController extends Controller{
                 'device_model' => $device_model,
                 'device_plateform' => $device_plateform,
                 'imeinumber' => $imeinumber,
-                'status' => 1
+                'status' => 1,
+                'created_at' => date('Y-m-d H:i:s')
             ];
 
             $lastId = DB::table('users')->insertGetId($or_d);
             //$lastId = DB::table('users')->lastInsertId();
-            $user = User::where(['id' => $lastId])->get();
+            $user = User::where(['id' => $lastId])->first();
             return response()->json(['status' => 'success', 'state' => 'register', 'message'=>'Register Successfully', 'data' => $user], 200);
         }
     }
