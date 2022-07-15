@@ -6,6 +6,7 @@ use App\CentralLogics\Helpers;
 use App\Http\Controllers\Controller;
 use App\Model\Order;
 use App\Model\OrderDetail;
+use App\Model\OrderHistory;
 use App\Model\Product;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
@@ -68,9 +69,11 @@ class OrderController extends Controller
     public function details($id)
     {
         $order = Order::with('details')->where(['id' => $id])->first();
+        $cartId = $order->cart_id;
+        $cartData = DB::table('cart_final')->where(['id' => $cartId])->first();
         $deliveryOptions = DB::table('delivery_options')->get();
         if (isset($order)) {
-            return view('admin-views.order.order-view', compact('order', 'deliveryOptions'));
+            return view('admin-views.order.order-view', compact('order', 'deliveryOptions', 'cartData'));
         } else {
             Toastr::info('No more orders!');
             return back();
@@ -194,6 +197,15 @@ class OrderController extends Controller
 
         $order->order_status = $request->order_status;
         $order->save();
+
+        $orderHistoryData = OrderHistory::create([
+            'order_id' => $request->id,
+            'user_id' => 1,
+            'user_type' => 'admin',
+            'status_captured' => $request->order_status,
+            'status_reason' => ""
+        ]);
+
         $fcm_token = $order->customer->cm_firebase_token;
         $value = Helpers::order_status_update_message($request->order_status);
         try {

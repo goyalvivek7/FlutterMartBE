@@ -294,6 +294,18 @@
                                             }
                                         } ?>
                                     </h6>
+                                    <h6 class="text-capitalize" style="color: #8a8a8a;">Same Day Delievery : 
+                                        <?php if($order['same_day_delievery'] == 1){
+                                            echo "Yes";
+                                        } else {
+                                            echo "No";
+                                        } ?>
+                                    </h6>
+                                    <h6 class="text-capitalize" style="color: #8a8a8a;">Coupon Code : 
+                                        <?php if($order['coupon_code'] != NULL && $order['coupon_code'] != ""){
+                                            echo $order['coupon_code'];
+                                        } ?>
+                                    </h6>
                                 </div>
                             </div>
                         </div>
@@ -360,7 +372,7 @@
                             @endif
                         @endforeach
 
-                        <div class="row justify-content-md-end mb-3">
+                        <!-- <div class="row justify-content-md-end mb-3">
                             <div class="col-md-9 col-lg-8">
                                 <dl class="row text-sm-right">
                                     <dt class="col-sm-6">{{\App\CentralLogics\translate('items')}} {{\App\CentralLogics\translate('price')}}
@@ -396,7 +408,23 @@
                                     <dt class="col-sm-6">{{\App\CentralLogics\translate('total')}}:</dt>
                                     <dd class="col-sm-6">{{$sub_total+$del_c+$total_tax-$order['coupon_discount_amount']." ".\App\CentralLogics\Helpers::currency_symbol()}}</dd>
                                 </dl>
-                                <!-- End Row -->
+                            </div>
+                        </div> -->
+                        <?php //echo '<pre />'; print_r($cartData); ?>
+                        <div class="row justify-content-md-end mb-3">
+                            <div class="col-md-9 col-lg-8">
+                                <dl class="row text-sm-right">
+                                    <dt class="col-sm-6">Item Price:</dt> <dd class="col-sm-6">{{$cartData->basic_amount}}</dd>
+                                    <dt class="col-sm-6">Item Discount:</dt> <dd class="col-sm-6">{{$cartData->basic_amount - $cartData->total_amount}}</dd>
+                                    <dt class="col-sm-6">Item Total:</dt> <dd class="col-sm-6">{{$cartData->total_amount}}</dd>
+                                    <dt class="col-sm-6">Tax:</dt> <dd class="col-sm-6">{{$cartData->tax_amount}}</dd>
+                                    <dt class="col-sm-6">Delivery Charge:</dt> <dd class="col-sm-6">{{$cartData->delivery_charge}}</dd>
+                                    <dt class="col-sm-6">Coupon Discount: </dt> <dd class="col-sm-6">- {{$cartData->coupon_discount}}</dd>
+                                    <dt class="col-sm-6">Wallet Deduction: </dt> <dd class="col-sm-6">- {{$cartData->wallet_balance}}</dd>
+                                    <dt class="col-sm-6">Sub Total:</dt> <dd class="col-sm-6">{{$cartData->remaining_sub_total}}<hr /></dd>
+                                    <dt class="col-sm-6">{{\App\CentralLogics\translate('total')}}:</dt>
+                                    <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()}}{{$cartData->final_amount}}</dd>
+                                </dl>
                             </div>
                         </div>
                         <!-- End Row -->

@@ -58,6 +58,11 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get('welcome-icons', 'SaleController@welcome_icons')->name('welcome-icons');
             Route::get('status/{id}/{status}', 'SaleController@status')->name('status');
             Route::delete('delete/{id}', 'SaleController@delete')->name('delete');
+            Route::get('smart-deals', 'SaleController@smart_deals')->name('smart-deals');
+            Route::post('deal-store', 'SaleController@deal_store')->name('deal-store');
+            Route::get('deal-edit/{id}', 'SaleController@deal_edit')->name('deal-edit');
+            Route::delete('deal-delete/{id}', 'SaleController@deal_delete')->name('deal-delete');
+            Route::post('deal-update/{id}', 'SaleController@deal_update')->name('deal-update');
         });
 
         Route::group(['prefix' => 'attribute', 'as' => 'attribute.'], function () {

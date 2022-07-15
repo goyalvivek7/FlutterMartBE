@@ -260,6 +260,12 @@
                                         <span class="text-truncate">Welcome Icons</span>
                                     </a>
                                 </li>
+                                <li class="nav-item {{Request::is('admin/sale/smart-deals')?'active':''}}">
+                                    <a class="nav-link " href="{{route('admin.sale.smart-deals')}}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">Smart Deal</span>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                         <!-- End Pages -->
@@ -382,7 +388,7 @@
                         <!-- End Pages -->
 
                         <!-- Pages -->
-                        <li class="navbar-vertical-aside-has-menu {{Request::is('admin/message*')?'active':''}}">
+                        <!-- <li class="navbar-vertical-aside-has-menu {{Request::is('admin/message*')?'active':''}}">
                             <a class="js-navbar-vertical-aside-menu-link nav-link"
                                href="{{route('admin.message.list')}}"
                             >
@@ -391,7 +397,7 @@
                                     {{\App\CentralLogics\translate('messages')}}
                                 </span>
                             </a>
-                        </li>
+                        </li> -->
                         <!-- End Pages -->
                         <li class="navbar-vertical-aside-has-menu {{Request::is('admin/timeSlot*')?'active':''}}">
                             <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{route('admin.timeSlot.add-new')}}"

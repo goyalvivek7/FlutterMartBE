@@ -36,64 +36,68 @@ class CustomerAuthController extends Controller{
         $temporary_token = Str::random(40);
 
         if(isset($request->phone) && $request->phone != "" && $request->phone != NULL){
-            $condition['phone'] = $request->phone;
+            //$condition['phone'] = $request->phone;
+            $checkUser = User::where(['phone' => $request->phone])->first();
+            if (isset($checkUser)) {
+                return response()->json(['status' => 'success', 'state' => 'login', 'message'=>'Login Successfully', 'data' => $checkUser], 200);
+            }
         }
 
         if(isset($request->email) && $request->email != "" && $request->email != NULL){
-            $condition['email'] = $request->email;
+            //$condition['email'] = $request->email;
+            $checkUser = User::where(['email' => $request->email])->first();
+            if (isset($checkUser)) {
+                return response()->json(['status' => 'success', 'state' => 'login', 'message'=>'Login Successfully', 'data' => $checkUser], 200);
+            }
         }
-
-        //$user = User::where(['access_token' => $request->access_token, 'username' => $request->username])->first();
-      	//echo '<pre />'; print_r($condition);
-        $user = User::where($condition)->first();
-        //echo '<pre />'; print_r($user); die;
+        
+        //$user = User::where($condition)->first();
       	
-        if (isset($user)) {
-            return response()->json(['status' => 'success', 'state' => 'login', 'message'=>'Login Successfully', 'data' => $user], 200);
-        } else {
-            //die("@@@@@@");
-            if(isset($request->firbase_token) && $request->firbase_token != ""){
+        // if (isset($user)) {
+        //     return response()->json(['status' => 'success', 'state' => 'login', 'message'=>'Login Successfully', 'data' => $user], 200);
+        // } else {
+            if(isset($request->firbase_token) && $request->firbase_token != "" && $request->imeinumber != "null"){
                 $firebaseToken = $request->firbase_token;
             } else {
                 $firebaseToken = NULL;
             }
-            if(isset($request->device_id) && $request->device_id != ""){
+            if(isset($request->device_id) && $request->device_id != "" && $request->imeinumber != "null"){
                 $device_id = $request->device_id;
             } else {
                 $device_id = NULL;
             }
-            if(isset($request->app_version) && $request->app_version != ""){
+            if(isset($request->app_version) && $request->app_version != "" && $request->imeinumber != "null"){
                 $appVersion = $request->app_version;
             } else {
                 $appVersion = NULL;
             }
 
-            if(isset($request->phone) && $request->phone != ""){
+            if(isset($request->phone) && $request->phone != "" && $request->imeinumber != "null"){
                 $phone = $request->phone;
             } else {
                 $phone = NULL;
             }
-            if(isset($request->email) && $request->email != ""){
+            if(isset($request->email) && $request->email != "" && $request->imeinumber != "null"){
                 $email = $request->email;
             } else {
                 $email = NULL;
             }
-            if(isset($request->access_plateform) && $request->access_plateform != ""){
+            if(isset($request->access_plateform) && $request->access_plateform != "" && $request->imeinumber != "null"){
                 $access_plateform = $request->access_plateform;
             } else {
                 $access_plateform = NULL;
             }
-            if(isset($request->device_model) && $request->device_model != ""){
+            if(isset($request->device_model) && $request->device_model != "" && $request->imeinumber != "null"){
                 $device_model = $request->device_model;
             } else {
                 $device_model = NULL;
             }
-            if(isset($request->device_plateform) && $request->device_plateform != ""){
+            if(isset($request->device_plateform) && $request->device_plateform != "" && $request->imeinumber != "null"){
                 $device_plateform = $request->device_plateform;
             } else {
                 $device_plateform = NULL;
             }
-            if(isset($request->imeinumber) && $request->imeinumber != ""){
+            if(isset($request->imeinumber) && $request->imeinumber != "" && $request->imeinumber != "null"){
                 $imeinumber = $request->imeinumber;
             } else {
                 $imeinumber = NULL;
@@ -118,10 +122,9 @@ class CustomerAuthController extends Controller{
             ];
 
             $lastId = DB::table('users')->insertGetId($or_d);
-            //$lastId = DB::table('users')->lastInsertId();
             $user = User::where(['id' => $lastId])->first();
             return response()->json(['status' => 'success', 'state' => 'register', 'message'=>'Register Successfully', 'data' => $user], 200);
-        }
+        //}
     }
 
 

@@ -43,6 +43,18 @@ class CouponController extends Controller
             'discount' => 'required'
         ]);
 
+        if(isset($request->valid_text) && $request->valid_text != ""){
+            $validText = $request->valid_text;
+        } else {
+            $validText = NULL;
+        }
+
+        if(isset($request->valid_detail) && $request->valid_detail != ""){
+            $validDetail = $request->valid_detail;
+        } else {
+            $validDetail = NULL;
+        }
+
         DB::table('coupons')->insert([
             'title' => $request->title,
             'code' => $request->code,
@@ -55,6 +67,8 @@ class CouponController extends Controller
             'discount' => $request->discount_type == 'amount' ? $request->discount : $request['discount'],
             'discount_type' => $request->discount_type,
             'status' => 1,
+            'valid_text' => $validText,
+            'valid_detail' => $validDetail,
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -79,6 +93,18 @@ class CouponController extends Controller
             'discount' => 'required'
         ]);
 
+        if(isset($request->valid_text) && $request->valid_text != ""){
+            $validText = $request->valid_text;
+        } else {
+            $validText = NULL;
+        }
+
+        if(isset($request->valid_detail) && $request->valid_detail != ""){
+            $validDetail = $request->valid_detail;
+        } else {
+            $validDetail = NULL;
+        }
+
         DB::table('coupons')->where(['id' => $id])->update([
             'title' => $request->title,
             'code' => $request->code,
@@ -90,6 +116,8 @@ class CouponController extends Controller
             'max_discount' => $request->max_discount != null ? $request->max_discount : 0,
             'discount' => $request->discount_type == 'amount' ? $request->discount : $request['discount'],
             'discount_type' => $request->discount_type,
+            'valid_text' => $validText,
+            'valid_detail' => $validDetail,
             'updated_at' => now()
         ]);
 

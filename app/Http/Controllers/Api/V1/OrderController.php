@@ -85,6 +85,7 @@ class OrderController extends Controller
                 $userId = $finalCart[0]->user_id;
                 $time_slot_id = $finalCart[0]->time_slot_id;
                 $same_day_delievery = $finalCart[0]->same_day_delievery;
+                $couponCode = $finalCart[0]->coupon_code;
                 if($same_day_delievery == 1){
                     $o_delivery = date("Y-m-d");
                 } else {
@@ -96,6 +97,7 @@ class OrderController extends Controller
                     'same_day_delievery' => $finalCart[0]->same_day_delievery,
                     'delivery_date' => $o_delivery,
                     'order_type' => $finalCart[0]->order_type,
+                    'coupon_code' => $couponCode,
                   	'delivery_address_id' => $finalCart[0]->delivery_address_id,
                   	'delivery_charge' => $finalCart[0]->delivery_charge
                 ]);
@@ -182,6 +184,22 @@ class OrderController extends Controller
                     ]);
 
                 }
+
+                $orderHistoryData = OrderHistory::create([
+                    'order_id' => $customeOrderID,
+                    'user_id' => $userId,
+                    'user_type' => 'user',
+                    'status_captured' => 'created',
+                    'status_reason' => "Order Placed"
+                ]);
+
+                $orderHistoryData = OrderHistory::create([
+                    'order_id' => $customeOrderID,
+                    'user_id' => $userId,
+                    'user_type' => 'user',
+                    'status_captured' => 'pending',
+                    'status_reason' => "Order pending for confirmation"
+                ]);
 
                 $orderUpdate = DB::table('orders')->where('order_id', $orderId)->get();
                 $response['status'] = 'success';
@@ -275,7 +293,8 @@ class OrderController extends Controller
         $userId = $request['user_id'];
         $orderId = $request['order_id'];
 
-        $orderHistoryData = OrderHistory::Where(['order_id' => $orderId, 'user_id' => $userId])->get();
+        //$orderHistoryData = OrderHistory::Where(['order_id' => $orderId, 'user_id' => $userId])->get();
+        $orderHistoryData = OrderHistory::Where(['order_id' => $orderId])->get();
         
         if ($orderHistoryData->count() > 0) {
 

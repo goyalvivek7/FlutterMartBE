@@ -97,6 +97,20 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                       <div class="col-md-6 col-6">
+                           <div class="form-group">
+                               <label class="input-label" for="exampleFormControlInput1">Coupon Text</label>
+                               <input type="text" name="valid_text" class="form-control" placeholder="Coupon Text" required>
+                           </div>
+                       </div>
+                       <div class="col-md-6 col-6">
+                           <div class="form-group">
+                               <label class="input-label" for="exampleFormControlInput1">Coupon Details</label>
+                               <textarea name="valid_detail" class="form-control" placeholder="Coupon Detail"></textarea>
+                           </div>
+                       </div>
+                    </div>
                     <button type="submit" class="btn btn-primary">{{\App\CentralLogics\translate('submit')}}</button>
                 </form>
             </div>

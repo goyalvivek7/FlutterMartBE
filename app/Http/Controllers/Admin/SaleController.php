@@ -16,6 +16,92 @@ use Illuminate\Support\Facades\DB;
 class SaleController extends Controller
 {
 
+    public function deal_delete(Request $request)
+    {
+        $deal = DB::table('smart_deals')->find($request->id);
+        if (Storage::disk('public')->exists('smart_deals/' . $deal->slider_image)) {
+            Storage::disk('public')->delete('smart_deals/' . $deal->slider_image);
+        }
+        
+        DB::table('smart_deals')->delete($request->id);
+        Toastr::success('Deal removed!');
+        return back();
+    }
+
+    public function deal_update(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required',
+        ], [
+            'title.required' => 'Title is required!',
+        ]);
+        
+        $deal = DB::table('smart_deals')->find($id);
+
+        $title = $request->title;
+        if($request->status == "on"){
+            $status = '1';
+        } else {
+            $status = '0';
+        }
+
+        if($request->has('slider_image')){
+            $image_name =  Helpers::upload('smart_deals/', 'png', $request->file('slider_image'));
+        } else {
+            $image_name =  $deal->slider_image;
+        }
+        
+        $dealStatus = DB::table('smart_deals')->where('id', $id)->update([
+            'title' => $title,
+            'slider_image' => $image_name,
+            'status' => $status
+        ]);
+        
+        Toastr::success('Smart deals updated successfully!');
+        return back();
+    }
+
+    public function deal_edit($id)
+    {
+        $deal = DB::table('smart_deals')->find($id);
+        return view('admin-views.sale.smart-deal-edit', compact('deal'));
+    }
+
+    function deal_store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required',
+        ], [
+            'title.required' => 'Title is required!',
+        ]);
+
+        if (!empty($request->file('slider_image'))) {
+            $image_name =  Helpers::upload('smart_deals/', 'png', $request->file('slider_image'));
+        } else {
+            $image_name = 'def.png';
+        }
+
+        if($request->status == "on"){
+            $status = 1;
+        } else {
+            $status = 0;
+        }
+
+        $smartArray = [
+            'title' => $request->title,
+            'slider_image' => $image_name,
+            'status' => $status
+        ];
+        DB::table('smart_deals')->insert($smartArray);
+        Toastr::success('Deal added successfully!');
+        return back();
+    }
+
+    function smart_deals(Request $request){
+        $smartDeals = DB::table('smart_deals')->orderBy('id', 'DESC')->paginate(Helpers::getPagination());
+        return view('admin-views.sale.smart-deals',compact('smartDeals'));
+    }
+
     function welcome_icons(){
         $welcomeIcons = DB::table('miscellaneous')->where(['setting_type' => 'welcome_icons'])->get();
         return view('admin-views.sale.welcome-icons',compact('welcomeIcons'));
