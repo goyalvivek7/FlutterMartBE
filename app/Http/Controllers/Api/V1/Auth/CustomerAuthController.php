@@ -133,9 +133,7 @@ class CustomerAuthController extends Controller{
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
             'f_name' => 'required',
-            'l_name' => 'required',
-            'email' =>  'required',
-            'phone' =>  'required'
+            'l_name' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -158,11 +156,27 @@ class CustomerAuthController extends Controller{
                 $image = Helpers::upload('users/', 'png', $request->file('image'));
             }
 
+            if(isset($request['email']) && $request['email'] != NULL && $request['email'] != ""){
+                $email = $request['email'];
+            } elseif(isset($userRow[0]->email) && $userRow[0]->email != NULL && $userRow[0]->email != ""){
+                $email = $userRow[0]->email;
+            } else {
+                $email = NULL;
+            }
+
+            if(isset($request['phone']) && $request['phone'] != NULL && $request['phone'] != ""){
+                $phone = $request['phone'];
+            } elseif(isset($userRow[0]->phone) && $userRow[0]->phone != NULL && $userRow[0]->phone != ""){
+                $phone = $userRow[0]->phone;
+            } else {
+                $phone = NULL;
+            }
+
             $users = [
                 'f_name' => $request['f_name'],
                 'l_name' => $request['l_name'],
-                'email' => $request['email'],
-                'phone' => $request['phone'],
+                'email' => $email,
+                'phone' => $phone,
                 'image' => $image
             ];
 

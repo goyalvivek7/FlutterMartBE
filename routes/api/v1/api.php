@@ -126,6 +126,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::put('payment-method', 'OrderController@update_payment_method');
         Route::post('create-order', 'OrderController@create_order');
         Route::post('captured', 'OrderController@captured');
+        Route::post('direct-captured', 'OrderController@direct_captured');
     });
 
     Route::group(['prefix' => 'wish-list'], function () {

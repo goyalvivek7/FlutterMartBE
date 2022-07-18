@@ -228,6 +228,7 @@ class CartController extends Controller
                 //echo '<pre />'; print_r($deliveryCharge);
             }
             
+            if($request['order_type'] != 1){ $delCharge = 0; }
 
             if(isset($request['coupon_code']) && $request['coupon_code'] != ""){
                 $couponCode = $request['coupon_code'];
@@ -753,19 +754,21 @@ class CartController extends Controller
   	public function membership_package(){
 
         $membershipPackages = DB::table('membership_package')->where('status', 1)->get();
+        $membershipFeatures = DB::table('membership_features')->where('status', 1)->orderBy('priorty', 'ASC')->get();
 
         if(!empty($membershipPackages) && isset($membershipPackages[0])){
 
             $response['status'] = 'success';
             $response['message'] = 'Membership Package List';
             $response['data'] = $membershipPackages;
+            $response['features'] = $membershipFeatures;
             return response()->json($response, 200);
 
         } else {
 
             $response['status'] = 'fail';
             $response['message'] = 'Membership Package Not Found';
-            $response['items'] = [];
+            $response['data'] = [];
             return response()->json($response, 200);
 
         }

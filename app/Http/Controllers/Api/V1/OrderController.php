@@ -21,8 +21,172 @@ use Redirect;
 use Session;
 
 class OrderController extends Controller
-{
-  
+{  
+
+    public function direct_captured(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $userId = $request['user_id'];
+
+        $finalCart = DB::table('cart_final')->where('user_id', $userId)->where('cart_status', 'pending')->first();
+
+        if(isset($finalCart) && !empty($finalCart)){
+
+            $finalCartId = $finalCart->id;
+            $cartArray = json_decode($finalCart->cart_list);
+            $productArray = json_decode($finalCart->product_list);
+            $walletBalance = $finalCart->wallet_balance;
+            $time_slot_id = $finalCart->time_slot_id;
+            $same_day_delievery = $finalCart->same_day_delievery;
+            $couponCode = $finalCart->coupon_code;
+            if($same_day_delievery == 1){
+                $o_delivery = date("Y-m-d");
+            } else {
+                $o_delivery = NULL;
+            }
+            $customeOrderID = 100000 + Order::all()->count() + 1;
+            $cartOrder = [
+                'order_id' => $customeOrderID,
+                'receipt_id' => Order::all()->count() + 1,
+                'user_id' => $userId,
+                'cart_id' => $finalCart->id,
+                'order_amount' => $finalCart->final_amount,
+                'payment_status' => 'paid',
+                'order_status' => 'pending',
+                'payment_method' => 'direct',
+                'delivery_address_id' => $finalCart->delivery_address_id,
+                'delivery_charge' => $finalCart->delivery_charge,
+                'coupon_code' => $couponCode,
+                'order_type' => $finalCart->order_type,
+                'same_day_delievery' => $finalCart->same_day_delievery,
+                'time_slot_id' => $time_slot_id,
+                'delivery_date' => $o_delivery
+            ];
+            
+            $orderId = DB::table('orders')->insertGetId($cartOrder);
+
+            $fCartStatus = DB::table('cart_final')->where('id', $finalCartId)->update([
+				'cart_status' => 'success'
+			]);
+
+            for($i=0; $i<count($cartArray); $i++){
+				$cartId = $cartArray[$i];
+				$fCartStatus = DB::table('cart')->where('id', $cartId)->update([
+					'status' => 'sucess'
+				]);
+
+				$cartData = $fCartStatus = DB::table('cart')->where('id', $cartId)->get();
+				$productId = $cartData[0]->product_id;
+				$product = Product::find($productId);
+			  
+				$variationArray = [];
+				if($cartData[0]->variations != NULL && $cartData[0]->variations != ""){
+					$variationArray[0]['type'] = $cartData[0]->variations;
+				}
+			  
+				if (count(json_decode($product['variations'], true)) > 0 && $cartData[0]->variations != NULL && $cartData[0]->variations != "") {
+					$price = Helpers::variation_price($product, json_encode($variationArray));
+				} else {
+					$price = $product['price'];
+				}
+
+				$or_d = [
+					'order_id'            => $orderId,
+					'product_id'          => $productId,
+					'time_slot_id'        => $time_slot_id,
+					'delivery_date'       => $o_delivery,
+					'product_details'     => $product,
+					'quantity'            => $cartData[0]->quantity,
+					'price'               => $price,
+					'unit'                => $product['unit'],
+					'tax_amount'          => Helpers::tax_calculate($product, $price),
+					'discount_on_product' => Helpers::discount_calculate($product, $price),
+					'discount_type'       => 'discount_on_product',
+					'variant'             => json_encode($cartData[0]->variations),
+					'variation'           => json_encode($variationArray),
+					'is_stock_decreased'  => 1,
+
+					'created_at'          => now(),
+					'updated_at'          => now(),
+				];
+
+				$type = $cartData[0]->variations;
+				$var_store = [];
+
+				foreach (json_decode($product['variations'], true) as $var) {
+					if ($type == $var['type']) {
+						$var['stock'] -= $cartData[0]->quantity;
+					}
+					array_push($var_store, $var);
+				}
+
+				Product::where(['id' => $product['id']])->update([
+					'variations'  => json_encode($var_store),
+					'total_stock' => $product['total_stock'] - $cartData[0]->quantity,
+				]);
+
+				DB::table('order_details')->insert($or_d);
+			}
+
+            if($walletBalance != 0){
+
+				$historyArray = [
+					'user_id' => $userId,
+					'amount' => $walletBalance,
+					'status' => 'debit',
+					'recharge_id' => $customeOrderID
+				];
+				DB::table('wallet_histories')->insert($historyArray);
+
+				$walletData = DB::table('wallet')->where('user_id', $userId)->get();
+				$previousAmount = $walletData[0]->balance;
+				$newAmount = $previousAmount - $walletBalance;
+				$walletUpdate = DB::table('wallet')->where('user_id', $userId)->update([
+					'balance' => $newAmount
+				]);
+
+			}
+
+			$orderHistoryData = OrderHistory::create([
+				'order_id' => $orderId,
+				'user_id' => $userId,
+				'user_type' => 'user',
+				'status_captured' => 'created',
+				'status_reason' => "Order Placed"
+			]);
+
+			$orderHistoryData = OrderHistory::create([
+				'order_id' => $orderId,
+				'user_id' => $userId,
+				'user_type' => 'user',
+				'status_captured' => 'pending',
+				'status_reason' => "Order pending for confirmation"
+			]);
+
+			$orderUpdate = DB::table('orders')->where('id', $orderId)->get();
+			$response['status'] = 'success';
+			$response['message'] = 'Order successfully placed.';
+			$response['order_type'] = 'cart';
+			$response['data'] = $orderUpdate;
+			return response()->json($response, 200);
+
+        } else {
+            $response['status'] = 'fail';
+            $response['message'] = 'Cart Detail Not Found';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+    }
   	
   	public function captured(Request $request){
 
