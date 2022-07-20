@@ -99,7 +99,7 @@
                                         <span class="text-truncate">
                                             {{\App\CentralLogics\translate('all')}}
                                             <span class="badge badge-info badge-pill ml-1">
-                                                {{\App\Model\Order::where('order_type', '!=', 'pos')->count()}}
+                                                {{\App\Model\Order::where('order_type', '!=', 'pos')->where('order_status', '!=', 'created')->count()}}
                                             </span>
                                         </span>
                                     </a>

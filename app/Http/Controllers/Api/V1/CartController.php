@@ -142,16 +142,35 @@ class CartController extends Controller
   
 
     public function final_cart(Request $request){
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
-            'is_wallet' => 'required',
-            'delivery_address_id' => 'required',
-            'time_slot_id' => 'required',
-            'same_day_delievery' => 'required',
-            'order_type' => 'required'
-        ]);
+        if(isset($request['order_type']) && $request['order_type'] != 4){
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
+                'is_wallet' => 'required',
+                'delivery_address_id' => 'required',
+                'time_slot_id' => 'required',
+                'same_day_delievery' => 'required',
+                'order_type' => 'required'
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                $response['status'] = 'fail';
+                $response['message'] = 'Please send all required fields.';
+                $response['data'] = []; 
+                return response()->json($response, 200);
+            }
+        } elseif($request['order_type'] == 4){
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required',
+                'is_wallet' => 'required'
+            ]);
+
+            if ($validator->fails()) {
+                $response['status'] = 'fail';
+                $response['message'] = 'Please send all required fields.';
+                $response['data'] = []; 
+                return response()->json($response, 200);
+            }
+        } else {
             $response['status'] = 'fail';
             $response['message'] = 'Please send all required fields.';
             $response['data'] = []; 

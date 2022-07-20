@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Model\DeliveryHistory;
 use App\Model\DeliveryMan;
 use App\Model\OrderHistory;
+use App\Model\OrderDetail;
+use App\Model\Review;
+use App\Model\Product;
 use App\Model\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +17,52 @@ use Illuminate\Support\Facades\Validator;
 
 class DeliverymanController extends Controller
 {
+
+    public function available_status(Request $request){
+        $validator = Validator::make($request->all(), [
+            'delivery_man_id' => 'required',
+            'available_status' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Plese send all inputs.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $userId = $request['delivery_man_id'];
+        $availableStatus = $request['available_status'];
+
+        if($availableStatus == "0"){
+            DeliveryMan::where(['id' => $userId])->update([
+                'is_available' => "0"
+            ]);
+            $response['status'] = 'success';
+            $response['message'] = 'Status Updated';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        } else {
+            $todayDate = date('Y-m-d');
+            $orders = Order::where(['delivery_man_id' => $userId, 'delivery_date' => $todayDate])->first();
+            if(isset($orders) && !empty($orders)){
+                $response['status'] = 'fail';
+                $response['message'] = 'You have pending orders today';
+                $response['data'] = [];
+                return response()->json($response, 200);
+            } else {
+                DeliveryMan::where(['id' => $userId])->update([
+                    'is_available' => "1"
+                ]);
+                $response['status'] = 'success';
+                $response['message'] = 'Status Updated';
+                $response['data'] = [];
+                return response()->json($response, 200);
+            }
+        }
+
+    }
+
 
     public function notifications(Request $request){
 
@@ -252,12 +301,18 @@ class DeliverymanController extends Controller
             //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
+        if(isset($request['collected_amount']) && $request['collected_amount'] != ""){
+            $collectedAmount = $request['collected_amount'];
+        } else {
+            $collectedAmount = NULL;
+        }
+
         $signature = "";
         if (!empty($request->file('signature'))) {
             $signature = Helpers::upload('order/', 'png', $request->file('signature'));
         }
         
-        $statusReason = $request['status_reason'];
+        
         $dm = DeliveryMan::where(['id' => $request['deliveryman_id']])->first();
         if (isset($dm) == false) {
             $response['status'] = 'fail';
@@ -275,10 +330,17 @@ class DeliverymanController extends Controller
 
         if ($request['status']=='out_for_delivery'){
             $value=Helpers::order_status_update_message('ord_start');
+            $statusReason = "out_for_delivery";
         }elseif ($request['status']=='delivered'){
             $value=Helpers::order_status_update_message('delivery_boy_delivered');
+            $statusReason = "delivered";
         }elseif ($request['status']=='canceled'){
             $value=Helpers::order_status_update_message('canceled');
+            $statusReason = "canceled";
+        }
+
+        if(isset($request['status_reason']) && $request['status_reason'] != ""){
+            $statusReason = $request['status_reason'];
         }
       
       	
@@ -292,18 +354,20 @@ class DeliverymanController extends Controller
               'status_captured' => $request['status'],
               'reason_id' => $reasonId,
               'status_reason' => $statusReason,
+              'collected_amount' => $collectedAmount,
               'signature' => $signature
             ]);
         } else {
             
         	$complaint = OrderHistory::create([
-            'order_id' => $request['order_id'],
-            'user_id' => $dm['id'],
-            'user_type' => 'delivery_man',
-            'status_captured' => $request['status'],
-            'status_reason' => $statusReason,
-            'signature' => $signature
-        ]);
+                'order_id' => $request['order_id'],
+                'user_id' => $dm['id'],
+                'user_type' => 'delivery_man',
+                'status_captured' => $request['status'],
+                'status_reason' => $statusReason,
+                'collected_amount' => $collectedAmount,
+                'signature' => $signature
+            ]);
           
         }
         
@@ -338,29 +402,71 @@ class DeliverymanController extends Controller
     public function get_order_details(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'token' => 'required'
+            'order_id' => 'required'
         ]);
+
         if ($validator->fails()) {
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
-        $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
-        if (isset($dm) == false) {
+
+      	$orderdata = Order::with(['customer', 'delivery_man.rating', 'time_slot', 'delivery_address', 'final_cart'])->where(['id' => $request['order_id']])->get();
+      	$delivery_address_id = $orderdata[0]->delivery_address_id;
+        $addressData = DB::table('customer_addresses')->where('id', $delivery_address_id)->get();
+      	//echo '<pre />'; print_r($addressData);
+      
+        $details = OrderDetail::where(['order_id' => $request['order_id']])->get();
+
+        if ($details->count() > 0) {
+            foreach ($details as $det) {
+                $det['variation'] = json_decode($det['variation']);
+                $det['review_count'] = Review::where(['order_id' => $det['order_id'], 'product_id' => $det['product_id']])->count();
+                $product = Product::where('id', $det['product_id'])->first();
+                $det['product_details'] = isset($product) ? Helpers::product_data_formatting($product) : '';
+            }
+          
+          	$response['status'] = 'success';
+            $response['message'] = 'Order detail fetched successfully!';
+          	$response['order_data'] = $orderdata;
+          	$response['address_data'] = $addressData;
+            $response['data'] = $details;
+          	return response()->json($response, 200);
+          
+            //return response()->json($details, 200);
+        } else {
             return response()->json([
                 'errors' => [
-                    ['code' => 'delivery-man', 'message' => 'Invalid token!']
-                ]
+                    ['code' => 'order', 'message' => 'not found!']
+                ], 'status' => 'fail'
             ], 401);
         }
-        $order = Order::with(['details'])->where(['delivery_man_id' => $dm['id'], 'id' => $request['order_id']])->first();
-        $details = $order->details;
-        foreach ($details as $det) {
-            $det['add_on_ids'] = json_decode($det['add_on_ids']);
-            $det['add_on_qtys'] = json_decode($det['add_on_qtys']);
-            $det['variation'] = json_decode($det['variation']);
-            $det['product_details'] = Helpers::product_data_formatting(json_decode($det['product_details'], true));
-        }
-        return response()->json($details, 200);
     }
+
+    // public function get_order_details(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'token' => 'required'
+    //     ]);
+    //     if ($validator->fails()) {
+    //         return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+    //     }
+    //     $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
+    //     if (isset($dm) == false) {
+    //         return response()->json([
+    //             'errors' => [
+    //                 ['code' => 'delivery-man', 'message' => 'Invalid token!']
+    //             ]
+    //         ], 401);
+    //     }
+    //     $order = Order::with(['details'])->where(['delivery_man_id' => $dm['id'], 'id' => $request['order_id']])->first();
+    //     $details = $order->details;
+    //     foreach ($details as $det) {
+    //         $det['add_on_ids'] = json_decode($det['add_on_ids']);
+    //         $det['add_on_qtys'] = json_decode($det['add_on_qtys']);
+    //         $det['variation'] = json_decode($det['variation']);
+    //         $det['product_details'] = Helpers::product_data_formatting(json_decode($det['product_details'], true));
+    //     }
+    //     return response()->json($details, 200);
+    // }
 
     public function dashboard(Request $request)
     {

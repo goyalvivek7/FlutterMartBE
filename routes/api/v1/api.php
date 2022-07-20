@@ -48,6 +48,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::put('update-fcm-token', 'DeliverymanController@update_fcm_token');
         Route::get('cancel-reasons', 'DeliverymanController@cancel_reasons');
         Route::post('notifications', 'DeliverymanController@notifications');
+        Route::post('available-status', 'DeliverymanController@available_status');
 
         Route::group(['prefix' => 'reviews', 'middleware' => ['auth:api']], function () {
             Route::get('/{delivery_man_id}', 'DeliveryManReviewController@get_reviews');

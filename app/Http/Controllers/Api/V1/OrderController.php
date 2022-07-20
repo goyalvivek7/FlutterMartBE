@@ -38,6 +38,12 @@ class OrderController extends Controller
 
         $userId = $request['user_id'];
 
+        if(isset($request['payment_method']) && $request['payment_method'] != ""){
+            $paymentMethod = $request['payment_method'];
+        } else {
+            $paymentMethod = "direct";
+        }
+
         $finalCart = DB::table('cart_final')->where('user_id', $userId)->where('cart_status', 'pending')->first();
 
         if(isset($finalCart) && !empty($finalCart)){
@@ -63,7 +69,7 @@ class OrderController extends Controller
                 'order_amount' => $finalCart->final_amount,
                 'payment_status' => 'paid',
                 'order_status' => 'pending',
-                'payment_method' => 'direct',
+                'payment_method' => $paymentMethod,
                 'delivery_address_id' => $finalCart->delivery_address_id,
                 'delivery_charge' => $finalCart->delivery_charge,
                 'coupon_code' => $couponCode,
