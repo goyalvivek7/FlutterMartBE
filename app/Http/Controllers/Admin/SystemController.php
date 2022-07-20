@@ -14,7 +14,8 @@ class SystemController extends Controller
 {
     public function restaurant_data()
     {
-        $new_order = DB::table('orders')->where(['checked' => 0])->count();
+        //$new_order = DB::table('orders')->where(['checked' => 0])->count();
+        $new_order = DB::table('orders')->where('checked', 0)->where('order_status', '!=', 'created')->count();
         return response()->json([
             'success' => 1,
             'data' => ['new_order' => $new_order]

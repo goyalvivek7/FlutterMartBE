@@ -258,5 +258,13 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get('view/{user_id}', 'CustomerController@view')->name('view');
             Route::post('search', 'CustomerController@search')->name('search');
         });
+
+
+        Route::group(['prefix' => 'wallet', 'as' => 'wallet.'], function () {
+            Route::get('list', 'WalletController@wallet_list')->name('list');
+            Route::get('view/{user_id}', 'WalletController@view')->name('view');
+            Route::post('search', 'WalletController@search')->name('search');
+        });
+
     });
 });

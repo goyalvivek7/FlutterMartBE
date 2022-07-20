@@ -95,36 +95,37 @@ class DeliverymanController extends Controller
                 'otp' => $randno
             ]);
 
-            $dltId = "1307165294037975142";
-            $senderId = "INFBUY";
-            $pretag = urlencode('<#> ');
-            $authKey = "377364AWhOWdwDOTQS628b49baP1";
-            //$message = urlencode("Dear User,\n\nPlease use ".$randno." one-time verification code for login.\n\nBest Regards,\n\nTeam VW ABC 2021");
-            $message = urlencode("Hi User, Your one time password for phone verification is ".$randno.". Team Infinbuy Private Limited");
-            $route = "4";
-            $postData = array(
-                'authkey' => $authKey,
-                'mobiles' => "91".$request['phone'],
-                'message' => $message,
-                'sender' => $senderId,
-                'route' => $route,
-                'DLT_TE_ID' => $dltId
-            );
-            $url="https://api.msg91.com/api/sendhttp.php";
-            $ch = curl_init();
-            curl_setopt_array($ch, array(
-                CURLOPT_URL => $url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST => true,
-                CURLOPT_POSTFIELDS => $postData
-            ));
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-            $output = curl_exec($ch);
-            if(curl_errno($ch)){
-                echo 'error:' . curl_error($ch);
-            }
-            curl_close($ch);    
+            // $dltId = "1307165294037975142";
+            // $senderId = "INFBUY";
+            // $pretag = urlencode('<#> ');
+            // $authKey = "377364AWhOWdwDOTQS628b49baP1";
+            // $message = urlencode("Hi User, Your one time password for phone verification is ".$randno.". Team Infinbuy Private Limited");
+            // $route = "4";
+            // $postData = array(
+            //     'authkey' => $authKey,
+            //     'mobiles' => "91".$request['phone'],
+            //     'message' => $message,
+            //     'sender' => $senderId,
+            //     'route' => $route,
+            //     'DLT_TE_ID' => $dltId
+            // );
+            // $url="https://api.msg91.com/api/sendhttp.php";
+            // $ch = curl_init();
+            // curl_setopt_array($ch, array(
+            //     CURLOPT_URL => $url,
+            //     CURLOPT_RETURNTRANSFER => true,
+            //     CURLOPT_POST => true,
+            //     CURLOPT_POSTFIELDS => $postData
+            // ));
+            // curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+            // $output = curl_exec($ch);
+            // if(curl_errno($ch)){
+            //     echo 'error:' . curl_error($ch);
+            // }
+            // curl_close($ch);
+            $dmPhone = $request['phone'];
+            $smsData = file_get_contents('https://api.msg91.com/api/sendhttp.php?authkey=378531A3SYlMChc0qI62b1a431P1&mobiles=91'.$dmPhone.'&message=Dear%20user%2C%20'.$randno.'%20is%20your%20OTP%20for%20registration%20at%20TESMART.%20Happy%20shopping%21&sender=TESMAT&route=4&DLT_TE_ID=1307164908009671091');
 
             $otpArray = array();
             $otpArray['otp'] = $randno;
@@ -386,6 +387,10 @@ class DeliverymanController extends Controller
         
         $orderArray = array();
         if(isset($orders) && isset($orders[0])){
+            $orderArray['out_for_delivery'] = 0;
+            $orderArray['delivered'] = 0;
+            $orderArray['pending'] = 0;
+
             $counter = 0;
             foreach($orders as $order){
                 $orderStatus = $order['order_status'];
@@ -455,6 +460,9 @@ class DeliverymanController extends Controller
         $orders = Order::with(['delivery_address','customer'])->where(['delivery_man_id' => $dm['id']])->get();
         
         $orderArray = array();
+        $orderArray['out_for_delivery'] = [];
+        $orderArray['delivered'] = [];
+        $orderArray['pending'] = [];
         if(isset($orders) && isset($orders[0])){
             foreach($orders as $order){
                 $orderStatus = $order['order_status'];

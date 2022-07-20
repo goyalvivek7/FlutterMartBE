@@ -11,7 +11,8 @@ class OrderLogic
 {
     public static function track_order($order_id)
     {
-        return Order::with(['details', 'delivery_man.rating'])->where(['id' => $order_id])->first();
+        //return Order::with(['details', 'delivery_man.rating'])->where(['id' => $order_id])->first();
+        return Order::with(['details', 'delivery_man.rating'])->select('*','created_at as created')->where(['id' => $order_id])->first();
     }
 
     public static function place_order($customer_id, $email, $customer_info, $cart, $payment_method, $discount, $coupon_code = null)

@@ -116,8 +116,8 @@ class OrderController extends Controller
 					'variation'           => json_encode($variationArray),
 					'is_stock_decreased'  => 1,
 
-					'created_at'          => now(),
-					'updated_at'          => now(),
+					//'created_at'          => now(),
+					//'updated_at'          => now(),
 				];
 
 				$type = $cartData[0]->variations;
@@ -157,13 +157,13 @@ class OrderController extends Controller
 
 			}
 
-			$orderHistoryData = OrderHistory::create([
-				'order_id' => $orderId,
-				'user_id' => $userId,
-				'user_type' => 'user',
-				'status_captured' => 'created',
-				'status_reason' => "Order Placed"
-			]);
+			// $orderHistoryData = OrderHistory::create([
+			// 	'order_id' => $orderId,
+			// 	'user_id' => $userId,
+			// 	'user_type' => 'user',
+			// 	'status_captured' => 'created',
+			// 	'status_reason' => "Order Placed"
+			// ]);
 
 			$orderHistoryData = OrderHistory::create([
 				'order_id' => $orderId,
@@ -308,8 +308,8 @@ class OrderController extends Controller
                         'variation'           => json_encode($variationArray),
                         'is_stock_decreased'  => 1,
     
-                        'created_at'          => now(),
-                        'updated_at'          => now(),
+                        //'created_at'          => now(),
+                        //'updated_at'          => now(),
                     ];
 
                     $type = $cartData[0]->variations;
@@ -349,13 +349,13 @@ class OrderController extends Controller
 
                 }
 
-                $orderHistoryData = OrderHistory::create([
-                    'order_id' => $customeOrderID,
-                    'user_id' => $userId,
-                    'user_type' => 'user',
-                    'status_captured' => 'created',
-                    'status_reason' => "Order Placed"
-                ]);
+                // $orderHistoryData = OrderHistory::create([
+                //     'order_id' => $customeOrderID,
+                //     'user_id' => $userId,
+                //     'user_type' => 'user',
+                //     'status_captured' => 'created',
+                //     'status_reason' => "Order Placed"
+                // ]);
 
                 $orderHistoryData = OrderHistory::create([
                     'order_id' => $customeOrderID,
@@ -458,7 +458,8 @@ class OrderController extends Controller
         $orderId = $request['order_id'];
 
         //$orderHistoryData = OrderHistory::Where(['order_id' => $orderId, 'user_id' => $userId])->get();
-        $orderHistoryData = OrderHistory::Where(['order_id' => $orderId])->get();
+      	//$orderHistoryData = OrderHistory::Where(['order_id' => $orderId])->get();
+      	$orderHistoryData = OrderHistory::Select('*', 'created_at as created')->where(['order_id' => $orderId])->get();
         
         if ($orderHistoryData->count() > 0) {
 
@@ -702,8 +703,8 @@ class OrderController extends Controller
 
                 'date'                   => date('Y-m-d'),
                 'delivery_charge'        => Helpers::get_delivery_charge($request['distance']),
-                'created_at'             => now(),
-                'updated_at'             => now(),
+                //'created_at'             => now(),
+                //'updated_at'             => now(),
             ];
 
             $o_id = DB::table('orders')->insertGetId($or);
@@ -734,8 +735,8 @@ class OrderController extends Controller
                     'variation'           => json_encode($c['variation']),
                     'is_stock_decreased'  => 1,
 
-                    'created_at'          => now(),
-                    'updated_at'          => now(),
+                    //'created_at'          => now(),
+                    //'updated_at'          => now(),
                 ];
               	
 				$type = $c['variation'][0]['type'];

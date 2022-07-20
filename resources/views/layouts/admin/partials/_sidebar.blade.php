@@ -270,6 +270,13 @@
                         </li>
                         <!-- End Pages -->
 
+                        <li class="navbar-vertical-aside-has-menu {{Request::is('admin/wallet*')?'active':''}}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{route('admin.wallet.list')}}">
+                                <i class="tio-money-vs nav-icon"></i>
+                                <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">Wallet</span>
+                            </a>
+                        </li>
+
 
                         <!-- Pages -->
                         <li class="navbar-vertical-aside-has-menu {{Request::is('admin/category*')?'active':''}}">

@@ -169,8 +169,8 @@
                                     <i class="tio-shopping-basket-outlined"></i>
                                 </div>
                                 <div class="media-body">
-                                    <span
-                                        class="text-body text-hover-primary">{{$customer->orders->count()}} {{\App\CentralLogics\translate('orders')}}</span>
+                                    <!-- <span class="text-body text-hover-primary">{{$customer->orders->count()}} {{\App\CentralLogics\translate('orders')}}</span> -->
+                                    <span class="text-body text-hover-primary">{{$allOrders->count()}} {{\App\CentralLogics\translate('orders')}}</span>
                                 </div>
                                 <div class="media-body text-right">
                                     {{--<i class="tio-chevron-right text-body"></i>--}}
