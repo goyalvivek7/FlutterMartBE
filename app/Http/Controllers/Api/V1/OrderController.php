@@ -10,6 +10,7 @@ use App\Model\DMReview;
 use App\Model\Order;
 use App\Model\OrderDetail;
 use App\Model\OrderHistory;
+use App\Model\OrderType;
 use App\Model\Product;
 use App\Model\Review;
 use App\Model\CartFinal;
@@ -825,7 +826,7 @@ class OrderController extends Controller
             return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-      	$orderdata = Order::with(['customer', 'delivery_man.rating', 'time_slot', 'delivery_address', 'final_cart'])->where(['id' => $request['order_id']])->get();
+      	$orderdata = Order::with(['customer', 'delivery_man.rating', 'time_slot', 'delivery_address', 'final_cart', 'order_type'])->where(['id' => $request['order_id']])->get();
       	$delivery_address_id = $orderdata[0]->delivery_address_id;
         $addressData = DB::table('customer_addresses')->where('id', $delivery_address_id)->get();
       	//echo '<pre />'; print_r($addressData);

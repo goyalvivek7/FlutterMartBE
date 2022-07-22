@@ -37,7 +37,7 @@
                             <tr>
                                 <th>{{\App\CentralLogics\translate('#')}}</th>
                                 <th style="width: 30%">{{\App\CentralLogics\translate('title')}}</th>
-                                <th style="width: 25%">{{\App\CentralLogics\translate('image')}}</th>
+                                <th style="width: 25%">{{\App\CentralLogics\translate('sale_type')}}</th>
                                 <th>{{\App\CentralLogics\translate('status')}}</th>
                                 <th style="width: 100px">{{\App\CentralLogics\translate('action')}}</th>
                             </tr>
@@ -53,10 +53,11 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <div style="height: 100px; width: 100px; overflow-x: hidden;overflow-y: hidden">
+                                        {{$banner['sale_type']}}
+                                        <!-- <div style="height: 100px; width: 100px; overflow-x: hidden;overflow-y: hidden">
                                             <img src="{{asset('storage/app/public/banner')}}/{{$banner['image']}}" style="width: 100px"
                                                  onerror="this.src='{{asset('public/assets/admin/img/160x160/img2.jpg')}}'">
-                                        </div>
+                                        </div> -->
                                     </td>
                                     <td>
                                         @if($banner['status']==1)
@@ -80,14 +81,7 @@
                                                 <i class="tio-settings"></i>
                                             </button>
                                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                <a class="dropdown-item"
-                                                   href="{{route('admin.banner.edit',[$banner['id']])}}">{{\App\CentralLogics\translate('edit')}}</a>
-                                                <a class="dropdown-item" href="javascript:"
-                                                   onclick="form_alert('banner-{{$banner['id']}}','Want to delete this banner')">{{\App\CentralLogics\translate('delete')}}</a>
-                                                <form action="{{route('admin.banner.delete',[$banner['id']])}}"
-                                                      method="post" id="banner-{{$banner['id']}}">
-                                                    @csrf @method('delete')
-                                                </form>
+                                                <a class="dropdown-item" href="{{route('admin.sale.edit',[$banner['id']])}}">Edit</a>
                                             </div>
                                         </div>
                                         <!-- End Dropdown -->

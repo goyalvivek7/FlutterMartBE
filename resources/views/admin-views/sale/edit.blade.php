@@ -12,14 +12,14 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col-sm mb-2 mb-sm-0">
-                    <h1 class="page-header-title"><i class="tio-edit"></i> {{\App\CentralLogics\translate('update')}} {{\App\CentralLogics\translate('banner')}}</h1>
+                    <h1 class="page-header-title"><i class="tio-edit"></i> Edit</h1>
                 </div>
             </div>
         </div>
         <!-- End Page Header -->
         <div class="row gx-2 gx-lg-3">
             <div class="col-sm-12 col-lg-12 mb-3 mb-lg-2">
-                <form action="{{route('admin.banner.update',[$banner['id']])}}" method="post"
+                <form action="{{route('admin.sale.update',[$banner['id']])}}" method="post"
                       enctype="multipart/form-data">
                     @csrf @method('put')
 
@@ -42,26 +42,48 @@
                             </div>
                         </div>
                     </div>
-
+                    <?php //echo '!!!!<pre />'; print_r($banner); ?>
                     <div class="row">
                         <div class="col-6">
-                            <div class="form-group">
-                                <label>{{\App\CentralLogics\translate('banner')}} {{\App\CentralLogics\translate('image')}}</label><small style="color: red">* ( {{\App\CentralLogics\translate('ratio')}} 3:1 )</small>
-                                <div class="custom-file">
-                                    <input type="file" name="image" id="customFileEg1" class="custom-file-input"
-                                           accept=".jpg, .png, .jpeg, .gif, .bmp, .tif, .tiff|image/*">
-                                    <label class="custom-file-label" for="customFileEg1">{{\App\CentralLogics\translate('choose')}} {{\App\CentralLogics\translate('file')}}</label>
-                                </div>
-                                <hr>
-                                <center>
-                                    <img style="width: 80%;border: 1px solid; border-radius: 10px;" id="viewer"
-                                         src="{{asset('storage/app/public/banner')}}/{{$banner['image']}}" alt="banner image"/>
-                                </center>
+                            <div class="form-group" id="type-category">
+                                <label class="input-label" for="exampleFormControlSelect1">Category</label>
+                                <select name="cat_id" class="form-control js-select2-custom">
+                                    <?php $i = 0; ?>
+                                    @foreach($categories as $category)
+                                        <!-- <option value="{{$category['id']}}" {{$banner['cat_id']==$category['id']?'selected':''}}>{{$category['name']}}</option> -->
+                                        <?php if(($i==0 && $banner['cat_id'] != NULL) || ($i==0 && $banner['cat_id'] != "")){
+                                            echo '<option value="">Select Category</option>';
+                                            $i++;
+                                        } ?>
+                                        <option value="{{$category['id']}}" <?php if(in_array($category['id'], json_decode($banner['cat_id']))){ echo 'selected'; } ?>>{{$category['name']}}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="form-group" id="type-product"
-                                 style="display: {{$banner['product_id']==null?'none':'block'}}">
+                            <div class="form-group" id="type-category"
+                                 style="display: {{$banner['category_id']==null?'none':'block'}}">
+                                <label class="input-label" for="exampleFormControlSelect1">Sub Category</label>
+                                <select name="sub_category_id" class="form-control js-select2-custom">
+                                    @foreach($subCategories as $category)
+                                        <option value="{{$category['id']}}" {{$banner['category_id']==$category['id']?'selected':''}}>{{$category['name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group" id="type-category"
+                                 style="display: {{$banner['category_id']==null?'none':'block'}}">
+                                <label class="input-label" for="exampleFormControlSelect1">Child Category</label>
+                                <select name="chil_category_id" class="form-control js-select2-custom">
+                                    @foreach($childCategories as $category)
+                                        <option value="{{$category['id']}}" {{$banner['category_id']==$category['id']?'selected':''}}>{{$category['name']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group" id="type-product" style="">
                                 <label class="input-label" for="exampleFormControlSelect1">{{\App\CentralLogics\translate('product')}} <span
                                         class="input-label-secondary">*</span></label>
                                 <select name="product_id" class="form-control js-select2-custom">
@@ -70,16 +92,6 @@
                                             value="{{$product['id']}}" {{$banner['product_id']==$product['id']?'selected':''}}>
                                             {{$product['name']}}
                                         </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="form-group" id="type-category"
-                                 style="display: {{$banner['category_id']==null?'none':'block'}}">
-                                <label class="input-label" for="exampleFormControlSelect1">{{\App\CentralLogics\translate('category')}} <span
-                                        class="input-label-secondary">*</span></label>
-                                <select name="category_id" class="form-control js-select2-custom">
-                                    @foreach($categories as $category)
-                                        <option value="{{$category['id']}}" {{$banner['category_id']==$category['id']?'selected':''}}>{{$category['name']}}</option>
                                     @endforeach
                                 </select>
                             </div>

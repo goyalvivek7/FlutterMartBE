@@ -36,7 +36,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('dashboard', 'DeliverymanController@dashboard');
         Route::post('login', 'DeliverymanController@login');
         Route::post('verify-otp', 'DeliverymanController@verify_otp');
-        Route::get('profile', 'DeliverymanController@get_profile');
+        Route::post('profile', 'DeliverymanController@get_profile');
         Route::get('current-orders', 'DeliverymanController@get_current_orders');
         Route::get('all-orders', 'DeliverymanController@get_all_orders');
         Route::post('record-location-data', 'DeliverymanController@record_location_data');
@@ -80,6 +80,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
       	Route::get('homepagesales', 'ProductController@homepage_sales');
         Route::get('smart-deals', 'ProductController@smart_deals');
         Route::get('barcode/{barcode}', 'ProductController@barcode_product');
+        Route::post('user-order-review', 'ProductController@user_order_review');
+        Route::post('submit-order-review', 'ProductController@submit_order_review');
     });
 
     Route::group(['prefix' => 'banners'], function () {
@@ -114,7 +116,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
       Route::get('list', 'CustomerController@address_list');
       Route::post('add', 'CustomerController@add_new_address');
       Route::put('update/{id}', 'CustomerController@update_address');
-      Route::delete('delete', 'CustomerController@delete_address');
+      Route::post('delete', 'CustomerController@delete_address');
     });
   
   	Route::group(['prefix' => 'order'], function () {

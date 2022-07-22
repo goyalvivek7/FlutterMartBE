@@ -196,21 +196,51 @@ class DeliverymanController extends Controller
 
     public function get_profile(Request $request)
     {
+        // $validator = Validator::make($request->all(), [
+        //     'token' => 'required'
+        // ]);
+        // if ($validator->fails()) {
+        //     return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        // }
+        // $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
+        // if (isset($dm) == false) {
+        //     return response()->json([
+        //         'errors' => [
+        //             ['code' => 'delivery-man', 'message' => 'Invalid token!']
+        //         ]
+        //     ], 401);
+        // }
+        // return response()->json($dm, 200);
+
         $validator = Validator::make($request->all(), [
-            'token' => 'required'
+            'user_id' => 'required'
         ]);
+
         if ($validator->fails()) {
-            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+            $response['status'] = 'fail';
+            $response['message'] = 'Plese send all inputs.';
+            $response['data'] = [];
+            return response()->json($response, 200);
         }
-        $dm = DeliveryMan::where(['auth_token' => $request['token']])->first();
-        if (isset($dm) == false) {
-            return response()->json([
-                'errors' => [
-                    ['code' => 'delivery-man', 'message' => 'Invalid token!']
-                ]
-            ], 401);
+
+        $deliveryManData = DeliveryMan::where(['id' => $request['user_id']])->get();
+        
+        if(!empty($deliveryManData)){
+
+            $response['status'] = 'success';
+            $response['message'] = 'Deliveryman Data Found.';
+            $response['data'][] = $deliveryManData;
+            return response()->json($response, 200);
+
+        } else {
+
+            $response['status'] = 'fail';
+            $response['message'] = 'Deliveryman Not Found.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+
         }
-        return response()->json($dm, 200);
+
     }
 
     public function get_current_orders(Request $request)

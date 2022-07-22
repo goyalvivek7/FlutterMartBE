@@ -189,9 +189,12 @@ class SaleController extends Controller
     public function edit($id)
     {
         $products = Product::orderBy('name')->get();
-        $banner = Banner::find($id);
+        //$banner = Banner::find($id);
+        $banner = Sale::find($id);
         $categories = Category::where(['parent_id'=>0])->orderBy('name')->get();
-        return view('admin-views.banner.edit', compact('banner', 'products', 'categories'));
+        $subCategories = Category::where(['parent_id'=>1])->orderBy('name')->get();
+        $childCategories = Category::where(['parent_id'=>2])->orderBy('name')->get();
+        return view('admin-views.sale.edit', compact('banner', 'products', 'categories', 'subCategories', 'childCategories'));
     }
 
     public function status(Request $request)

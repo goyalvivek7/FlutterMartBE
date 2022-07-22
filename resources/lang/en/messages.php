@@ -354,4 +354,5 @@
   'category_icon' => 'Category icon',
   'joined_at' => 'Joined at',
   'addresses' => 'Addresses',
+  'sale_type' => 'Sale type',
 );

@@ -20,6 +20,66 @@ use Illuminate\Support\Facades\DB;
 class ProductController extends Controller
 {
 
+    public function submit_order_review(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'order_id' => 'required',
+            'comment' => 'required',
+            'rating' => 'required|numeric|max:5',
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please Send All Inputs.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $review = new Review;
+        $review->user_id = $request->user_id;
+        $review->product_id = 0;
+        $review->order_id = $request->order_id;
+        $review->comment = $request->comment;
+        $review->rating = $request->rating;
+        $review->save();
+
+        $response['status'] = 'succcess';
+        $response['message'] = 'successfully review submitted!';
+        $response['data'] = [];
+        return response()->json($response, 200);
+
+        //return response()->json(['message' => 'successfully review submitted!'], 200);
+    }
+
+    public function user_order_review(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id' => 'required',
+            'user_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please Send All Inputs.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $userReview = Review::where(['order_id' => $request->order_id, 'user_id' => $request->user_id])->get();
+        if (isset($userReview) && isset($userReview[0]) && !empty($userReview[0])) {
+            $response['status'] = 'success';
+            $response['message'] = 'Review Found';
+            $response['data'] = $userReview;
+            return response()->json($response, 200);
+        } else {
+            $response['status'] = 'success';
+            $response['message'] = 'No Review Found';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+    }
+
     public function popular_search(){
         try {
             $popularSearch = DB::table('custome_searches')->where('title', 'popular_search')->where('status', 1)->get();

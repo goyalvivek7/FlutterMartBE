@@ -17,10 +17,11 @@ use Intervention\Image\Facades\Image;
 
 class CustomerController extends Controller
 {
+
     public function address_list(Request $request)
     {
         //return response()->json(CustomerAddress::where('user_id', $request->user()->id)->latest()->get(), 200);
-      	$address = CustomerAddress::where('user_id', $request->user_id)->latest()->get();
+      	$address = CustomerAddress::where('user_id', $request->user_id)->where('status', 1)->latest()->get();
         if(!empty($address) && $address != "" && $address != NULL && $address != [] && $address!= '[]'){
           return response()->json(['state' => 'Add Address', 'status' => 'success', 'data' => $address], 200);
         } else {
@@ -98,18 +99,30 @@ class CustomerController extends Controller
     public function delete_address(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'address_id' => 'required'
+            'address_id' => 'required',
+            'user_id' => 'required'
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+            return response()->json(['state' => 'Please send all params', 'status' => 'fail'], 200);
         }
+        $addressId = $request['address_id'];
+        $userId = $request['user_id'];
 
-        if (DB::table('customer_addresses')->where(['id' => $request['address_id'], 'user_id' => $request->user()->id])->first()) {
-            DB::table('customer_addresses')->where(['id' => $request['address_id'], 'user_id' => $request->user()->id])->delete();
-            return response()->json(['message' => 'successfully removed!'], 200);
-        }
-        return response()->json(['message' => 'No such data found!'], 404);
+        DB::table('customer_addresses')->where(['user_id' => $userId, 'id' => $addressId])->update([
+            'status' => '0'
+        ]);
+        return response()->json(['state' => 'Address Deleted', 'status' => 'success'], 200);
+
+        // if ($validator->fails()) {
+        //     return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+        // }
+
+        // if (DB::table('customer_addresses')->where(['id' => $request['address_id'], 'user_id' => $request->user()->id])->first()) {
+        //     DB::table('customer_addresses')->where(['id' => $request['address_id'], 'user_id' => $request->user()->id])->delete();
+        //     return response()->json(['message' => 'successfully removed!'], 200);
+        // }
+        // return response()->json(['message' => 'No such data found!'], 404);
     }
 
     public function get_order_list(Request $request)

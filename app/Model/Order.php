@@ -59,4 +59,7 @@ class Order extends Model
     {
         return $this->belongsTo(CartFinal::class, 'cart_id');
     }
+    public function order_type(){
+        return $this->belongsTo(OrderType::class, 'order_type');
+    }
 }

@@ -82,7 +82,7 @@
                                         onchange="addDeliveryMan(this.value)">
                                     <option
                                         value="0">{{\App\CentralLogics\translate('select')}} {{\App\CentralLogics\translate('deliveryman')}}</option>
-                                    @foreach(\App\Model\DeliveryMan::whereIn('branch_id',['all',$order['branch_id']])->get() as $deliveryMan)
+                                    @foreach(\App\Model\DeliveryMan::whereIn('branch_id',['all',$order['branch_id']])->where('status', 1)->where('is_available', 1)->get() as $deliveryMan)
                                         <option
                                             value="{{$deliveryMan['id']}}" {{$order['delivery_man_id']==$deliveryMan['id']?'selected':''}}>
                                             {{$deliveryMan['f_name'].' '.$deliveryMan['l_name']}}
