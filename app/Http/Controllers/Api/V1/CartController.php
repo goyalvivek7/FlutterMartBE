@@ -8,6 +8,7 @@ use App\Model\Cart;
 use App\Model\CartFinal;
 use App\Model\Coupon;
 use App\Model\Order;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -57,6 +58,7 @@ class CartController extends Controller
             'user_id' => 'required',
             'amount' => 'required',
             'package_id' => 'required',
+            'valid_days' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -72,6 +74,7 @@ class CartController extends Controller
             $userId = $request['user_id'];
             $amount = $request['amount'];
             $packageId = $request['package_id'];
+            $validDays = $request['valid_days'];
 
             $lastWallet = DB::table('memberships')->whereNotNull('receipt_id')->limit(1)->orderBy('id', 'DESC')->get();
             if(count($lastWallet) > 0){
@@ -103,6 +106,7 @@ class CartController extends Controller
                 $orderNotes = $orderData['notes'];
                 $orderUserId = $orderNotes->user_id;
                 $orderOrderType = $orderNotes->order_type;
+                $validDays = $request['valid_days'];
                 
                 
                 $walletOrders = [
@@ -111,7 +115,8 @@ class CartController extends Controller
                     'package_id' => $packageId,
                     'amount' => $orderAmount,
                     'receipt_id' => $orderReceipt,
-                    'order_status' => $orderData['status']
+                    'order_status' => $orderData['status'],
+                    'valid_days' => $validDays
                 ];
                 
                 DB::table('memberships')->insert($walletOrders);
@@ -247,7 +252,18 @@ class CartController extends Controller
                 //echo '<pre />'; print_r($deliveryCharge);
             }
             
-            if($request['order_type'] != 1){ $delCharge = 0; }
+            if($request['order_type'] != 1){ 
+                $delCharge = 0; 
+            }
+
+            $userData = User::where('id', $userId)->first();
+            if($userData->prime_member==1){
+                $memberValidity = $userData->member_validity;
+                $todayStr = strtotime(date('Y-m-d h:i:s'));
+                if($todayStr<strtotime($memberValidity)){
+                    $delCharge = 0;
+                }
+            }
 
             if(isset($request['coupon_code']) && $request['coupon_code'] != ""){
                 $couponCode = $request['coupon_code'];

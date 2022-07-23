@@ -14,6 +14,7 @@ use App\Model\OrderType;
 use App\Model\Product;
 use App\Model\Review;
 use App\Model\CartFinal;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -23,6 +24,72 @@ use Session;
 
 class OrderController extends Controller
 {  
+
+    public function member_captured(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'orderId' => 'required',
+            'sigId' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $orderId = $request['orderId'];
+        $sigId = $request['sigId'];
+
+        $orderData = DB::table('memberships')->where('order_id', $orderId)->first();
+        if(isset($orderData) && !empty($orderData)){
+
+            $updateStatus = DB::table('memberships')->where('order_id', $orderId)->update([
+				'order_status' => 'captured'
+			]);
+
+            $userId = $orderData->user_id;
+            $packageId = $orderData->package_id;
+            $validDays = $orderData->valid_days;
+
+            $userData = User::where('id', $userId)->first();
+            //echo date('Y-m-d h:i:s').'#####'.date('Y-m-d H:i:s'); die;
+            if(isset($userData) && !empty($userData)){
+                if($userData->member_validity != NULL && $userData->member_validity != ""){
+                    //$existValidDays = $userData->member_validity;
+                    $cDate1 =  $userData->member_validity;
+                    $todayStr = strtotime(date('Y-m-d h:i:s'));
+                    if($todayStr<strtotime($cDate1)){
+                        $validDate = date('Y-m-d h:i:s', strtotime($userData->member_validity.' + '.$validDays.' days'));
+                    } else {
+                        $validDate = date('Y-m-d h:i:s', strtotime(' + '.$validDays.' days'));
+                    }
+                } else {
+                    $validDate = date('Y-m-d h:i:s', strtotime(' + '.$validDays.' days'));
+                }
+                //echo $validDate; die;
+                $userStatus = User::where('id', $userId)->update([
+                    'prime_member' => '1',
+                    'member_validity' => $validDate
+                ]);
+
+                $userData = User::where('id', $userId)->first();
+
+                $response['status'] = 'success';
+                $response['message'] = 'Membership Updated.';
+                $response['data'][] = $userData;
+                return response()->json($response, 200);
+                
+            } else {
+                $response['status'] = 'fail';
+                $response['message'] = 'User Not Found.';
+                $response['data'] = [];
+                return response()->json($response, 200);
+            }
+
+        }
+    }
 
     public function direct_captured(Request $request){
 

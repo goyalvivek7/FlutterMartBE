@@ -8,6 +8,7 @@ use App\Model\DeliveryHistory;
 use App\Model\DeliveryMan;
 use App\Model\OrderHistory;
 use App\Model\OrderDetail;
+use App\Model\OrderType;
 use App\Model\Review;
 use App\Model\Product;
 use App\Model\Order;
@@ -331,7 +332,7 @@ class DeliverymanController extends Controller
             //return response()->json(['errors' => Helpers::error_processor($validator)], 403);
         }
 
-        if(isset($request['collected_amount']) && $request['collected_amount'] != ""){
+        if(isset($request['collected_amount']) && $request['collected_amount'] !== ""){
             $collectedAmount = $request['collected_amount'];
         } else {
             $collectedAmount = NULL;
@@ -453,12 +454,16 @@ class DeliverymanController extends Controller
                 $product = Product::where('id', $det['product_id'])->first();
                 $det['product_details'] = isset($product) ? Helpers::product_data_formatting($product) : '';
             }
+
+            $orderHistoryData = OrderHistory::where(['order_id' => $det['order_id'], 'status_captured' => 'delivered'])->first();
           
           	$response['status'] = 'success';
             $response['message'] = 'Order detail fetched successfully!';
           	$response['order_data'] = $orderdata;
           	$response['address_data'] = $addressData;
             $response['data'] = $details;
+            $response['item_count'] = $details->count();
+            $response['order_history'][] = $orderHistoryData;
           	return response()->json($response, 200);
           
             //return response()->json($details, 200);
@@ -518,10 +523,22 @@ class DeliverymanController extends Controller
             $response['data'] = [];
             return response()->json($response, 200);
         }
+
+        $codToday = 0;
+        $todayStartDate = date("Y-m-d 00:00:00"); $todayEndDate = date("Y-m-d 23:59:59");
+        $todayOrders = OrderHistory::where('user_type', 'delivery_man')->where('status_captured', 'delivered')->whereBetween('created_at', [$todayStartDate, $todayEndDate])->get();
+        if(isset($todayOrders) && isset($todayOrders[0]) && !empty($todayOrders[0])){
+            //echo '<pre />'; print_r($todayOrders);
+            foreach($todayOrders as $codOrder){
+                //echo '<pre />'; print_r($codOrder);
+              	$codToday += $codOrder->collected_amount;
+            }
+        }
         
         $orders = Order::with(['delivery_address','customer'])->where(['delivery_man_id' => $dm['id']])->get();
         
         $orderArray = array();
+        $orderArray['today_cod'] = $codToday;
         if(isset($orders) && isset($orders[0])){
             $orderArray['out_for_delivery'] = 0;
             $orderArray['delivered'] = 0;
@@ -593,7 +610,7 @@ class DeliverymanController extends Controller
             return response()->json($response, 200);
         }
         
-        $orders = Order::with(['delivery_address','customer'])->where(['delivery_man_id' => $dm['id']])->get();
+        $orders = Order::with(['delivery_address','customer', 'time_slot'])->where(['delivery_man_id' => $dm['id']])->get();
         
         $orderArray = array();
         $orderArray['out_for_delivery'] = [];

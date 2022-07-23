@@ -130,6 +130,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('create-order', 'OrderController@create_order');
         Route::post('captured', 'OrderController@captured');
         Route::post('direct-captured', 'OrderController@direct_captured');
+        Route::post('member-captured', 'OrderController@member_captured');
     });
 
     Route::group(['prefix' => 'wish-list'], function () {

@@ -61,23 +61,29 @@
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="form-group" id="type-category"
-                                 style="display: {{$banner['category_id']==null?'none':'block'}}">
+                            <div class="form-group" id="type-category">
                                 <label class="input-label" for="exampleFormControlSelect1">Sub Category</label>
                                 <select name="sub_category_id" class="form-control js-select2-custom">
                                     @foreach($subCategories as $category)
-                                        <option value="{{$category['id']}}" {{$banner['category_id']==$category['id']?'selected':''}}>{{$category['name']}}</option>
+                                        <?php if(($i==0 && $banner['sub_cat_id'] != NULL) || ($i==0 && $banner['sub_cat_id'] != "")){
+                                            echo '<option value="">Select Sub Category</option>';
+                                            $i++;
+                                        } ?>
+                                        <option value="{{$category['id']}}" <?php if(in_array($category['id'], json_decode($banner['sub_cat_id']))){ echo 'selected'; } ?>>{{$category['name']}}</option>
                                     @endforeach
                                 </select>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="form-group" id="type-category"
-                                 style="display: {{$banner['category_id']==null?'none':'block'}}">
+                            <div class="form-group" id="type-category">
                                 <label class="input-label" for="exampleFormControlSelect1">Child Category</label>
-                                <select name="chil_category_id" class="form-control js-select2-custom">
+                                <select name="child_cat_id" class="form-control js-select2-custom">
                                     @foreach($childCategories as $category)
-                                        <option value="{{$category['id']}}" {{$banner['category_id']==$category['id']?'selected':''}}>{{$category['name']}}</option>
+                                    <?php if(($i==0 && $banner['child_cat_id'] != NULL) || ($i==0 && $banner['child_cat_id'] != "")){
+                                            echo '<option value="">Select Sub Category</option>';
+                                            $i++;
+                                        } ?>
+                                        <option value="{{$category['id']}}" <?php if(in_array($category['id'], json_decode($banner['child_cat_id']))){ echo 'selected'; } ?>>{{$category['name']}}</option>
                                     @endforeach
                                 </select>
                             </div>
