@@ -214,19 +214,25 @@ class SaleController extends Controller
             'title.required' => 'Title is required!',
         ]);
 
-        $banner = Banner::find($id);
-        $banner->title = $request->title;
-        if ($request['item_type'] == 'product') {
-            $banner->product_id = $request->product_id;
-            $banner->category_id = null;
-        } elseif ($request['item_type'] == 'category') {
-            $banner->product_id = null;
-            $banner->category_id = $request->category_id;
-        }
-        $banner->image = $request->has('image') ? Helpers::update('banner/', $banner->image, 'png', $request->file('image')) : $banner->image;
-        $banner->save();
-        Toastr::success('Banner updated successfully!');
-        return redirect('admin/banner/list');
+        $saleId = $request->id; 
+        $title = $request->title;
+        $itemType = $request->item_type;
+        $catId = $request->cat_id;
+        $subCategoryId = $request->sub_category_id;
+        $childCatId = $request->child_cat_id;
+        $productId = $request->product_id;
+        
+        $updateStatus = Sale::where('id', $saleId)->update([
+            'title' => $title,
+            'sale_type' => $itemType,
+            'cat_id' => $catId,
+            'sub_cat_id' => $subCategoryId,
+            'child_cat_id' => $childCatId,
+            'allow_ids' => $productId
+        ]);
+        
+        Toastr::success('Sale updated successfully!');
+        return redirect('admin/sale/edit/'.$saleId);
     }
 
     public function delete(Request $request)

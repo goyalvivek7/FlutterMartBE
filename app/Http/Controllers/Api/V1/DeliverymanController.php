@@ -135,7 +135,7 @@ class DeliverymanController extends Controller
             return response()->json($response, 200);
         }
 
-        $deliveryManData = DeliveryMan::where(['phone' => $request['phone'], 'status' => 1])->get();
+        $deliveryManData = DeliveryMan::where(['phone' => $request['phone'], 'status' => 1])->first();
         
         if(!empty($deliveryManData)){
 
@@ -144,6 +144,12 @@ class DeliverymanController extends Controller
             DeliveryMan::where(['phone' => $request['phone']])->update([
                 'otp' => $randno
             ]);
+
+            if(isset($request['firebase_key']) && $request['firebase_key'] != ""){
+                DeliveryMan::where(['phone' => $request['phone']])->update([
+                    'fcm_token' => $request['firebase_key']
+                ]);
+            }
 
             // $dltId = "1307165294037975142";
             // $senderId = "INFBUY";
@@ -610,20 +616,26 @@ class DeliverymanController extends Controller
             return response()->json($response, 200);
         }
         
-        $orders = Order::with(['delivery_address','customer', 'time_slot'])->where(['delivery_man_id' => $dm['id']])->get();
+        $orders = Order::with(['delivery_address','customer', 'time_slot'])->where(['delivery_man_id' => $dm['id']])->latest()->get();
         
         $orderArray = array();
-        $orderArray['out_for_delivery'] = [];
+        //$orderArray['out_for_delivery'] = [];
         $orderArray['delivered'] = [];
         $orderArray['pending'] = [];
         if(isset($orders) && isset($orders[0])){
             foreach($orders as $order){
                 $orderStatus = $order['order_status'];
+                if($orderStatus == "confirmed" || $orderStatus == "processing" || $orderStatus == "out_for_delivery"){
+                    $orderStatus = "pending";
+                }
+                if($orderStatus == "returned" || $orderStatus == "failed" || $orderStatus == "canceled"){
+                    $orderStatus = "delivered";
+                }
                 $orderArray[$orderStatus][] = $order;
             }
 
             $response['status'] = 'success';
-            $response['message'] = 'No Order Found.';
+            $response['message'] = 'Orders Found.';
             $response['data'][] = $orderArray;
             return response()->json($response, 200);
             

@@ -22,7 +22,7 @@
                 <form action="{{route('admin.sale.update',[$banner['id']])}}" method="post"
                       enctype="multipart/form-data">
                     @csrf @method('put')
-                    <input type="hidden" name="id" value="{{$banner['id']}}" />
+
                     <div class="row">
                         <div class="col-6">
                             <div class="form-group">
@@ -37,8 +37,8 @@
                                         class="input-label-secondary">*</span></label>
                                 <select name="item_type" id="item_type" class="form-control" onchange="show_item(this.value)">
                                     <option value="">Select</option>
-                                    <option value="products" {{$banner['sale_type']=='products'?'selected':''}}>{{\App\CentralLogics\translate('product')}}</option>
-                                    <option value="categories" {{$banner['sale_type']=='categories'?'selected':''}}>{{\App\CentralLogics\translate('category')}}</option>
+                                    <option value="product" {{$banner['product_id']==null?'':'selected'}}>{{\App\CentralLogics\translate('product')}}</option>
+                                    <option value="category" {{$banner['category_id']==null?'':'selected'}}>{{\App\CentralLogics\translate('category')}}</option>
                                 </select>
                             </div>
                         </div>
@@ -48,7 +48,7 @@
                         <div class="col-6" id="type-category" style="display: none">
                             <div class="form-group">
                                 <label class="input-label" for="exampleFormControlSelect1">Category</label>
-                                <select name="cat_id[]" id="cat_id" class="form-control js-select2-custom" multiple>
+                                <select name="cat_id" id="cat_id" class="form-control js-select2-custom" multiple>
                                     <?php $i = 0; ?>
                                     @foreach($categories as $category)
                                         <!-- <option value="{{$category['id']}}" {{$banner['cat_id']==$category['id']?'selected':''}}>{{$category['name']}}</option> -->
@@ -64,7 +64,7 @@
                         <div class="col-6" id="type-sub-category" style="display: none;">
                             <div class="form-group">
                                 <label class="input-label" for="exampleFormControlSelect1">Sub Category</label>
-                                <select name="sub_category_id[]" class="form-control js-select2-custom" multiple>
+                                <select name="sub_category_id" class="form-control js-select2-custom" multiple>
                                     @foreach($subCategories as $category)
                                         <?php if(($i==0 && $banner['sub_cat_id'] != NULL) || ($i==0 && $banner['sub_cat_id'] != "")){
                                             echo '<option value="">Select Sub Category</option>';
@@ -78,7 +78,7 @@
                         <div class="col-6" id="type-cat-category" style="display: none;">
                             <div class="form-group">
                                 <label class="input-label" for="exampleFormControlSelect1">Child Category</label>
-                                <select name="child_cat_id[]" class="form-control js-select2-custom" multiple>
+                                <select name="child_cat_id" class="form-control js-select2-custom" multiple>
                                     @foreach($childCategories as $category)
                                     <?php if(($i==0 && $banner['child_cat_id'] != NULL) || ($i==0 && $banner['child_cat_id'] != "")){
                                             echo '<option value="">Select Sub Category</option>';
@@ -93,7 +93,7 @@
                             <div class="form-group">
                                 <label class="input-label" for="exampleFormControlSelect1">{{\App\CentralLogics\translate('product')}} <span
                                         class="input-label-secondary">*</span></label>
-                                <select name="product_id[]" class="form-control js-select2-custom" multiple>
+                                <select name="product_id" class="form-control js-select2-custom" multiple>
                                     @foreach($products as $product)
                                         <option
                                             value="{{$product['id']}}" {{$banner['product_id']==$product['id']?'selected':''}}>
@@ -118,10 +118,10 @@
     <script>
 
         function show_item(type) {
-            if (type === 'products') {
+            if (type === 'product') {
                 $("#type-product").show();
                 $("#type-category").hide();
-            } else if(type === 'categories') {
+            } else {
                 $("#type-product").hide();
                 $("#type-category").show();
             }
@@ -129,15 +129,17 @@
 
         $("#cat_id").on('change', function(){
             $("#type-sub-category").css('display', 'block');
+            alert(1);
         });
 
         $("#type-sub-category").on('change', function(){
             $("#type-cat-category").css('display', 'block');
+            alert(1);
         });
 
         $("#type-cat-category").on('change', function(){
             $("#type-product").css('display', 'block');
+            alert(1);
         });
-
     </script>
 @endpush
