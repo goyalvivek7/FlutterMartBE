@@ -7,10 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Model\Order;
 use App\Model\OrderDetail;
 use App\Model\OrderHistory;
+use App\Model\BusinessSetting;
 use App\Model\Product;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade as PDF;
 
 class OrderController extends Controller
 {
@@ -72,7 +74,19 @@ class OrderController extends Controller
         $cartId = $order->cart_id;
         $cartData = DB::table('cart_final')->where(['id' => $cartId])->first();
         $deliveryOptions = DB::table('delivery_options')->get();
+        $busineessData = BusinessSetting::get();
+        $bisData = [];
+        foreach($busineessData as $bData){
+            $key = $bData['key'];
+            $value = $bData['value'];
+            $bisData[$key] = $value;
+        }
         if (isset($order)) {
+            if($order['invoice_no'] == NULL || $order['invoice_no'] == ""){
+                $orderNo = $order['id'];
+                $pdf = PDF::loadView('admin-views.order.partials._invoice', compact('order', 'cartData', 'deliveryOptions', 'bisData'));
+                return $pdf->download('order_'.$orderNo . '.pdf');
+            }
             return view('admin-views.order.order-view', compact('order', 'deliveryOptions', 'cartData'));
         } else {
             Toastr::info('No more orders!');
