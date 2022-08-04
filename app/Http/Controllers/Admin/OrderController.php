@@ -71,7 +71,7 @@ class OrderController extends Controller
     public function details($id)
     {
         $order = Order::with('details')->where(['id' => $id])->first();
-        $cartId = $order->cart_id;
+        $cartId = $order['cart_id'];
         $cartData = DB::table('cart_final')->where(['id' => $cartId])->first();
         $deliveryOptions = DB::table('delivery_options')->get();
         $busineessData = BusinessSetting::get();
@@ -85,7 +85,14 @@ class OrderController extends Controller
             if($order['invoice_no'] == NULL || $order['invoice_no'] == ""){
                 $orderNo = $order['id'];
                 $pdf = PDF::loadView('admin-views.order.partials._invoice', compact('order', 'cartData', 'deliveryOptions', 'bisData'));
-                return $pdf->download('order_'.$orderNo . '.pdf');
+                //return $pdf->download('order_'.$orderNo . '.pdf');
+                $pdfName = 'order_'.$orderNo . '.pdf';
+                $pdf->save($pdfName);
+                $orderPdf = Helpers::upload('order/', 'pdf', $pdfName);
+                Order::where(['id' => $id])->update([
+                    'invoice_url' => $orderPdf
+                ]);
+                $order['invoice_url'] = $orderPdf;
             }
             return view('admin-views.order.order-view', compact('order', 'deliveryOptions', 'cartData'));
         } else {

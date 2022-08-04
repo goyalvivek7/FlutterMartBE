@@ -74,7 +74,10 @@
                            href={{route('admin.orders.generate-invoice',[$order['id']])}}>
                             <i class="tio-print mr-1"></i> {{\App\CentralLogics\translate('print')}} {{\App\CentralLogics\translate('invoice')}}
                         </a>
-
+                        <a class="text-body mr-3" target="_blank"
+                           href="<?php echo asset('storage/app/public/order/')."/".$order['invoice_url']; ?>">
+                            <i class="tio-print mr-1"></i> Order PDF
+                        </a>
                         <!-- Unfold -->
                         @if($order['order_type']!='self_pickup' && $order['order_type'] != 'pos')
                             <div class="hs-unfold">
