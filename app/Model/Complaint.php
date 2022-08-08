@@ -2,6 +2,7 @@
 
 namespace App\Model;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Complaint extends Model
@@ -10,4 +11,12 @@ class Complaint extends Model
     protected $fillable = [
         'user_id', 'issue_id', 'comment', 'attachments', 'status', 'parent_id'
     ];
+    public function complaint_issues()
+    {
+        return $this->belongsTo(ComplaintIssues::class, 'issue_id');
+    }
+    public function customer()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

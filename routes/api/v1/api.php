@@ -164,6 +164,10 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('/', 'TimeSlotController@branch_list');
     });
 
+    Route::group(['prefix' => 'faq'], function () {
+        Route::get('/', 'FaqController@list');
+    });
+
     Route::group(['prefix' => 'customer', 'middleware' => 'auth:api'], function () {
         Route::get('info', 'CustomerController@info');
         Route::put('update-profile', 'CustomerController@update_profile');

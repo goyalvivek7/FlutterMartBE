@@ -63,8 +63,10 @@ class ComplaintController extends Controller
         $attachmentsFileName = "";
         if ($request->hasFile('attachments')) {
             $attachmentsFile = $request->file('attachments');
-            $attachmentsFileName = time().'-'.$userId.'.'.$attachmentsFile->extension(); 
-            $attachmentsFile->move(public_path('complaints'), $attachmentsFileName);
+            //$attachmentsFileName = time().'-'.$userId.'.'.$attachmentsFile->extension(); 
+            //$attachmentsFile->move(public_path('complaints'), $attachmentsFileName);
+            //$attachmentsFile->move(asset('/storage/app/public/complaints/'), $attachmentsFileName);
+            $attachmentsFileName =  Helpers::upload('complaints/', 'png', $request->file('attachments'));
         }
 
         $complaint = Complaint::create([
@@ -148,7 +150,9 @@ class ComplaintController extends Controller
         if ($request->hasFile('attachments')) {
             $attachmentsFile = $request->file('attachments');
             $attachmentsFileName = time().'-'.$userId.'.'.$attachmentsFile->extension(); 
-            $attachmentsFile->move(public_path('complaints'), $attachmentsFileName);
+            //$attachmentsFile->move(public_path('complaints'), $attachmentsFileName);
+            //$attachmentsFile->move(asset('/storage/app/public/complaints/'), $attachmentsFileName);
+            $attachmentsFileName =  Helpers::upload('complaints/', 'png', $request->file('attachments'));
         }
 
         $complaint = Complaint::create([

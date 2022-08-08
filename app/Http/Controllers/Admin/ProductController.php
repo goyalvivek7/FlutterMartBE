@@ -22,6 +22,31 @@ use GuzzleHttp\Client;
 class ProductController extends Controller
 {
 
+    public function get_product_listing(Request $request)
+    {
+        //$catId = explode(',', $request['cat-id']);
+        $catId = $request['cat-id'];
+        $catPosition = $request['cat-position'];
+        if($catPosition == 0){
+            $allProducts = DB::table('products')->whereIn('cat_id', $catId)->where('status', 1)->get();
+        }
+        if($catPosition == 1){
+            $allProducts = DB::table('products')->whereIn('sub_cat_id', $catId)->where('status', 1)->get();
+        }
+        if($catPosition == 2){
+            $allProducts = DB::table('products')->whereIn('child_cat_id', $catId)->where('status', 1)->get();
+        }
+        //echo $allProducts->toSql();
+        return $allProducts;
+    }
+
+    public function get_categories_multi(Request $request)
+    {
+        $catArray = $request['parent_id'];
+        $cat = Category::whereIn('parent_id', $catArray)->get();
+        return $cat;
+    }
+
     public function search_update(Request $request, $id)
     {
         //echo $id."@@@@@@".$request['selected_product']."######";

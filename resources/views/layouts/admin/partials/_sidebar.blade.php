@@ -242,12 +242,12 @@
                             </a>
                             <ul class="js-navbar-vertical-aside-submenu nav nav-sub"
                                 style="display: {{Request::is('admin/sale*')?'block':'none'}}">
-                                <li class="nav-item {{Request::is('admin/sale/add-new')?'active':''}}">
+                                <!-- <li class="nav-item {{Request::is('admin/sale/add-new')?'active':''}}">
                                     <a class="nav-link " href="{{route('admin.sale.add-new')}}">
                                         <span class="tio-circle nav-indicator-icon"></span>
                                         <span class="text-truncate">Add Sale</span>
                                     </a>
-                                </li>
+                                </li> -->
                                 <li class="nav-item {{Request::is('admin/sale/list')?'active':''}}">
                                     <a class="nav-link " href="{{route('admin.sale.list')}}">
                                         <span class="tio-circle nav-indicator-icon"></span>
@@ -453,6 +453,27 @@
                             </a>
                         </li>
                         <!-- End Pages -->
+
+
+                        <!-- End Pages -->
+                        <li class="navbar-vertical-aside-has-menu {{Request::is('admin/faq*')?'active':''}}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{route('admin.faq.add-new')}}"
+                               title="Pages">
+                                <i class="tio-file-text nav-icon"></i>
+                                <span
+                                    class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">Faq</span>
+                            </a>
+                        </li>
+
+                        <!-- End Pages -->
+                        <li class="navbar-vertical-aside-has-menu {{Request::is('admin/complaint*')?'active':''}}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link" href="{{route('admin.complaint.list')}}"
+                               title="Pages">
+                                <i class="tio-files-labeled-outlined nav-icon"></i>
+                                <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">Complaints</span>
+                            </a>
+                        </li>
+
 
                         <!-- Pages -->
                         <li class="navbar-vertical-aside-has-menu {{Request::is('admin/business-settings*')?'active':''}}">

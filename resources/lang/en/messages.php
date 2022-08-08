@@ -355,4 +355,5 @@
   'joined_at' => 'Joined at',
   'addresses' => 'Addresses',
   'sale_type' => 'Sale type',
+  'Faq' => 'Faq',
 );

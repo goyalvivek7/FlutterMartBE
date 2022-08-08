@@ -191,9 +191,10 @@ class SaleController extends Controller
         $products = Product::orderBy('name')->get();
         //$banner = Banner::find($id);
         $banner = Sale::find($id);
-        $categories = Category::where(['parent_id'=>0])->orderBy('name')->get();
-        $subCategories = Category::where(['parent_id'=>1])->orderBy('name')->get();
-        $childCategories = Category::where(['parent_id'=>2])->orderBy('name')->get();
+        $categories = Category::where(['position'=>0])->orderBy('name')->get();
+        $subCategories = Category::where(['position'=>1])->orderBy('name')->get();
+        $childCategories = Category::where(['position'=>2])->orderBy('name')->get();
+        
         return view('admin-views.sale.edit', compact('banner', 'products', 'categories', 'subCategories', 'childCategories'));
     }
 
@@ -217,10 +218,43 @@ class SaleController extends Controller
         $saleId = $request->id; 
         $title = $request->title;
         $itemType = $request->item_type;
-        $catId = $request->cat_id;
-        $subCategoryId = $request->sub_category_id;
-        $childCatId = $request->child_cat_id;
-        $productId = $request->product_id;
+
+        if(isset($request->cat_id) && $request->cat_id != ""){
+            $catId = array_unique($request->cat_id);
+        } else {
+            $catId = NULL;
+        }
+
+        if(isset($request->sub_category_id) && $request->sub_category_id != ""){
+            $subCategoryId = array_unique($request->sub_category_id);
+        } else {
+            $subCategoryId = NULL;
+        }
+
+        if(isset($request->child_cat_id) && $request->child_cat_id != ""){
+            $childCatId = array_unique($request->child_cat_id);
+        } else {
+            $childCatId = NULL;
+        }
+
+        if(isset($request->product_id) && $request->product_id != ""){
+            $productId = array_unique($request->product_id);
+        } else {
+            $productId = NULL;
+        }
+        
+        // $subCategoryId = array_unique($request->sub_category_id);
+        // $childCatId = array_unique($request->child_cat_id);
+        // $productId = array_unique($request->product_id);
+
+        // echo $saleId;
+        // echo $title;
+        // echo $itemType;
+        // echo 'catId<pre />'; print_r($catId);
+        // echo 'subCategoryId<pre />'; print_r($subCategoryId);
+        // echo 'childCatId<pre />'; print_r($childCatId);
+        // echo 'productId<pre />'; print_r($productId);
+        //die;
         
         $updateStatus = Sale::where('id', $saleId)->update([
             'title' => $title,
@@ -230,6 +264,8 @@ class SaleController extends Controller
             'child_cat_id' => $childCatId,
             'allow_ids' => $productId
         ]);
+
+        //die;
         
         Toastr::success('Sale updated successfully!');
         return redirect('admin/sale/edit/'.$saleId);

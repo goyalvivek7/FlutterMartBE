@@ -127,6 +127,8 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('daily-needs', 'ProductController@daily_needs')->name('daily-needs');
             Route::get('popular-product', 'ProductController@popular_product')->name('popular-product');
             Route::post('search-update/{id}', 'ProductController@search_update')->name('search-update');
+            Route::post('get-categories-multi', 'ProductController@get_categories_multi')->name('get-categories-multi');
+            Route::post('get-product-listing', 'ProductController@get_product_listing')->name('get-product-listing');
         });
 
         Route::group(['prefix' => 'orders', 'as' => 'orders.'], function () {
@@ -198,6 +200,24 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('update/{id}', 'TimeSlotController@update');
             Route::get('status/{id}/{status}', 'TimeSlotController@status')->name('status');
             Route::delete('delete/{id}', 'TimeSlotController@delete')->name('delete');
+        });
+
+        Route::group(['prefix' => 'faq', 'as' => 'faq.'], function () {
+            Route::get('add-new', 'FaqController@add_new')->name('add-new');
+            Route::post('store', 'FaqController@store')->name('store');
+            Route::get('edit/{id}', 'FaqController@edit')->name('update');
+            Route::post('update', 'FaqController@update');
+            Route::get('status/{id}/{status}', 'FaqController@status')->name('status');
+            Route::delete('delete/{id}', 'FaqController@delete')->name('delete');
+        });
+
+        Route::group(['prefix' => 'complaint', 'as' => 'complaint.'], function () {
+            Route::get('list', 'ComplaintController@list')->name('list');
+            Route::post('store', 'ComplaintController@store')->name('store');
+            Route::get('edit/{id}', 'ComplaintController@edit')->name('edit');
+            Route::post('update/{id}', 'ComplaintController@update')->name('update');
+            Route::get('status/{id}/{status}', 'ComplaintController@status')->name('status');
+            Route::delete('delete/{id}', 'ComplaintController@delete')->name('delete');
         });
 
         Route::group(['prefix' => 'business-settings', 'as' => 'business-settings.'], function () {
