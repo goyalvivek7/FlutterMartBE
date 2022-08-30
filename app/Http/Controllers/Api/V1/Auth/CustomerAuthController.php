@@ -56,43 +56,43 @@ class CustomerAuthController extends Controller{
         // if (isset($user)) {
         //     return response()->json(['status' => 'success', 'state' => 'login', 'message'=>'Login Successfully', 'data' => $user], 200);
         // } else {
-            if(isset($request->firbase_token) && $request->firbase_token != "" && $request->imeinumber != "null"){
+            if(isset($request->firbase_token) && $request->firbase_token != "" && $request->firbase_token != "null"){
                 $firebaseToken = $request->firbase_token;
             } else {
                 $firebaseToken = NULL;
             }
-            if(isset($request->device_id) && $request->device_id != "" && $request->imeinumber != "null"){
+            if(isset($request->device_id) && $request->device_id != "" && $request->device_id != "null"){
                 $device_id = $request->device_id;
             } else {
                 $device_id = NULL;
             }
-            if(isset($request->app_version) && $request->app_version != "" && $request->imeinumber != "null"){
+            if(isset($request->app_version) && $request->app_version != "" && $request->app_version != "null"){
                 $appVersion = $request->app_version;
             } else {
                 $appVersion = NULL;
             }
 
-            if(isset($request->phone) && $request->phone != "" && $request->imeinumber != "null"){
+            if(isset($request->phone) && $request->phone != "" && $request->phone != "null"){
                 $phone = $request->phone;
             } else {
                 $phone = NULL;
             }
-            if(isset($request->email) && $request->email != "" && $request->imeinumber != "null"){
+            if(isset($request->email) && $request->email != "" && $request->email != "null"){
                 $email = $request->email;
             } else {
                 $email = NULL;
             }
-            if(isset($request->access_plateform) && $request->access_plateform != "" && $request->imeinumber != "null"){
+            if(isset($request->access_plateform) && $request->access_plateform != "" && $request->access_plateform != "null"){
                 $access_plateform = $request->access_plateform;
             } else {
                 $access_plateform = NULL;
             }
-            if(isset($request->device_model) && $request->device_model != "" && $request->imeinumber != "null"){
+            if(isset($request->device_model) && $request->device_model != "" && $request->device_model != "null"){
                 $device_model = $request->device_model;
             } else {
                 $device_model = NULL;
             }
-            if(isset($request->device_plateform) && $request->device_plateform != "" && $request->imeinumber != "null"){
+            if(isset($request->device_plateform) && $request->device_plateform != "" && $request->device_plateform != "null"){
                 $device_plateform = $request->device_plateform;
             } else {
                 $device_plateform = NULL;

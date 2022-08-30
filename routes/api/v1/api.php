@@ -151,6 +151,14 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('id-list', 'CartController@id_list');
     });
 
+    Route::group(['prefix' => 'subscription'], function () {
+        Route::get('daily-prodcuts', 'SubscriptionController@daily_needs');
+        Route::get('daily-needs-categories', 'SubscriptionController@daily_needs_categories');
+        Route::post('create-subscription', 'SubscriptionController@create_subscription');
+        Route::post('list', 'SubscriptionController@subscription_list');
+        Route::post('detail', 'SubscriptionController@subscription_detail');
+    });
+
     Route::get('pages', 'TimeSlotController@all_pages');
     Route::get('page/{page_name}', 'TimeSlotController@static_pages');
     Route::get('delivery-options', 'TimeSlotController@delivery_options');

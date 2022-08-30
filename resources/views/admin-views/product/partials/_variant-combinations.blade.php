@@ -9,6 +9,9 @@
                 <label for="" class="control-label">Variant Price</label>
             </td>
             <td class="text-center">
+                <label for="" class="control-label">Original Price (Without Discount)</label>
+            </td>
+            <td class="text-center">
                 <label for="" class="control-label">Variant Stock</label>
             </td>
             <td class="text-center">
@@ -37,6 +40,10 @@
                      </td>
                     <td>
                         <input type="number" name="price_{{ $str }}" value="{{ $price }}" min="0" step="0.01"
+                               class="form-control" required>
+                    </td>
+                    <td>
+                        <input type="number" name="org_price_{{ $str }}" value="{{ $price }}" min="0" step="0.01"
                                class="form-control" required>
                     </td>
                     <td>

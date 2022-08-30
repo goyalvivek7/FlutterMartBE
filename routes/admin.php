@@ -158,6 +158,14 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::delete('delete/{id}', 'OrderController@delete')->name('delete');
         });
 
+        Route::group(['prefix' => 'subscription', 'as' => 'subscription.'], function () {
+            Route::get('list/{status}', 'SubscriptionController@list')->name('list');
+            Route::get('details/{id}', 'SubscriptionController@details')->name('details');
+            Route::get('status', 'SubscriptionController@status')->name('status');
+            Route::get('payment-status', 'SubscriptionController@payment_status')->name('payment-status');
+            Route::get('add-delivery-man/{order_id}/{sub_date}/{delivery_man_id}', 'SubscriptionController@add_delivery_man')->name('add-delivery-man');
+        });
+
         Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
             Route::get('add', 'CategoryController@index')->name('add');
             Route::get('add-sub-category', 'CategoryController@sub_index')->name('add-sub-category');

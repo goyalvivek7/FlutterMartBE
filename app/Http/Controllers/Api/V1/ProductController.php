@@ -203,10 +203,26 @@ class ProductController extends Controller
     {
         try {
 
-            $getProducts = DB::table('products')->where('bar_code', $barcode)->get();
+            //$getProducts = DB::table('products')->where('bar_code', $barcode)->get();
+            $getProducts = DB::table('products')->where('status', 1)->get();
+            foreach($getProducts as $allProduct){
+                if(isset($allProduct->bar_code) && $allProduct->bar_code === $barcode){
+                    $id = $allProduct->id;
+                }
+                if(isset($allProduct->variations) && $allProduct->variations != ""){
+                    $variationArray = json_decode($allProduct->variations);
+                  	for($i=0; $i<count($variationArray); $i++){
+                      if(isset($variationArray[$i]->barcode) && $variationArray[$i]->barcode != ""){
+                          if($variationArray[$i]->barcode === $barcode){
+                              $id = $allProduct->id;
+                          }
+                      }
+                    }
+                }
+            }
 
-            if(count($getProducts) > 0){
-                $id = $getProducts[0]->id;
+            if(count($getProducts) > 0 && isset($id) && $id != ""){
+                //$id = $getProducts[0]->id;
 
                 $product = ProductLogic::get_product($id);
 

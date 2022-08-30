@@ -356,4 +356,6 @@
   'addresses' => 'Addresses',
   'sale_type' => 'Sale type',
   'Faq' => 'Faq',
+  'ongoing' => 'Ongoing',
+  'completed' => 'Completed',
 );

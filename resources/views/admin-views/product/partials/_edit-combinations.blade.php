@@ -9,6 +9,9 @@
                 <label for="" class="control-label">Variant Price</label>
             </td>
             <td class="text-center">
+                <label for="" class="control-label">Original Price (Without Discount)</label>
+            </td>
+            <td class="text-center">
                 <label for="" class="control-label">Variant Stock</label>
             </td>
             <td class="text-center">
@@ -28,6 +31,10 @@
                            value="{{$combination['price']}}" min="0"
                            step="0.01"
                            class="form-control" required>
+                </td>
+                <td>
+                    <input type="number" name="org_price_{{ $combination['type'] }}" value="<?php if(isset($combination['org_price'])){ echo $combination['org_price']; } ?>" min="0" step="0.01"
+                            class="form-control" required>
                 </td>
                 <td>
                     <input type="number" name="stock_{{ $combination['type'] }}" value="{{ $combination['stock']??0 }}"

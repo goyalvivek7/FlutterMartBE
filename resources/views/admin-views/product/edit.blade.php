@@ -100,7 +100,7 @@
                                 <div class="form-group">
                                     <label class="input-label"
                                            for="exampleFormControlInput1">Regular Price</label>
-                                    <input type="number" value="{{$product['org_price']}}" min="1" max="100000000" name="price" class="form-control" step="0.01" placeholder="Ex : 100" required>
+                                    <input type="number" value="{{$product['org_price']}}" min="1" max="100000000" name="org_price" class="form-control" step="0.01" placeholder="Ex : 100" required>
                                 </div>
                             </div>
                             <div class="col-4">
@@ -479,7 +479,8 @@
             // @endif
 
             var formData = new FormData(this);
-
+            
+            //return 0;
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -505,6 +506,7 @@
                             CloseButton: true,
                             ProgressBar: true
                         });
+                        //console.log("formData", data);
                         setTimeout(function () {
                             location.href = '{{route('admin.product.list')}}';
                         }, 2000);

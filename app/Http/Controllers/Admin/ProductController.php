@@ -279,6 +279,7 @@ class ProductController extends Controller
                 $item = [];
                 $item['type'] = $str;
                 $item['price'] = abs($request['price_' . str_replace('.', '_', $str)]);
+                $item['org_price'] = ($request['org_price_' . str_replace('.', '_', $str)]);
                 $item['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
                 $item['barcode'] = $request['barcode_' . str_replace('.', '_', $str)];
                 array_push($variations, $item);
@@ -954,6 +955,7 @@ class ProductController extends Controller
 
         //Generates the combinations of customer choice options
         $combinations = Helpers::combinations($options);
+        //echo '<pre />'; print_r($combinations); die; return false;
         $stock_count = 0;
         if (count($combinations[0]) > 0) {
             foreach ($combinations as $key => $combination) {
@@ -968,6 +970,7 @@ class ProductController extends Controller
                 $item = [];
                 $item['type'] = $str;
                 $item['price'] = abs($request['price_' . str_replace('.', '_', $str)]);
+                $item['org_price'] = ($request['org_price_' . str_replace('.', '_', $str)]);
                 $item['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
                 $item['barcode'] = $request['barcode_' . str_replace('.', '_', $str)];
                 array_push($variations, $item);
@@ -996,7 +999,7 @@ class ProductController extends Controller
         } else {
             $sku = NULL;
         }
-
+        //die("!!!!!!"); echo '<pre />'; print_r($variations); die; return 0;
         //combinations end
         $p->variations = json_encode($variations);
         $p->price = $request->price;

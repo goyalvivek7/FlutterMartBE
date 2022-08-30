@@ -570,6 +570,75 @@
                         </li>
                         <!-- End Pages -->
 
+
+                        <!-- Pages -->
+                        <li class="navbar-vertical-aside-has-menu {{Request::is('admin/subscription*')?'active':''}}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:"
+                            >
+                                <i class="tio-image nav-icon"></i>
+                                <span
+                                    class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">Subscriptions</span>
+                            </a>
+                            <ul class="js-navbar-vertical-aside-submenu nav nav-sub"
+                                style="display: {{Request::is('admin/subscription*')?'block':'none'}}">
+                                <li class="nav-item {{Request::is('admin/subscription/list/pending')?'active':''}}">
+                                    <a class="nav-link " href="{{route('admin.subscription.list',['pending'])}}" title="">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">
+                                            {{\App\CentralLogics\translate('pending')}}
+                                            <span class="badge badge-soft-info badge-pill ml-1">
+                                                {{\App\Model\SubscriptionOrders::where(['order_status'=>'pending'])->count()}}
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="nav-item {{Request::is('admin/subscription/list/ongoing')?'active':''}}">
+                                    <a class="nav-link " href="{{route('admin.subscription.list',['ongoing'])}}" title="">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">
+                                            {{\App\CentralLogics\translate('ongoing')}}
+                                            <span class="badge badge-soft-info badge-pill ml-1">
+                                                {{\App\Model\SubscriptionOrders::where(['order_status'=>'ongoing'])->count()}}
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="nav-item {{Request::is('admin/subscription/list/confirmed')?'active':''}}">
+                                    <a class="nav-link " href="{{route('admin.subscription.list',['confirmed'])}}" title="">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">
+                                            {{\App\CentralLogics\translate('confirmed')}}
+                                            <span class="badge badge-soft-info badge-pill ml-1">
+                                                {{\App\Model\SubscriptionOrders::where(['order_status'=>'confirmed'])->count()}}
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="nav-item {{Request::is('admin/subscription/list/completed')?'active':''}}">
+                                    <a class="nav-link " href="{{route('admin.subscription.list',['completed'])}}" title="">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">
+                                            {{\App\CentralLogics\translate('completed')}}
+                                            <span class="badge badge-soft-info badge-pill ml-1">
+                                                {{\App\Model\SubscriptionOrders::where(['order_status'=>'completed'])->count()}}
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                                <li class="nav-item {{Request::is('admin/subscription/list/canceled')?'active':''}}">
+                                    <a class="nav-link " href="{{route('admin.subscription.list',['canceled'])}}" title="">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">
+                                            {{\App\CentralLogics\translate('canceled')}}
+                                            <span class="badge badge-soft-info badge-pill ml-1">
+                                                {{\App\Model\SubscriptionOrders::where(['order_status'=>'canceled'])->count()}}
+                                            </span>
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
                         <li class="nav-item">
                             <small class="nav-subtitle"
                                    title="Layouts">{{\App\CentralLogics\translate('deliveryman')}} {{\App\CentralLogics\translate('section')}}</small>
