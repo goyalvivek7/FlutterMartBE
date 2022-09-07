@@ -148,13 +148,18 @@
 
                                 <div class="media-body">
                                     <div class="row">
-                                        <div class="col-md-3 mb-3 mb-md-0">
+                                        <div class="col-md-4 mb-4 mb-md-0">
                                             <strong> {{$product['name']}}</strong><br>
                                         </div>
-                                        <div class="col-md-3 mb-3 mb-md-0">
-                                            <strong>Wallet Balance: {{$wallet->balance}}</strong><br>
+                                        <div class="col-md-4 mb-4 mb-md-0">
+                                            <strong>Order Time Balance:</strong> {{$order['user_balance']}}<br>
+                                            <?php if(!empty($wallet)){ ?>
+                                                <strong>Current Wallet Balance:</strong> {{$wallet->balance}}<br>
+                                            <?php } else { ?>
+                                                <strong>Wallet Balance:</strong> Wallet Not Created<br>
+                                            <?php } ?>
                                         </div>
-                                        <div class="col-md-3 mb-3 mb-md-0">
+                                        <div class="col-md-4 mb-4 mb-md-0">
                                             <strong>Delivery Address</strong><br />
                                             <?php if(isset($delivery_address)){?>
                                                 {{$order->delivery_address['address']}}

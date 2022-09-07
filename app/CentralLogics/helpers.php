@@ -63,6 +63,7 @@ class Helpers
                     array_push($variations, [
                         'type' => $var['type'],
                         'price' => (float)$var['price'],
+                        'org_price' => (float)$var['org_price'],
                         'stock' => isset($var['stock']) ? (integer)$var['stock'] : (integer)0,
                     ]);
                 }
@@ -92,6 +93,7 @@ class Helpers
                 array_push($variations, [
                     'type' => $var['type'],
                     'price' => (float)$var['price'],
+                    'org_price' => (float)$var['org_price'],
                     'stock' => isset($var['stock']) ? (integer)$var['stock'] : (integer)0,
                 ]);
             }

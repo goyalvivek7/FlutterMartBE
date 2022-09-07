@@ -84,7 +84,8 @@ class SubscriptionController extends Controller
             'days_formation' => 'required',
             'quantity_array' => 'required',
             'start_date' => 'required',
-            'end_date' => 'required'
+            'end_date' => 'required',
+            'delivery_address_id' => 'required'
         ]);
 
         if ($validator->fails()) {
@@ -135,6 +136,14 @@ class SubscriptionController extends Controller
                 $orderId = 10000;
             }
 
+            $wallet = DB::table('wallet')->where('user_id', $userId)->first();
+            if(isset($wallet) &&  !empty($wallet)){
+                $userBalance = $wallet->balance;
+            } else {
+                $userBalance = 0;
+            }
+            
+
             $subscriptionOrders = [
                 'user_id' => $userId,
                 'order_id' => $orderId,
@@ -145,6 +154,7 @@ class SubscriptionController extends Controller
                 'start_date' => $request['start_date'],
                 'end_date' => $request['end_date'],
                 'coupon_code' => $couponCode,
+                'user_balance' => $userBalance,
             ];
             
             DB::table('subscription_orders')->insert($subscriptionOrders);

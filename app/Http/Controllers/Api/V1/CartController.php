@@ -9,6 +9,7 @@ use App\Model\CartFinal;
 use App\Model\Coupon;
 use App\Model\Order;
 use App\User;
+use App\Model\Wishlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -191,6 +192,7 @@ class CartController extends Controller
 
             $basicCart['total_items'] = count($cartOrder);
             $totalPrice = 0.00; $basicPrice = 0.00; $taxAmount = 0.00; $catName = ""; $remainingBalance = 0.00;
+            $productBaseDiscount = 0.00; $productOfferDiscount = 0.00;  $productPrice = 0.00;
             $cartArray = array(); $productArray = array();
             foreach($cartOrder as $cart){
                 $productId = $cart->product_id;
@@ -203,7 +205,10 @@ class CartController extends Controller
 
                 //$totalPrice += ($cart->quantity * $cart->total_price);
                 $totalPrice += $cart->total_price;
-                $basicPrice += ($cart->quantity * $cart->product_price);
+                //$basicPrice += ($cart->quantity * $cart->product_price);
+                $basicPrice += ($cart->quantity * $cart->product_org_price);
+                $productPrice += ($cart->quantity * $cart->product_price);
+
 
                 if(isset($productData) && !empty($productData[0])){
                     $tax = $productData[0]->tax;
@@ -315,6 +320,12 @@ class CartController extends Controller
 
             $basicCart['total_amount'] = $totalPrice;
             $basicCart['basic_amount'] = $basicPrice;
+            $productBaseDiscount = $basicPrice - $productPrice;
+            $basicCart['product_base_discount'] = $productBaseDiscount;
+            $productOfferDiscount = $productPrice - $totalPrice;
+            $basicCart['product_offer_discount'] = $productOfferDiscount;
+
+
 
             $fDiscount = ($basicPrice - $totalPrice);
 
@@ -362,6 +373,8 @@ class CartController extends Controller
                     'product_list'  => json_encode($productArray),
                     'total_amount'  => $totalPrice,
                     'basic_amount'  => $basicPrice,
+                    'product_base_discount' => $productBaseDiscount,
+                    'product_offer_discount' => $productOfferDiscount,
                     'total_discount'  => $fDiscount,
                     'coupon_code' => $couponCode,
                     'tax_amount'  => $taxAmount,
@@ -386,6 +399,8 @@ class CartController extends Controller
                 $cartFinal->product_list  = json_encode($productArray);
                 $cartFinal->total_amount  = $totalPrice;
                 $cartFinal->basic_amount  = $basicPrice;
+                $cartFinal->product_base_discount = $productBaseDiscount;
+                $cartFinal->product_offer_discount = $productOfferDiscount;
                 $cartFinal->total_discount  = $fDiscount;
                 $cartFinal->coupon_code = $couponCode;
                 $cartFinal->tax_amount  = $taxAmount;
@@ -459,8 +474,9 @@ class CartController extends Controller
             $response['data'] = []; 
             return response()->json($response, 200);
         }
-
-        $cartOrder = DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('status', 'pending')->get();
+        
+        //$cartOrder = DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('status', 'pending')->get();
+        $cartOrder = DB::table('cart')->where('user_id', $userId)->where('product_id', $productId)->where('variations', $variationsType)->where('status', 'pending')->get();
 
         if(!empty($cartOrder) && isset($cartOrder[0])){
             foreach($cartOrder as $cart){
@@ -471,8 +487,24 @@ class CartController extends Controller
 
                     $productData = DB::table('products')->where('id', $productId)->get();
 
+
                     if(isset($productData) && !empty($productData[0])){
 
+                        if($variationsType != ""){
+                            if(isset($productData[0]->variations) && $productData[0]->variations != "" && $productData[0]->variations != '[]'){
+                                $variationArray = json_decode($productData[0]->variations);
+                                foreach($variationArray as $variation){
+                                    if($variation->type == $variationsType){
+                                        $productOriginalPrice = $variation->org_price;
+                                    }
+                                }
+                            } else {
+                                $productOriginalPrice = $productData[0]->org_price;
+                            }
+                        } else {
+                            $productOriginalPrice = $productData[0]->org_price;
+                        }
+                        
                         $productPrice = $productData[0]->price;
                         $productOrgPrice = $productData[0]->price;
                         $discount = $productData[0]->discount;
@@ -523,7 +555,8 @@ class CartController extends Controller
                         }
 
 
-                        Cart::where(['user_id' => $request['user_id'], 'product_id' => $productId])->update([
+                        Cart::where(['user_id' => $request['user_id'], 'product_id' => $productId, 'variations' => $variationsType])->update([
+                            'product_org_price' => $productOriginalPrice,
                             'product_price'  => $productPrice,
                             'product_image'  => $productImage,
                             'quantity'  => $quantity,
@@ -544,6 +577,21 @@ class CartController extends Controller
 
             if(isset($productData) && !empty($productData[0])){
 
+                if($variationsType != ""){
+                    if(isset($productData[0]->variations) && $productData[0]->variations != "" && $productData[0]->variations != '[]'){
+                        $variationArray = json_decode($productData[0]->variations);
+                        foreach($variationArray as $variation){
+                            if($variation->type == $variationsType){
+                                $productOriginalPrice = $variation->org_price;
+                            }
+                        }
+                    } else {
+                        $productOriginalPrice = $productData[0]->org_price;
+                    }
+                } else {
+                    $productOriginalPrice = $productData[0]->org_price;
+                }
+                
                 $productPrice = $productData[0]->price;
                 $productOrgPrice = $productData[0]->price;
                 $discount = $productData[0]->discount;
@@ -597,6 +645,7 @@ class CartController extends Controller
                 $cart = new Cart();
                 $cart->user_id = $request['user_id'];
                 $cart->product_id = $request['product_id'];
+                $cart->product_org_price = $productOriginalPrice;
                 $cart->product_name = $productName;
                 $cart->product_price = $productPrice;
                 $cart->product_image = $productImage;
@@ -626,6 +675,11 @@ class CartController extends Controller
             $totalPrice += $cart->total_price;
         }
         $basicCart['total_amount'] = $totalPrice;
+
+
+        if(isset($request['from_wishlist'])  && $request['from_wishlist'] == 1){
+            Wishlist::where(['user_id' => $request['user_id'], 'product_id' => $productId])->delete();
+        }
 
 
         $response['status'] = 'success';
@@ -711,7 +765,8 @@ class CartController extends Controller
 				
               	$totalPrice += $cart->total_price;
                 //$totalPrice += ($cart->quantity * $cart->total_price);
-                $basicPrice += ($cart->quantity * $cart->product_price);
+                //$basicPrice += ($cart->quantity * $cart->product_price);
+                $basicPrice += ($cart->quantity * $cart->product_org_price);
 
                 if(isset($productData) && !empty($productData[0])){
                     $tax = $productData[0]->tax;

@@ -45,7 +45,7 @@ class DeliverymanController extends Controller
             return response()->json($response, 200);
         } else {
             $todayDate = date('Y-m-d');
-            $orders = Order::where(['delivery_man_id' => $userId, 'delivery_date' => $todayDate])->first();
+            $orders = Order::where(['delivery_man_id' => $userId, 'delivery_date' => $todayDate])->where('order_type', '!=', 4)->where('order_type', '!=', 2)->first();
             if(isset($orders) && !empty($orders)){
                 $response['status'] = 'fail';
                 $response['message'] = 'You have pending orders today';
@@ -541,7 +541,7 @@ class DeliverymanController extends Controller
             }
         }
         
-        $orders = Order::with(['delivery_address','customer'])->where(['delivery_man_id' => $dm['id']])->get();
+        $orders = Order::with(['delivery_address','customer'])->where(['delivery_man_id' => $dm['id']])->where('order_type', '!=', 4)->where('order_type', '!=', 2)->get();
         
         $orderArray = array();
         $orderArray['today_cod'] = $codToday;
@@ -616,7 +616,8 @@ class DeliverymanController extends Controller
             return response()->json($response, 200);
         }
         
-        $orders = Order::with(['delivery_address','customer', 'time_slot'])->where(['delivery_man_id' => $dm['id']])->latest()->get();
+        //$orders = Order::with(['delivery_address','customer', 'time_slot'])->where(['delivery_man_id' => $dm['id']])->latest()->get();
+        $orders = Order::with(['delivery_address','customer', 'time_slot'])->where('delivery_man_id', $dm['id'])->where('order_type', '!=', 4)->where('order_type', '!=', 2)->latest()->get();
         
         $orderArray = array();
         //$orderArray['out_for_delivery'] = [];

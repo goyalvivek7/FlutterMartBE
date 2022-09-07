@@ -27,13 +27,12 @@ class ProductController extends Controller
         //$catId = explode(',', $request['cat-id']);
         $catId = $request['cat-id'];
         $catPosition = $request['cat-position'];
+        $allProducts = [];
         if($catPosition == 0){
             $allProducts = DB::table('products')->whereIn('cat_id', $catId)->where('status', 1)->get();
-        }
-        if($catPosition == 1){
+        } elseif($catPosition == 1){
             $allProducts = DB::table('products')->whereIn('sub_cat_id', $catId)->where('status', 1)->get();
-        }
-        if($catPosition == 2){
+        } elseif($catPosition == 2){
             $allProducts = DB::table('products')->whereIn('child_cat_id', $catId)->where('status', 1)->get();
         }
         //echo $allProducts->toSql();
