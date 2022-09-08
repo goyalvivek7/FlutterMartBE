@@ -26,6 +26,138 @@ use Session;
 class SubscriptionController extends Controller
 {  
 
+
+    public function monthly_subscription_date_wise(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'order_month' => 'required',
+            'order_year' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+
+        if($request['user_id'] != ""){
+            $userId = $request['user_id'];
+            $orderMonth = $request['order_month'];
+            $orderYear = $request['order_year'];
+
+            $dataData = array();
+            
+            if($orderMonth < 10){
+                $orderMonth = "0".$orderMonth;
+            }
+            $orderStartDate = $orderYear."-".$orderMonth."-01";
+            $orderEndDate = $orderYear."-".$orderMonth."-31";
+            
+            $userOrders = DB::table('subscription_orders')->join('products', 'products.id', '=', 'subscription_orders.product_id')->where('subscription_orders.user_id', $userId)->where( function ($query) use ($orderStartDate, $orderEndDate){
+                $query->whereBetween('subscription_orders.start_date', [$orderStartDate, $orderEndDate])
+                ->orWhereBetween('subscription_orders.end_date', [$orderStartDate, $orderEndDate]);
+            })->select('subscription_orders.*', 'products.name', 'products.image', 'products.price')->orderBy('subscription_orders.id','DESC')->get();
+            //echo $userOrders->toSql();
+            if(isset($userOrders) && !empty($userOrders[0])){
+
+                foreach($userOrders as $order){
+                    // echo '<pre />'; print_r($order);
+                    //$orderHistory = $order['order_history'];
+                    $image = "";
+                    $orderHistory = json_decode($order->order_history);
+                    
+                    if(isset($order->image) && $order->image != "" && $order->image != []){
+                        $imageArray = json_decode($order->image);
+                        $image = $imageArray[0];
+                    }
+                    
+
+                    foreach($orderHistory as $subOrder){
+                        $newArray = [];
+                        $subOrderDate = $subOrder->date;
+                        $newArray['payment_status'] = $subOrder->payment_status;
+                        $newArray['delivery_status'] = $subOrder->delivery_status;
+                        $newArray['product_name'] = $order->name;
+                        $newArray['quantity'] = $subOrder->quantity;
+                        $newArray['product_id'] = $order->product_id;
+                        $newArray['order_id'] = $order->order_id;
+                        $newArray['image'] = $image;
+                        $dataData[$subOrderDate][] = $newArray;
+                        //echo $subOrderDate.'<pre />'; print_r($subOrder);
+                    }
+                    //$deliveryDate = $orderHistory->date;
+                    //echo '<pre />'; print_r($orderHistory);
+                }
+
+                $response['status'] = 'success';
+                $response['message'] = 'Calander Orders Found';
+                // $response['data'] = $userOrders;
+                $response['data'][] = $dataData;
+                return response()->json($response, 200);
+            } else {
+                $response['status'] = 'fail';
+                $response['message'] = 'Calander Orders Not Found';
+                $response['data'] = [];
+                return response()->json($response, 200);
+            }
+            
+        }
+    }
+
+
+    public function current_month_orders(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'order_month' => 'required',
+            'order_year' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+
+        if($request['user_id'] != ""){
+            $userId = $request['user_id'];
+            $orderMonth = $request['order_month'];
+            $orderYear = $request['order_year'];
+            
+            if($orderMonth < 10){
+                $orderMonth = "0".$orderMonth;
+            }
+            $orderStartDate = $orderYear."-".$orderMonth."-01";
+            $orderEndDate = $orderYear."-".$orderMonth."-31";
+            //$userOrders = DB::table('subscription_orders')->where('user_id', $userId)->get();
+            //$userOrders = DB::table('subscription_orders')->join('products', 'products.id', '=', 'subscription_orders.product_id')->where('subscription_orders.user_id', $userId)->where('subscription_orders.start_date', '>=', $orderStartDate)->orWhere('subscription_orders.end_date', '<=', $orderEndDate)->select('subscription_orders.*', 'products.name', 'products.image', 'products.price')->orderBy('subscription_orders.id','DESC')->toSql();
+            // $userOrders = DB::table('subscription_orders')->join('products', 'products.id', '=', 'subscription_orders.product_id')->where('subscription_orders.user_id', $userId)->where( function ($query) use ($orderStartDate, $orderEndDate){
+            //     $query->where('subscription_orders.start_date', '>=', $orderStartDate)
+            //     ->orWhere('subscription_orders.end_date', '<=', $orderEndDate);
+            // })->select('subscription_orders.*', 'products.name', 'products.image', 'products.price')->orderBy('subscription_orders.id','DESC')->toSql();
+            $userOrders = DB::table('subscription_orders')->join('products', 'products.id', '=', 'subscription_orders.product_id')->where('subscription_orders.user_id', $userId)->where( function ($query) use ($orderStartDate, $orderEndDate){
+                $query->whereBetween('subscription_orders.start_date', [$orderStartDate, $orderEndDate])
+                ->orWhereBetween('subscription_orders.end_date', [$orderStartDate, $orderEndDate]);
+            })->select('subscription_orders.*', 'products.name', 'products.image', 'products.price')->orderBy('subscription_orders.id','DESC')->get();
+            //echo $userOrders->toSql();
+            if(isset($userOrders) && !empty($userOrders[0])){
+                $response['status'] = 'success';
+                $response['message'] = 'Monthely Subscription Orders';
+                $response['data'] = $userOrders;
+                return response()->json($response, 200);
+            } else {
+                $response['status'] = 'fail';
+                $response['message'] = 'No Monthely Subscription Orders';
+                $response['data'] = [];
+                return response()->json($response, 200);
+            }
+            
+        }
+    }
+
     public function subscription_detail(Request $request){
         $validator = Validator::make($request->all(), [
             'order_id' => 'required',

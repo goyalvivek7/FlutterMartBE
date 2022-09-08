@@ -157,6 +157,8 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('create-subscription', 'SubscriptionController@create_subscription');
         Route::post('list', 'SubscriptionController@subscription_list');
         Route::post('detail', 'SubscriptionController@subscription_detail');
+        Route::post('current-month-orders', 'SubscriptionController@current_month_orders');
+        Route::post('monthly-subscription-date-wise', 'SubscriptionController@monthly_subscription_date_wise');
     });
 
     Route::get('pages', 'TimeSlotController@all_pages');
