@@ -164,6 +164,7 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get('status', 'SubscriptionController@status')->name('status');
             Route::get('payment-status', 'SubscriptionController@payment_status')->name('payment-status');
             Route::get('add-delivery-man/{order_id}/{sub_date}/{delivery_man_id}', 'SubscriptionController@add_delivery_man')->name('add-delivery-man');
+            Route::get('tomorrow-orders', 'SubscriptionController@tomorrow_orders')->name('tomorrow-orders');
         });
 
         Route::group(['prefix' => 'category', 'as' => 'category.'], function () {

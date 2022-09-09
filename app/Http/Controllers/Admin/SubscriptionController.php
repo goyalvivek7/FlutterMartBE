@@ -17,6 +17,50 @@ use Barryvdh\DomPDF\Facade as PDF;
 
 class SubscriptionController extends Controller{
 
+    
+    public function tomorrow_orders(Request $request){
+
+        $query_param = [];
+        $search = $request['search'];
+        $todayDate = date("Y-m-d");
+        $nextDate = date('Y-m-d', strtotime(' +1 day'));
+        //$todayDate = "2022-08-25";
+        //$nextDate = "2022-08-26";
+        $orders = [];
+        //echo $todayDate; die;
+
+        //$userOrders = DB::table('subscription_orders')->join('products', 'products.id', '=', 'subscription_orders.product_id')->where('subscription_orders.user_id', $userId)->where('subscription_orders.start_date', '<=', $todayDate)->where('subscription_orders.end_date', '>=', $todayDate)->select('subscription_orders.*', 'products.name', 'products.image', 'products.price')->orderBy('subscription_orders.id','DESC')->get();
+        $query = SubscriptionOrders::with(['customer'])->join('products', 'products.id', '=', 'subscription_orders.product_id')->where('subscription_orders.start_date', '<=', $todayDate)->where('subscription_orders.end_date', '>=', $todayDate)->select('subscription_orders.*', 'products.name', 'products.image', 'products.price');
+
+        if ($request->has('search')) {
+            $key = explode(' ', $request['search']);
+            $query = $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('id', 'like', "%{$value}%")
+                        ->orWhere('order_status', 'like', "%{$value}%");
+                }
+            });
+            $query_param = ['search' => $request['search']];
+        }
+
+        $tomOrders = $query->latest()->paginate(Helpers::getPagination())->appends($query_param);
+
+        foreach($tomOrders as $order){
+            $orderHistory = json_decode($order->order_history);
+            
+            foreach($orderHistory as $subOrder){
+                $subOrderDate = $subOrder->date;
+                if($subOrderDate == $nextDate){
+                    $orders[] = $order;
+                }
+            }
+        }
+
+        //echo '<pre />'; dd($tomOrders); die;
+        return view('admin-views.subscription.tomorrow-list', compact('orders', 'search', 'nextDate',));
+    }
+
+
     public function add_delivery_man($order_id, $sub_date, $delivery_man_id)
     {
         $orderId = $order_id;

@@ -636,6 +636,14 @@
                                         </span>
                                     </a>
                                 </li>
+                                <li class="nav-item {{Request::is('admin/subscription/tomorrow-orders')?'active':''}}">
+                                    <a class="nav-link " href="{{route('admin.subscription.tomorrow-orders')}}" title="">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">
+                                            Tomorrow Subscriptions
+                                        </span>
+                                    </a>
+                                </li>
                             </ul>
                         </li>
 
