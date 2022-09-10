@@ -74,6 +74,8 @@ class OrderController extends Controller
         $cartId = $order['cart_id'];
         $cartData = DB::table('cart_final')->where(['id' => $cartId])->first();
         $deliveryOptions = DB::table('delivery_options')->get();
+        $orderHistories = DB::table('order_histories')->where('order_id', $id)->get();
+        
         $busineessData = BusinessSetting::get();
         $bisData = [];
         foreach($busineessData as $bData){
@@ -94,7 +96,7 @@ class OrderController extends Controller
                 ]);
                 $order['invoice_url'] = $orderPdf;
             }
-            return view('admin-views.order.order-view', compact('order', 'deliveryOptions', 'cartData'));
+            return view('admin-views.order.order-view', compact('order', 'deliveryOptions', 'cartData', 'orderHistories'));
         } else {
             Toastr::info('No more orders!');
             return back();

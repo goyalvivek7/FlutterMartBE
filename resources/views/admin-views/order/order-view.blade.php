@@ -435,6 +435,7 @@
                     <!-- End Body -->
                 </div>
                 <!-- End Card -->
+
             </div>
 
             @if($order->customer)
@@ -527,6 +528,74 @@
             @endif
         </div>
         <!-- End Row -->
+
+        
+        <br /><br /><br />
+        <div class="card mb-3 mb-lg-5">
+            <div class="card-header" style="display: block!important;">
+                <h4 class="card-header-title">Order History</h4>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-1 border-bottom"><b>Sr.</b></div>
+                <div class="col-2 border-bottom"><b>User Type</b></div>
+                <div class="col-2 border-bottom"><b>Status</b></div>
+                <div class="col-2 border-bottom"><b>Status Reason</b></div>
+                <div class="col-1 border-bottom"><b>Collected Amount</b></div>
+                <div class="col-2 border-bottom"><b>Signature</b></div>
+                <div class="col-2 border-bottom"><b>Date</b></div>
+            </div>
+        </div>
+        
+        <?php if(isset($orderHistories) && !empty($orderHistories) && !empty($orderHistories[0])){
+            $i = 1;
+            foreach($orderHistories as $history){ ?>
+                <div class="row">
+                    <div class="col-1 border-bottom">{{$i}}</div>
+                    <div class="col-2 border-bottom">
+                        <?php if($history->user_type == "delivery_man"){
+                            echo "Delivery Man";
+                        } elseif($history->user_type == "user"){
+                            echo "Customer";
+                        } elseif($history->user_type == "admin"){
+                            echo "Admin";
+                        } else {
+                            echo $history->user_type;
+                        } ?>
+                    </div>
+                    <div class="col-2 border-bottom">
+                        <?php if($history->status_captured == "out_for_delivery"){
+                            echo "Out For Delivery";
+                        } elseif($history->status_captured == "created"){
+                            echo "Created";
+                        } elseif($history->status_captured == "pending"){
+                            echo "Pending";
+                        } elseif($history->status_captured == "delivered"){
+                            echo "Delivered";
+                        } elseif($history->status_captured == "confirmed"){
+                            echo "Confirmed";
+                        } elseif($history->status_captured == "processing"){
+                            echo "Processing";
+                        } else {
+                            echo $history->status_captured;
+                        } ?>
+                    </div>
+                    <div class="col-2 border-bottom">{{$history->status_reason}}</div>
+                    <div class="col-1 border-bottom">{{$history->collected_amount}}</div>
+                    <div class="col-2 border-bottom">
+                    
+                        <?php if($history->signature != NULL){ ?>
+                            <img src="<?php echo asset('storage/app/public/order/')."/".$history->signature; ?>" width="50px" />
+                        <?php } ?>
+                    </div>
+                    <div class="col-2 border-bottom">{{$history->created_at}}</div>
+                </div>
+            <?php $i++;
+            }
+        } ?>
+
+
     </div>
 
     <!-- Modal -->

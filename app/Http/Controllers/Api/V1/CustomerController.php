@@ -82,7 +82,7 @@ class CustomerController extends Controller
         }
 
         $address = [
-            'user_id' => $request->user()->id,
+            'user_id' => $request->user_id,
             'contact_person_name' => $request->contact_person_name,
             'contact_person_number' => $request->contact_person_number,
             'address_type' => $request->address_type,
@@ -93,7 +93,8 @@ class CustomerController extends Controller
             'updated_at' => now()
         ];
         DB::table('customer_addresses')->where('id',$id)->update($address);
-        return response()->json(['message' => 'successfully updated!'], 200);
+        //return response()->json(['message' => 'successfully updated!'], 200);
+        return response()->json(['state' => 'register', 'status' => 'success', 'message' => 'successfully updated!'], 200);
     }
 
     public function delete_address(Request $request)

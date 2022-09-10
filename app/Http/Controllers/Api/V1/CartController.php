@@ -808,6 +808,8 @@ class CartController extends Controller
 
                 $cart->category_name = $catName;
 
+                $cart->product_data = $productData;
+
                 //echo '<pre />'; print_r($deliveryArray);
                 //echo '<pre />'; print_r($deliveryCharge);
             }
