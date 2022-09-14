@@ -12,12 +12,73 @@ use App\Model\OrderType;
 use App\Model\Review;
 use App\Model\Product;
 use App\Model\Order;
+use App\Model\SubscriptionOrders;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class DeliverymanController extends Controller
 {
+
+
+    public function get_all_subscription(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required'
+        ]);
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Plese send all inputs.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+        
+        $dm = DeliveryMan::where(['id' => $request['user_id']])->first();
+        if (isset($dm) == false) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Delivery Man Not Found.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        $deliveryOrders = DB::table('delivery_histories')->where(['deliveryman_id' => $request['user_id']])->latest()->get();
+
+        if(isset($deliveryOrders) && !empty($deliveryOrders) && !empty($deliveryOrders[0])){
+
+            $deliveryArray = [];
+            foreach($deliveryOrders as $order){
+                $orderId = $order->order_id;
+              	$deliveryStatus = $order->delivery_status;
+              
+              	$singleOrderArray['date'] = $order->order_date;
+              	$singleOrderArray['delivery_status'] = $order->delivery_status;
+              	$singleOrderArray['order_id'] = $order->order_id;
+              
+              	$mainOrders = SubscriptionOrders::with(['customer','delivery_address','product'])->where('order_id', $orderId)->first();
+                if(isset($mainOrders) && !empty($mainOrders)){
+                  	$singleOrderArray['order_detail'] = $mainOrders;
+                }
+                
+
+                $deliveryArray[$deliveryStatus][] = $singleOrderArray;
+            }
+        }
+      
+      
+      	if(isset($deliveryArray) && !empty($deliveryArray)){
+          $response['status'] = 'success';
+          $response['message'] = 'Subscription List.';
+          $response['data'][] = $deliveryArray;
+          return response()->json($response, 200);
+        } else {
+          $response['status'] = 'fail';
+          $response['message'] = 'No Order Found.';
+          $response['data'] = [];
+          return response()->json($response, 200);
+        }
+
+    }
+
 
     public function available_status(Request $request){
         $validator = Validator::make($request->all(), [
@@ -650,6 +711,51 @@ class DeliverymanController extends Controller
         return response()->json($orders, 200);
 
     }
+
+    // public function get_all_orders(Request $request){
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id' => 'required'
+    //     ]);
+    //     if ($validator->fails()) {
+    //         $response['status'] = 'fail';
+    //         $response['message'] = 'Plese send all inputs.';
+    //         $response['data'] = [];
+    //         return response()->json($response, 200);
+    //     }
+    //     $dm = DeliveryMan::where(['id' => $request['user_id']])->first();
+    //     if (isset($dm) == false) {
+    //         $response['status'] = 'fail';
+    //         $response['message'] = 'Delivery Man Not Found.';
+    //         $response['data'] = [];
+    //         return response()->json($response, 200);
+    //     }
+    //     $orders = Order::with(['delivery_address','customer', 'time_slot'])->where('delivery_man_id', $dm['id'])->where('order_type', '!=', 4)->where('order_type', '!=', 2)->latest()->get();
+    //     $orderArray = array();
+    //     $orderArray['delivered'] = [];
+    //     $orderArray['pending'] = [];
+    //     if(isset($orders) && isset($orders[0])){
+    //         foreach($orders as $order){
+    //             $orderStatus = $order['order_status'];
+    //             if($orderStatus == "confirmed" || $orderStatus == "processing" || $orderStatus == "out_for_delivery"){
+    //                 $orderStatus = "pending";
+    //             }
+    //             if($orderStatus == "returned" || $orderStatus == "failed" || $orderStatus == "canceled"){
+    //                 $orderStatus = "delivered";
+    //             }
+    //             $orderArray[$orderStatus][] = $order;
+    //         }
+    //         $response['status'] = 'success';
+    //         $response['message'] = 'Orders Found.';
+    //         $response['data'][] = $orderArray;
+    //         return response()->json($response, 200);
+    //     } else {
+    //         $response['status'] = 'success';
+    //         $response['message'] = 'No Order Found.';
+    //         $response['data'] = [];
+    //         return response()->json($response, 200);
+    //     }
+    //     return response()->json($orders, 200);
+    // }
 
     public function get_last_location(Request $request)
     {

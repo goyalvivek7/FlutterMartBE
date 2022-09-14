@@ -20,4 +20,9 @@ class SubscriptionOrders extends Model
         return $this->belongsTo(CustomerAddress::class, 'delivery_address_id');
     }
 
+    public function product()
+    {
+        return $this->belongsTo(Product::class, 'product_id');
+    }
+
 }

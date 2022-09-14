@@ -170,12 +170,15 @@ class OrderController extends Controller
 			  
 				if (count(json_decode($product['variations'], true)) > 0 && $cartData[0]->variations != NULL && $cartData[0]->variations != "") {
 					$price = Helpers::variation_price($product, json_encode($variationArray));
+                    $orgPrice = Helpers::variation_org_price($product, json_encode($variationArray));
 				} else {
 					$price = $product['price'];
+                    $orgPrice = $product['org_price'];
 				}
 
 				$or_d = [
 					'order_id'            => $orderId,
+                    'product_org_price'   => $orgPrice,
 					'product_id'          => $productId,
 					'time_slot_id'        => $time_slot_id,
 					'delivery_date'       => $o_delivery,
@@ -361,14 +364,17 @@ class OrderController extends Controller
                     if (count(json_decode($product['variations'], true)) > 0 && $cartData[0]->variations != NULL && $cartData[0]->variations != "") {
                         //$price = Helpers::variation_price($product, json_encode($cartData[0]->variations));
                         $price = Helpers::variation_price($product, json_encode($variationArray));
+                        $orgPrice = Helpers::variation_org_price($product, json_encode($variationArray));
                     } else {
                         $price = $product['price'];
+                        $orgPrice = $product['org_price'];
                     }
                   	//echo $price.'##### <pre />'; print_r($variationArray); die;
 
                     $or_d = [
                         'order_id'            => $customeOrderID,
                         'product_id'          => $productId,
+                        'product_org_price'   => $orgPrice,
                         'time_slot_id'        => $time_slot_id,
                         'delivery_date'       => $o_delivery,
                         'product_details'     => $product,
@@ -789,13 +795,16 @@ class OrderController extends Controller
               	
               	if (count(json_decode($product['variations'], true)) > 0) {
                     $price = Helpers::variation_price($product, json_encode($c['variation']));
+                    $orgPrice = Helpers::variation_org_price($product, json_encode($variationArray));
                 } else {
                     $price = $product['price'];
+                    $orgPrice = $product['org_price'];
                 }
               
               	$or_d = [
                     'order_id'            => $o_id,
                     'product_id'          => $c['product_id'],
+                    'product_org_price'   => $orgPrice,
                     'time_slot_id'        => $o_time,
                     'delivery_date'       => $o_delivery,
                     'product_details'     => $product,

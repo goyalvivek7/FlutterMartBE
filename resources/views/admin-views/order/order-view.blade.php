@@ -74,7 +74,7 @@
                            href={{route('admin.orders.generate-invoice',[$order['id']])}}>
                             <i class="tio-print mr-1"></i> {{\App\CentralLogics\translate('print')}} {{\App\CentralLogics\translate('invoice')}}
                         </a>
-                        <a class="text-body mr-3" target="_blank"
+						<a class="text-body mr-3" target="_blank"
                            href="<?php echo asset('storage/app/public/order/')."/".$order['invoice_url']; ?>">
                             <i class="tio-print mr-1"></i> Order PDF
                         </a>
@@ -348,15 +348,15 @@
 
                                             </div>
 
-                                            <div class="col col-md-2 align-self-center">
-
-                                                <h6>{{$detail['price']-$detail['discount_on_product'] ." ".\App\CentralLogics\Helpers::currency_symbol()}}</h6>
+                                            <div class="col col-md-4 align-self-center">
+				
+                                              <h6><s>{{$detail['product_org_price']." ".\App\CentralLogics\Helpers::currency_symbol()}}</s> - {{$detail['price'] ." ".\App\CentralLogics\Helpers::currency_symbol() ."  ( -".$detail['discount_on_product']." ".\App\CentralLogics\Helpers::currency_symbol()." Extra Discount)"}}</h6>
                                             </div>
-                                            <div class="col col-md-2 align-self-center">
+                                            <div class="col col-md-1 align-self-center">
                                                 <h5>{{$detail['quantity']}} </h5>
                                             </div>
 
-                                            <!-- <div class="col col-md-2 align-self-center">
+                                            <!-- <div class="col col-md-1 align-self-center">
                                                 <h5>{{$detail->product['capacity']}} {{$detail['unit']}}</h5>
                                             </div> -->
 
@@ -435,7 +435,6 @@
                     <!-- End Body -->
                 </div>
                 <!-- End Card -->
-
             </div>
 
             @if($order->customer)
@@ -528,9 +527,9 @@
             @endif
         </div>
         <!-- End Row -->
-
-        
-        <br /><br /><br />
+      
+      	
+      	<br /><br /><br />
         <div class="card mb-3 mb-lg-5">
             <div class="card-header" style="display: block!important;">
                 <h4 class="card-header-title">Order History</h4>
@@ -593,9 +592,9 @@
                 </div>
             <?php $i++;
             }
-        } ?>
-
-
+        } ?>	
+      
+      
     </div>
 
     <!-- Modal -->

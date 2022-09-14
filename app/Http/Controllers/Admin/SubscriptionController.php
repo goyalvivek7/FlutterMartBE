@@ -78,6 +78,22 @@ class SubscriptionController extends Controller{
                 foreach($historyArray as $history){
                     if($history->date == $subsDate){
                         $history->delivery_man = $deliveryManId;
+                      
+                      	$orderGeneratedId = $order['order_id'];
+                        $checkFirstDeliver = DB::table('delivery_histories')->where('order_id', $orderGeneratedId)->where('order_date', $subsDate)->first();
+                        if(isset($checkFirstDeliver) && !empty($checkFirstDeliver)){
+                            $deliveryId = $checkFirstDeliver->id;
+                            DB::table('delivery_histories')->where('id', $deliveryId)->delete();
+                        }
+                        $deliveryHistories = [
+                            'order_id' => $orderGeneratedId,
+                            'deliveryman_id' => $deliveryManId,
+                            'order_type' => 'subscription',
+                            'order_date' => $subsDate,
+                            'delivery_status' => 'pending'
+                        ];
+                        DB::table('delivery_histories')->insert($deliveryHistories);	
+                      
                     }
                 }
                 $subsOrderUpdate = DB::table('subscription_orders')->where('id', $orderId)->update([

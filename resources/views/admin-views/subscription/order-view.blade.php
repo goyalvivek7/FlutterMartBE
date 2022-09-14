@@ -50,6 +50,10 @@
                             <span class="badge badge-soft-warning ml-2 ml-sm-3 text-capitalize">
                               <span class="legend-indicator bg-warning"></span>{{\App\CentralLogics\translate('processing')}}
                             </span>
+                        @elseif($order['order_status']=='pause')
+                            <span class="badge badge-soft-warning ml-2 ml-sm-3 text-capitalize">
+                              <span class="legend-indicator bg-warning"></span>{{\App\CentralLogics\translate('pause')}}
+                            </span>
                         @elseif($order['order_status']=='out_for_delivery')
                             <span class="badge badge-soft-warning ml-2 ml-sm-3 text-capitalize">
                               <span class="legend-indicator bg-warning"></span>{{\App\CentralLogics\translate('out_for_delivery')}}
@@ -515,32 +519,36 @@
 @push('script_2')
     <script>
         function addDeliveryMan(id, subs_date) {
-            $.ajax({
-                type: "GET",
-                url: '{{url('/')}}/admin/subscription/add-delivery-man/{{$order['id']}}/' + subs_date + '/' + id,
-                data: $('#product_form').serialize(),
-                success: function (data) {
-                    //console.log(data);
-                    if(data.status == true) {
-                        toastr.success('Deliveryman successfully assigned/changed', {
-                            CloseButton: true,
-                            ProgressBar: true
-                        });
-                    }else{
-                        toastr.error('Deliveryman man can not assign/change in that status', {
+            var confirmResult = confirm("If you already assigned, previous delivery data will lost. Are you sure to assign deliverman?");
+
+            if(confirmResult === true){
+                $.ajax({
+                    type: "GET",
+                    url: '{{url('/')}}/admin/subscription/add-delivery-man/{{$order['id']}}/' + subs_date + '/' + id,
+                    data: $('#product_form').serialize(),
+                    success: function (data) {
+                        //console.log(data);
+                        if(data.status == true) {
+                            toastr.success('Deliveryman successfully assigned/changed', {
+                                CloseButton: true,
+                                ProgressBar: true
+                            });
+                        }else{
+                            toastr.error('Deliveryman man can not assign/change in that status', {
+                                CloseButton: true,
+                                ProgressBar: true
+                            });
+                        }
+
+                    },
+                    error: function () {
+                        toastr.error('Add valid data', {
                             CloseButton: true,
                             ProgressBar: true
                         });
                     }
-
-                },
-                error: function () {
-                    toastr.error('Add valid data', {
-                        CloseButton: true,
-                        ProgressBar: true
-                    });
-                }
-            });
+                });
+            }
         }
 
         function last_location_view() {

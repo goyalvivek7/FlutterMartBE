@@ -49,6 +49,18 @@ class Helpers
         return $result;
     }
 
+    public static function variation_org_price($product, $variation)
+    {
+        $match = json_decode($variation, true)[0];
+        $result = 0;
+        foreach (json_decode($product['variations'], true) as $property => $value) {
+            if ($value['type'] == $match['type']) {
+                $result = $value['org_price'];
+            }
+        }
+        return $result;
+    }
+
     public static function product_data_formatting($data, $multi_data = false)
     {
         $storage = [];

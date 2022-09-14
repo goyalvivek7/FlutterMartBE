@@ -26,6 +26,113 @@ use Session;
 class SubscriptionController extends Controller
 {  
 
+    public function cancel_subscription(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'order_id' => 'required',
+            'cancel_issue_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+
+        if($request['user_id'] != ""){
+            $userId = $request['user_id'];
+            $orderId = $request['order_id'];
+            $cancelIssueId = $request['cancel_issue_id'];
+
+            if(isset($request['cancel_reason']) && !empty($request['cancel_reason'])){
+                $cancelReason = $request['cancel_reason'];
+            } else {
+                $cancelReason = NULL;
+            }
+
+            $checkOrder = DB::table('subscription_orders')->where([ 'order_id' => $orderId, 'user_id' => $userId ])->first();
+
+            if(isset($checkOrder) && !empty($checkOrder)){
+
+                DB::table('subscription_orders')->where(['order_id' => $orderId, 'user_id' => $userId])->update([
+                    'order_status'  => 'canceled',
+                    'cancel_issue_id' => $cancelIssueId,
+                    'cancel_reason' => $cancelReason
+                ]);
+
+                $checkOrder = DB::table('subscription_orders')->where([ 'order_id' => $orderId, 'user_id' => $userId ])->first();
+
+                $response['status'] = 'success';
+                $response['message'] = 'Subscription Order Canceled';
+                $response['data'][] = $checkOrder;
+                return response()->json($response, 200);
+                
+            } else {
+
+                $response['status'] = 'fail';
+                $response['message'] = 'Order Not Found';
+                $response['data'] = [];
+                return response()->json($response, 200);
+
+            }
+            
+        }
+    }
+
+    public function pause_subscription(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'order_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+
+        if($request['user_id'] != ""){
+            $userId = $request['user_id'];
+            $orderId = $request['order_id'];
+
+            $checkOrder = DB::table('subscription_orders')->where([ 'order_id' => $orderId, 'user_id' => $userId ])->first();
+
+            if(isset($checkOrder) && !empty($checkOrder)){
+
+                DB::table('subscription_orders')->where(['order_id' => $orderId, 'user_id' => $userId])->update([
+                    'order_status'  => 'pause'
+                ]);
+
+                $checkOrder = DB::table('subscription_orders')->where([ 'order_id' => $orderId, 'user_id' => $userId ])->first();
+
+                $response['status'] = 'success';
+                $response['message'] = 'Subscription Order Paused';
+                $response['data'][] = $checkOrder;
+                return response()->json($response, 200);
+                
+            } else {
+
+                $response['status'] = 'fail';
+                $response['message'] = 'Order Not Found';
+                $response['data'] = [];
+                return response()->json($response, 200);
+
+            }
+            
+        }
+    }
+
+    public function cancel_issues(Request $request){
+        $cancelIssues = DB::table('subs_cancel_issues')->where('status', 1)->get();
+        $response['status'] = 'success';
+        $response['message'] = 'Cancel Issues Found';
+        $response['data'] = $cancelIssues;
+        return response()->json($response, 200);
+    }
 
     public function monthly_subscription_date_wise(Request $request){
         $validator = Validator::make($request->all(), [
@@ -286,6 +393,7 @@ class SubscriptionController extends Controller
                 'start_date' => $request['start_date'],
                 'end_date' => $request['end_date'],
                 'coupon_code' => $couponCode,
+                'delivery_address_id' => $request['delivery_address_id'],
                 'user_balance' => $userBalance,
             ];
             

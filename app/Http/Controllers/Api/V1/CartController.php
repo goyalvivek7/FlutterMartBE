@@ -768,6 +768,8 @@ class CartController extends Controller
                 //$basicPrice += ($cart->quantity * $cart->product_price);
                 $basicPrice += ($cart->quantity * $cart->product_org_price);
 
+                $cart->item_total_discount = (($cart->product_org_price * $cart->quantity) - $cart->total_price);
+
                 if(isset($productData) && !empty($productData[0])){
                     $tax = $productData[0]->tax;
                     $taxType = $productData[0]->tax_type;

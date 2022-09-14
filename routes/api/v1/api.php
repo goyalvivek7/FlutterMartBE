@@ -49,6 +49,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('cancel-reasons', 'DeliverymanController@cancel_reasons');
         Route::post('notifications', 'DeliverymanController@notifications');
         Route::post('available-status', 'DeliverymanController@available_status');
+        Route::post('all-subscription', 'DeliverymanController@get_all_subscription');
 
         Route::group(['prefix' => 'reviews', 'middleware' => ['auth:api']], function () {
             Route::get('/{delivery_man_id}', 'DeliveryManReviewController@get_reviews');
@@ -159,6 +160,9 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('detail', 'SubscriptionController@subscription_detail');
         Route::post('current-month-orders', 'SubscriptionController@current_month_orders');
         Route::post('monthly-subscription-date-wise', 'SubscriptionController@monthly_subscription_date_wise');
+        Route::get('cancel-issues', 'SubscriptionController@cancel_issues');
+        Route::post('pause-subscription', 'SubscriptionController@pause_subscription');
+        Route::post('cancel-subscription', 'SubscriptionController@cancel_subscription');
     });
 
     Route::get('pages', 'TimeSlotController@all_pages');
