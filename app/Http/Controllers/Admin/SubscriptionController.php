@@ -204,6 +204,23 @@ class SubscriptionController extends Controller{
     {
         
         $order = SubscriptionOrders::with(['customer', 'delivery_address'])->where(['id' => $id])->first();
+        $subs_cancel_issues = DB::table('subs_cancel_issues')->get();
+        $cancelIssues = [];
+        foreach($subs_cancel_issues  as $subCancelIssues){
+            $issueId = $subCancelIssues->id;
+            $issueTitle = $subCancelIssues->title;
+            $cancelIssues[$issueId] = $issueTitle;
+        }
+
+        $delivery_men = DB::table('delivery_men')->get();
+        $deliveryMenList = [];
+        foreach($delivery_men  as $deliveryMen){
+            $deliveryMenId = $deliveryMen->id;
+            $fName = $deliveryMen->f_name;
+            $lLame = $deliveryMen->l_name;
+            $deliveryMenList[$deliveryMenId] = $fName." ".$lLame;
+        }
+        
         if (isset($order)) {
             $orderId = $order['order_id'];
             $productId = $order['product_id'];
@@ -211,8 +228,9 @@ class SubscriptionController extends Controller{
 
             $product = Product::where(['id' => $productId])->first();
             $walletHistories = DB::table('wallet_histories')->where('order_id', $orderId)->whereNotNull('subscription_date')->limit(1)->orderBy('id', 'ASC')->get();
+            $deliveryHistories = DB::table('delivery_histories')->where('order_id', $orderId)->get();
             $wallet = DB::table('wallet')->where('user_id', $userId)->first();
-            return view('admin-views.subscription.order-view', compact('order', 'product', 'walletHistories', 'wallet'));
+            return view('admin-views.subscription.order-view', compact('order', 'product', 'walletHistories', 'wallet', 'cancelIssues', 'deliveryHistories', 'deliveryMenList'));
         } else {
             Toastr::info('No more orders!');
             return back();

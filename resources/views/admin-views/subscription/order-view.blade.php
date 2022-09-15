@@ -75,7 +75,11 @@
 
                     <div class="mt-2">
                         
-                        <b>Order Type:</b> {{$order['order_type']}}
+                        <b>Order Type:</b> {{$order['order_type']}}<br />
+                      	@if($order['order_status']=='canceled')
+                      		<b>Cancel Issue:</b> <?php echo $cancelIssues[$order['cancel_issue_id']] ?><br />
+                      		<b>Cancel Reason:</b> <?php echo $order['cancel_reason'] ?>
+                      	@endif
 
 
                         <div class="hs-unfold float-right">
@@ -271,6 +275,42 @@
                         } else { ?>
                             <div class="row">
                                 <div class="col-md-12">No wallet histroy to show</div>
+                            </div>
+                        <?php } ?>
+                    </div>
+                </div>
+
+                <br /><br />
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-header-title">Delivery Histories</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-1"><b>#</b></div>
+                            <div class="col-md-1"><b>Date</b></div>
+                            <div class="col-md-2"><b>Delivery Man</b></div>
+                            <div class="col-md-2"><b>Status</b></div>
+                            <div class="col-md-3"><b>Reason</b></div>
+                            <div class="col-md-3"><b>Signature</b></div>
+                        </div>
+                        <hr />
+                        <?php if(isset($deliveryHistories) && !empty($deliveryHistories) && !empty($deliveryHistories[0])){
+                            $i=1;
+                            foreach($deliveryHistories as $deliveryHistory){?>
+                                <div class="row">
+                                    <div class="col-md-1">{{$i}}</div>
+                                    <div class="col-md-1">{{$deliveryHistory->order_date}}</div>
+                                    <div class="col-md-2">{{$deliveryHistory->deliveryman_id}}</div>
+                                    <div class="col-md-2">{{$deliveryHistory->delivery_status}}</div>
+                                    <div class="col-md-3">{{$deliveryHistory->cancel_reason}}</div>
+                                    <div class="col-md-3">{{$deliveryHistory->signature}}</div>
+                                </div>
+                                <?php $i++;
+                            }    
+                        } else { ?>
+                            <div class="row">
+                                <div class="col-md-12">No delivery histroy to show</div>
                             </div>
                         <?php } ?>
                     </div>

@@ -20,6 +20,102 @@ use Illuminate\Support\Facades\Validator;
 class DeliverymanController extends Controller
 {
 
+    public function update_subscription_status(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'deliveryman_id' => 'required',
+            'order_id' => 'required',
+            'status' => 'required',
+            'order_date' => 'required'
+        ]);
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Plese send all inputs.';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+        $signature = "";
+        if (!empty($request->file('signature'))) {
+            $signature = Helpers::upload('order/', 'png', $request->file('signature'));
+        }
+        $dm = DeliveryMan::where(['id' => $request['deliveryman_id']])->first();
+        if (isset($dm) == false) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Delivery Man Not Found';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+
+        if(isset($request['cancel_reason']) && $request['cancel_reason'] != ""){
+            $cancelReason = $request['cancel_reason'];
+        } else {
+            $cancelReason = NULL;
+        }
+
+        $checkDelivery = DB::table('delivery_histories')->where(['order_id' => $request['order_id'], 'deliveryman_id' => $request['deliveryman_id'], 'order_date' => $request['order_date']])->first();
+        if(isset($checkDelivery) && !empty($checkDelivery)){
+            DB::table('delivery_histories')->where(['order_id' => $request['order_id'], 'deliveryman_id' => $request['deliveryman_id'], 'order_date' => $request['order_date']])->update([
+                'delivery_status' => $request['status'],
+                'cancel_reason' => $cancelReason,
+              	'signature' => $signature
+            ]);
+            
+          	$sOrder=SubscriptionOrders::where('order_id', $request['order_id'])->first();
+            $orderHistoryArray = json_decode($sOrder->order_history);
+            foreach($orderHistoryArray as $historyArray){
+            	if($historyArray->date == $request['order_date']){
+                  $historyArray->delivery_status = $request['status'];
+                }
+            }
+          
+          	SubscriptionOrders::where('order_id', $request['order_id'])->update([
+              'order_history' => json_encode($orderHistoryArray)
+            ]);
+          
+          	$fcm_token=$sOrder->customer->cm_firebase_token;
+
+            if($request['status'] == "completed"){
+              $value=Helpers::order_status_update_message('delivery_boy_delivered');
+            } elseif($request['status'] == "canceled"){
+              $value=Helpers::order_status_update_message('returned_message');
+            }
+              
+
+            try {
+                if ($value){
+                    $data=[
+                        'title'=>'Order',
+                        'description'=>$value,
+                        'order_id'=>$order['id'],
+                        'image'=>'',
+                    ];
+                    Helpers::send_push_notif_to_device($fcm_token,$data);
+
+                    $response['status'] = 'success';
+                    $response['state'] = 'update_subscription_status';
+                    $response['message'] = 'Status updated';
+                    $response['data'] = [];
+                    return response()->json($response, 200);
+
+                }
+            } catch (\Exception $e) {
+
+            }
+          
+          	$response['status'] = 'success';
+            $response['state'] = 'update_subscription_status';
+            $response['message'] = 'Status updated';
+            $response['data'] = [];
+            return response()->json($response, 200);
+          
+        } else {
+            $response['status'] = 'fail';
+            $response['message'] = 'Order For This Delivery Man Not Found';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+    }
+    
 
     public function get_all_subscription(Request $request){
 
