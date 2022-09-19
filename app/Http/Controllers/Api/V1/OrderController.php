@@ -76,6 +76,20 @@ class OrderController extends Controller
 
                 $userData = User::where('id', $userId)->first();
 
+                $value = Helpers::order_status_update_message('member');
+                try {
+                    if ($value) {
+                        $data = [
+                            'title'       => 'Membership Update',
+                            'description' => $value,
+                            'order_id'    => $o_id,
+                            'image'       => '',
+                        ];
+                        Helpers::send_push_notif_to_device($fcm_token, $data);
+                    }
+                } catch (\Exception $e) {
+                }
+
                 $response['status'] = 'success';
                 $response['message'] = 'Membership Updated.';
                 $response['data'][] = $userData;
@@ -249,6 +263,21 @@ class OrderController extends Controller
 				'status_captured' => 'pending',
 				'status_reason' => "Order pending for confirmation"
 			]);
+
+
+            $value = Helpers::order_status_update_message('pending');
+            try {
+                if ($value) {
+                    $data = [
+                        'title'       => 'Order',
+                        'description' => $value,
+                        'order_id'    => $orderId,
+                        'image'       => '',
+                    ];
+                    Helpers::send_push_notif_to_device($fcm_token, $data);
+                }
+            } catch (\Exception $e) {
+            }
 
 			$orderUpdate = DB::table('orders')->where('id', $orderId)->get();
 			$response['status'] = 'success';
@@ -444,6 +473,22 @@ class OrderController extends Controller
                     'status_captured' => 'pending',
                     'status_reason' => "Order pending for confirmation"
                 ]);
+
+
+                $value = Helpers::order_status_update_message('pending');
+                try {
+                    if ($value) {
+                        $data = [
+                            'title'       => 'Order',
+                            'description' => $value,
+                            'order_id'    => $orderId,
+                            'image'       => '',
+                        ];
+                        Helpers::send_push_notif_to_device($fcm_token, $data);
+                    }
+                } catch (\Exception $e) {
+                }
+
 
                 $orderUpdate = DB::table('orders')->where('order_id', $orderId)->get();
                 $response['status'] = 'success';
@@ -851,7 +896,7 @@ class OrderController extends Controller
                         'order_id'    => $o_id,
                         'image'       => '',
                     ];
-                    //Helpers::send_push_notif_to_device($fcm_token, $data);
+                    Helpers::send_push_notif_to_device($fcm_token, $data);
                 }
             } catch (\Exception $e) {
             }

@@ -75,8 +75,10 @@
         <th>PRODUCT IMAGE</th>
         <th>DESC</th>
         <th>PRICE</th>
+      	<th>QUANTITY</th>
+      	<th>TOTAL</th>
     </tr>
-    <?php $sub_total=0; $total_tax=0; $total_dis_on_pro=0;
+    <?php $sub_total=0; $total_tax=0; $total_dis_on_pro=0; $amount = 0;
     foreach($order->details as $detail){
         if($detail->product){ ?>
             <tr>
@@ -99,8 +101,15 @@
                     } ?>
                 </td>
                 <td>
-                    <?php echo $detail['price']-$detail['discount_on_product'] ." "; ?>
+                    <?php //echo $detail['price']-$detail['discount_on_product'] ." "; ?>
+                  	<s><?php echo $detail->product_org_price." Rs"; ?></s> - <?php echo $detail->price ." Rs"."  ( -".$detail->discount_on_product." Rs"." Extra Discount)"; ?>
                 </td>
+              <td><?php echo $detail->quantity; ?></td>
+              <td>
+              	<?php $amount=(($detail->price - $detail->discount_on_product)*$detail->quantity); ?>
+                <?php $amount." Rs"; ?>
+                <?php echo $amount; ?>
+              </td>
             </tr>
         <?php }
     } ?>

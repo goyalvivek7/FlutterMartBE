@@ -370,6 +370,8 @@ class Helpers
             $data = BusinessSetting::where('key', 'failed_message')->first()->value??'';
         }  elseif ($status == 'canceled') {
             $data = BusinessSetting::where('key', 'canceled_message')->first()->value??'';
+        }  elseif ($status == 'member') {
+            $data = BusinessSetting::where('key', 'membership_placed')->first()->value??'';
         } else {
             $data = '{"status":"0","message":""}';
         }

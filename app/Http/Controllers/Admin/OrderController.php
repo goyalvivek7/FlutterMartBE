@@ -95,6 +95,7 @@ class OrderController extends Controller
                     'invoice_url' => $orderPdf
                 ]);
                 $order['invoice_url'] = $orderPdf;
+                unlink($pdfName);
             }
             return view('admin-views.order.order-view', compact('order', 'deliveryOptions', 'cartData', 'orderHistories'));
         } else {
