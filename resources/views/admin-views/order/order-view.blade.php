@@ -523,6 +523,23 @@
                 <!-- End Body -->
                 </div>
                 <!-- End Card -->
+
+                @if(isset($orderReview) && !empty($orderReview))
+                    <br />
+                    <div class="card">
+                        <!-- Header -->
+                        <div class="card-header">
+                            Order Review
+                        </div>
+                            <div class="card-body">
+                                <b>Rating:</b> {{$orderReview->rating}}
+                                <br />
+                                <b>Comment:</b> {{$orderReview->comment}}
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
             </div>
             @endif
         </div>

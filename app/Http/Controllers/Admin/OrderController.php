@@ -75,6 +75,7 @@ class OrderController extends Controller
         $cartData = DB::table('cart_final')->where(['id' => $cartId])->first();
         $deliveryOptions = DB::table('delivery_options')->get();
         $orderHistories = DB::table('order_histories')->where('order_id', $id)->get();
+        $orderReview = DB::table('reviews')->where('order_id', $id)->first();
         
         $busineessData = BusinessSetting::get();
         $bisData = [];
@@ -97,7 +98,7 @@ class OrderController extends Controller
                 $order['invoice_url'] = $orderPdf;
                 unlink($pdfName);
             }
-            return view('admin-views.order.order-view', compact('order', 'deliveryOptions', 'cartData', 'orderHistories'));
+            return view('admin-views.order.order-view', compact('order', 'deliveryOptions', 'cartData', 'orderHistories', 'orderReview'));
         } else {
             Toastr::info('No more orders!');
             return back();
@@ -247,9 +248,10 @@ class OrderController extends Controller
         }
 
         //delivery man notification
-        if ($request->order_status == 'processing' && $order->delivery_man != null) {
+        if (($request->order_status == 'processing' || $request->order_status == 'out_for_delivery' || $request->order_status == 'delivered' || $request->order_status == 'delivery_boy_delivered' ) && $order->delivery_man != null) {
             $fcm_token = $order->delivery_man->fcm_token;
-            $value = \App\CentralLogics\translate('One of your order is in processing');
+            //$value = \App\CentralLogics\translate('One of your order is in processing');
+            $value = Helpers::order_status_update_message($request->order_status);
             try {
                 if ($value) {
                     $data = [

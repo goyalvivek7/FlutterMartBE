@@ -533,6 +533,27 @@ class DeliverymanController extends Controller
             $statusReason = "canceled";
         }
 
+        if ($value) {
+            $data = [
+                'title' => 'Order',
+                'description' => $value,
+                'order_id' => $request['order_id'],
+                'image' => '',
+            ];
+            Helpers::send_push_notif_to_device($fcm_token, $data);
+        }
+
+        $fcm_token = $order->delivery_man->fcm_token;
+        if ($value) {
+            $data = [
+                'title' => 'Order',
+                'description' => $value,
+                'order_id' => $request['order_id'],
+                'image' => '',
+            ];
+            Helpers::send_push_notif_to_device($fcm_token, $data);
+        }
+
         if(isset($request['status_reason']) && $request['status_reason'] != ""){
             $statusReason = $request['status_reason'];
         }
