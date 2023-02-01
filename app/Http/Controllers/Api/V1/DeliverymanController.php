@@ -20,6 +20,37 @@ use Illuminate\Support\Facades\Validator;
 class DeliverymanController extends Controller
 {
 
+    public function changeStatusString($status = NULL){
+        if($status == "delivered"){
+            $retrunVal = "Delivered";
+        } else if($status == "paid"){
+            $retrunVal = "Paid";
+        } else if($status == "cod"){
+            $retrunVal = "COD";
+        } else if($status == "direct"){
+            $retrunVal = "Direct";
+        } else if($status == "unpaid"){
+            $retrunVal = "Unpaid";
+        } else if($status == "pending"){
+            $retrunVal = "Pending";
+        } else if($status == "confirmed"){
+            $retrunVal = "Confirmed";
+        } else if($status == "processing"){
+            $retrunVal = "Processing";
+        } else if($status == "out_for_delivery"){
+            $retrunVal = "Out For Delivery";
+        } else if($status == "returned"){
+            $retrunVal = "Returned";
+        } else if($status == "failed"){
+            $retrunVal = "Failed";
+        } else if($status == "canceled"){
+            $retrunVal = "Canceled";
+        } else {
+            $retrunVal = $status;
+        }
+        return $retrunVal;
+    }
+
     public function update_subscription_status(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -810,6 +841,9 @@ class DeliverymanController extends Controller
                 if($orderStatus == "returned" || $orderStatus == "failed" || $orderStatus == "canceled"){
                     $orderStatus = "delivered";
                 }
+                $order['order_status_str'] = $this->changeStatusString($orderStatus);
+                $order['payment_status_str'] = $this->changeStatusString($order['payment_status']);
+              	$order['payment_method_str'] = $this->changeStatusString($order['payment_method']);
                 $orderArray[$orderStatus][] = $order;
             }
 

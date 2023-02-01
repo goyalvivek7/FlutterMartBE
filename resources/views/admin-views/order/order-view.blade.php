@@ -350,7 +350,8 @@
 
                                             <div class="col col-md-4 align-self-center">
 				
-                                              <h6><s>{{$detail['product_org_price']." ".\App\CentralLogics\Helpers::currency_symbol()}}</s> - {{$detail['price'] ." ".\App\CentralLogics\Helpers::currency_symbol() ."  ( -".$detail['discount_on_product']." ".\App\CentralLogics\Helpers::currency_symbol()." Extra Discount)"}}</h6>
+                                                <!-- <h6><s>{{$detail['product_org_price']." ".\App\CentralLogics\Helpers::currency_symbol()}}</s> - {{$detail['price'] ." ".\App\CentralLogics\Helpers::currency_symbol() ."  ( -".$detail['discount_on_product']." ".\App\CentralLogics\Helpers::currency_symbol()." Discount)"}}</h6> -->
+                                              <h6><s>{{\App\CentralLogics\Helpers::currency_symbol()." ".$detail['product_org_price']}}</s> - {{\App\CentralLogics\Helpers::currency_symbol()." ".$detail['price'] ."  (".\App\CentralLogics\Helpers::currency_symbol()." -".$detail['discount_on_product']." Discount)"}}</h6>
                                             </div>
                                             <div class="col col-md-1 align-self-center">
                                                 <h5>{{$detail['quantity']}} </h5>
@@ -362,8 +363,9 @@
 
 
                                             <div class="col col-md-3 align-self-center text-right">
-                                                @php($amount=($detail['price']-$detail['discount_on_product'])*$detail['quantity'])
-                                                <h5>{{$amount." ".\App\CentralLogics\Helpers::currency_symbol()}}</h5>
+                                                <!-- @php($amount=($detail['price']-$detail['discount_on_product'])*$detail['quantity']) -->
+                                                @php($amount=$detail['price']*$detail['quantity'])
+                                                <h5>{{\App\CentralLogics\Helpers::currency_symbol()." ".$amount}}</h5>
                                             </div>
                                         </div>
                                     </div>
@@ -417,14 +419,18 @@
                         <div class="row justify-content-md-end mb-3">
                             <div class="col-md-9 col-lg-8">
                                 <dl class="row text-sm-right">
-                                    <dt class="col-sm-6">Item Price:</dt> <dd class="col-sm-6">{{$cartData->basic_amount}}</dd>
-                                    <dt class="col-sm-6">Item Discount:</dt> <dd class="col-sm-6">{{$cartData->basic_amount - $cartData->total_amount}}</dd>
-                                    <dt class="col-sm-6">Item Total:</dt> <dd class="col-sm-6">{{$cartData->total_amount}}</dd>
-                                    <dt class="col-sm-6">Tax:</dt> <dd class="col-sm-6">{{$cartData->tax_amount}}</dd>
-                                    <dt class="col-sm-6">Delivery Charge:</dt> <dd class="col-sm-6">{{$cartData->delivery_charge}}</dd>
-                                    <dt class="col-sm-6">Coupon Discount: </dt> <dd class="col-sm-6">- {{$cartData->coupon_discount}}</dd>
-                                    <dt class="col-sm-6">Wallet Deduction: </dt> <dd class="col-sm-6">- {{$cartData->wallet_balance}}</dd>
-                                    <dt class="col-sm-6">Sub Total:</dt> <dd class="col-sm-6">{{$cartData->remaining_sub_total}}<hr /></dd>
+                                    <dt class="col-sm-6">Item Price:</dt> <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()." ".$cartData->basic_amount}}</dd>
+                                    <!-- <dt class="col-sm-6">Item Discount:</dt> <dd class="col-sm-6">{{$cartData->basic_amount - $cartData->total_amount}}</dd> -->
+                                    <dt class="col-sm-6">Item Discount:</dt> <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()}} -{{$cartData->product_base_discount}}</dd>
+                                    <dt class="col-sm-6">Coupon Discount: </dt> <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()}} -{{$cartData->coupon_discount}}</dd>
+                                    <?php if($cartData->coupon_code != ""){ ?>
+                                        <dt class="col-sm-6">Coupon Code:</dt> <dd class="col-sm-6">{{$cartData->coupon_code}}</dd>
+                                    <?php } ?>
+                                    <dt class="col-sm-6">Item Total:</dt> <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()." ".$cartData->total_amount}}</dd>
+                                    <dt class="col-sm-6">Tax:</dt> <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()." ".$cartData->tax_amount}}</dd>
+                                    <dt class="col-sm-6">Delivery Charge:</dt> <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()." ".$cartData->delivery_charge}}</dd>
+                                    <dt class="col-sm-6">Wallet Deduction: </dt> <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()}} -{{$cartData->wallet_balance}}</dd>
+                                    <dt class="col-sm-6">Sub Total:</dt> <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()." ".$cartData->remaining_sub_total}}<hr /></dd>
                                     <dt class="col-sm-6">{{\App\CentralLogics\translate('total')}}:</dt>
                                     <dd class="col-sm-6">{{\App\CentralLogics\Helpers::currency_symbol()}}{{$cartData->final_amount}}</dd>
                                 </dl>

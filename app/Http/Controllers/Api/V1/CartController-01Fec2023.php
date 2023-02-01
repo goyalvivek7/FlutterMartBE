@@ -321,7 +321,6 @@ class CartController extends Controller
             $basicCart['total_amount'] = $totalPrice;
             $basicCart['basic_amount'] = $basicPrice;
             $productBaseDiscount = $basicPrice - $productPrice;
-            //$productBaseDiscount = $basicPrice - $totalPrice;
             $basicCart['product_base_discount'] = $productBaseDiscount;
             $productOfferDiscount = $productPrice - $totalPrice;
             $basicCart['product_offer_discount'] = $productOfferDiscount;
@@ -334,7 +333,6 @@ class CartController extends Controller
             $basicCart['tax_amount'] = $taxAmount;
             $basicCart['delivery_charge'] = $delCharge;
             $basicCart['coupon_discount'] = $couponDiscount;
-            $basicCart['coupon_code'] = $couponCode;
 
             $sTotal = round(($totalPrice + $taxAmount + $delCharge), 2);
 
