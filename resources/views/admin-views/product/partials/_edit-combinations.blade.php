@@ -17,6 +17,9 @@
             <td class="text-center">
                 <label for="" class="control-label">Bar Code</label>
             </td>
+            <td class="text-center">
+                <label for="" class="control-label">Discount</label>
+            </td>
         </tr>
         </thead>
         <tbody>
@@ -43,6 +46,10 @@
                 </td>
                 <td>
                     <input type="text" name="barcode_{{ $combination['type'] }}" value="{{ $combination['barcode']??'' }}"
+                           class="form-control" required>
+                </td>
+                <td>
+                    <input type="text" name="discount_{{ $combination['type'] }}" value="{{ $combination['discount']??'' }}"
                            class="form-control" required>
                 </td>
             </tr>

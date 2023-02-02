@@ -17,6 +17,9 @@
             <td class="text-center">
                 <label for="" class="control-label">Bar Code</label>
             </td>
+            <td class="text-center">
+                <label for="" class="control-label">Discount</label>
+            </td>
         </tr>
         </thead>
         <tbody>
@@ -52,6 +55,9 @@
                     </td>
                     <td>
                         <input type="text" name="barcode_{{ $str }}" value="" class="form-control" required>
+                    </td>
+                    <td>
+                        <input type="text" name="discount_{{ $str }}" value="" class="form-control" required>
                     </td>
                 </tr>
             @endif

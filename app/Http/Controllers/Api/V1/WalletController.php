@@ -40,7 +40,7 @@ class WalletController extends Controller
                 $response['message'] = 'User Wallet';
                 $response['data'] = $wallet;
 
-                $walletHistories = DB::table('wallet_histories')->where('user_id', $request['user_id'])->get();
+                $walletHistories = DB::table('wallet_histories')->where('user_id', $request['user_id'])->latest()->get();
                 $response['histories'] = $walletHistories;
 
             } else {

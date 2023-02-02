@@ -656,7 +656,11 @@ class DeliverymanController extends Controller
         }
 
       	$orderdata = Order::with(['customer', 'delivery_man.rating', 'time_slot', 'delivery_address', 'final_cart'])->where(['id' => $request['order_id']])->get();
-      	$delivery_address_id = $orderdata[0]->delivery_address_id;
+        $orderdata[0]->order_status_str = $this->changeStatusString($orderdata[0]->order_status);
+        $orderdata[0]->payment_status_str = $this->changeStatusString($orderdata[0]->payment_status);
+        $orderdata[0]->payment_method_str = $this->changeStatusString($orderdata[0]->payment_method);
+
+        $delivery_address_id = $orderdata[0]->delivery_address_id;
         $addressData = DB::table('customer_addresses')->where('id', $delivery_address_id)->get();
       	//echo '<pre />'; print_r($addressData);
       

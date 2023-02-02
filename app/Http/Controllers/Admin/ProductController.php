@@ -281,6 +281,8 @@ class ProductController extends Controller
                 $item['org_price'] = ($request['org_price_' . str_replace('.', '_', $str)]);
                 $item['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
                 $item['barcode'] = $request['barcode_' . str_replace('.', '_', $str)];
+                $item['discount'] = $request['discount_' . str_replace('.', '_', $str)];
+                $item['discount_type'] = 'amount';
                 array_push($variations, $item);
                 $stock_count += $item['stock'];
             }
@@ -972,6 +974,8 @@ class ProductController extends Controller
                 $item['org_price'] = ($request['org_price_' . str_replace('.', '_', $str)]);
                 $item['stock'] = abs($request['stock_' . str_replace('.', '_', $str)]);
                 $item['barcode'] = $request['barcode_' . str_replace('.', '_', $str)];
+                $item['discount'] = $request['discount_' . str_replace('.', '_', $str)];
+                $item['discount_type'] = 'amount';
                 array_push($variations, $item);
                 $stock_count += $item['stock'];
             }
