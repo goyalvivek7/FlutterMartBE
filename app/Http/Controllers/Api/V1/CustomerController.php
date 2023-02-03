@@ -46,6 +46,15 @@ class CustomerController extends Controller
 
         if($request->is_default && $request->is_default != ""){
             $isDefault = $request->is_default;
+
+            if($request->is_default == 1){
+                $defaultAddress = CustomerAddress::where('user_id', $request->user_id)->where('status', 1)->where('is_default', 1)->get();
+                
+                if(isset($defaultAddress) && !empty($defaultAddress) && !empty($defaultAddress[0])){
+                    return response()->json(['state' => 'Default Address Already Exists.', 'status' => 'fail'], 200);
+                }
+
+            }
         } else {
             $isDefault = 0;
         }
