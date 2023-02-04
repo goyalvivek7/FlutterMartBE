@@ -15,8 +15,39 @@ class TimeSlotController extends Controller
         try {
             $timeSlots = TimeSlot::active()->get();
             if(count($timeSlots) > 0){
+                $newTimeSlot = array();
+
+                $twoHourTime = date("h:i A", strtotime('+2 hours'));
+                $sTimeArray = explode(" ", $twoHourTime);
+                $sTimeStr = $sTimeArray[0];
+                $sTimeStrArray = explode(":", $sTimeStr);
+                $sTimeHour = $sTimeStrArray[0];
+                $sTimeMin = $sTimeStrArray[1];
+                $sTimeAmPm = $sTimeArray[1];
+                if($sTimeAmPm == "PM"){ $sTimeHour = $sTimeHour + 12; }
+                $sTotalMinutes = ($sTimeHour*60)+$sTimeMin;
+
+                foreach($timeSlots as $slot){
+                    $totalMinutes = 0;
+                    $timeArray = explode(" ", $slot['end_time']);
+                    $timeStr = $timeArray[0];
+                    $timeStrArray = explode(":", $timeStr);
+                    $timeHour = $timeStrArray[0];
+                    $timeMin = $timeStrArray[1];
+                    $timeAmPm = $timeArray[1];
+                    if($timeAmPm == "PM"){ $timeHour = $timeHour + 12; }
+                    $totalMinutes = ($timeHour*60)+$timeMin;
+
+                    //echo $sTotalMinutes.' - '.$totalMinutes.'@@@@<br />';
+                    if($sTotalMinutes <= $totalMinutes){
+                        $newTimeSlot[] = $slot;
+                    }
+                }
                 $response['message'] = 'Time Slots list';
-                $response['data'] = $timeSlots;
+                $response['data'] = $newTimeSlot;
+
+                //$response['message'] = 'Time Slots list';
+                //$response['data'] = $timeSlots;
             } else {
                 $response['message'] = 'Time Slots list';
                 $response['data'] = [];

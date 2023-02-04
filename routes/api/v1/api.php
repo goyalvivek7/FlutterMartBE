@@ -147,6 +147,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::post('add', 'CartController@add_to_cart');
         Route::post('remove', 'CartController@add_to_cart');
         Route::post('list', 'CartController@list');
+        Route::post('cart-with-variation', 'CartController@cart_list_with_variation');
         Route::post('final-cart', 'CartController@final_cart');
         Route::get('membership-package', 'CartController@membership_package');
         Route::post('create-membership-order', 'CartController@create_membership_order');

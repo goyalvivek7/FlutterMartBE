@@ -18,6 +18,46 @@ use Razorpay\Api\Api;
 class CartController extends Controller
 {
   
+    public function cart_list_with_variation(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+        $userId = $request['user_id'];
+
+        $cartOrder = DB::table('cart')->where('user_id', $userId)->where('status', 'pending')->get();
+        $cartArray = array();
+        if(!empty($cartOrder) && isset($cartOrder[0])){
+
+            $basicCart['total_items'] = count($cartOrder);
+            $totalPrice = 0; $basicPrice = 0; $taxAmount = 0; $catName = "";
+            foreach($cartOrder as $cart){
+                $tmpArray['product_id'] = $cart->product_id;
+                $tmpArray['variations'] = $cart->variations;
+                $tmpArray['quantity'] = $cart->quantity;
+                $cartArray[] = $tmpArray;
+            }
+            $response['status'] = 'success';
+            $response['message'] = 'Cart List';
+            $response['data'] = $cartArray;
+            return response()->json($response, 200);
+        } else {
+
+            $response['status'] = 'fail';
+            $response['message'] = 'Cart Not Found';
+            $response['data'] = [];
+            return response()->json($response, 200);
+        }
+        
+    }
+
   
   	public function id_list(Request $request){
         $validator = Validator::make($request->all(), [

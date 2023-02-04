@@ -108,7 +108,7 @@ class CategoryController extends Controller
 
       try {
         
-        $outputArray = []; $allProductArray = array();
+        $outputArray = [];
         $subCategories = Category::where(['position' => 1, 'status'=>1, 'parent_id'=>$mainCatId])->get();
         if(isset($subCategories) && !empty($subCategories)){
           
@@ -118,18 +118,6 @@ class CategoryController extends Controller
             $childCategories = Category::where(['position' => 2, 'status'=>1, 'parent_id'=>$subCatId])->get();
             if(isset($childCategories) && !empty($childCategories)){
               $subCat['child_category'] = $childCategories;
-
-              foreach($childCategories as $childData){
-                $childCatId = $childData['id'];
-                $allProducts = Product::where('child_cat_id', $childCatId)->where('status', 1)->get();
-
-                if(isset($allProducts) && !empty($allProducts)){
-                  foreach($allProducts as $singlProduct){
-                    $allProductArray[] = $singlProduct;
-                  }
-                }
-              }
-
             }
           }
           
@@ -144,7 +132,6 @@ class CategoryController extends Controller
   
         $response['status'] = $status;
         $response['data'] = $outputArray;
-        $response['all_product'] = $allProductArray;
         return response()->json($response, 200);
 
       } catch (\Exception $e) {
