@@ -20,6 +20,9 @@
             <td class="text-center">
                 <label for="" class="control-label">Discount</label>
             </td>
+            <td class="text-center">
+                <label for="" class="control-label">Discount Type</label>
+            </td>
         </tr>
         </thead>
         <tbody>
@@ -51,6 +54,17 @@
                 <td>
                     <input type="text" name="discount_{{ $combination['type'] }}" value="{{ $combination['discount']??'' }}"
                            class="form-control" required>
+                </td>
+                <td>
+                    <select name="discount_type_{{ $combination['type'] }}" class="form-control js-select2-custom">
+                        <option value="">Select Discount Type</option>
+                        <option value="percent" <?php if(isset($combination['discount_type']) && $combination['discount_type']=='percent'){ echo 'selected'; } ?>>
+                            Percent
+                        </option>
+                        <option value="amount" <?php if(isset($combination['discount_type']) && $combination['discount_type']=='amount'){ echo 'selected'; } ?>>
+                            Amount
+                        </option>
+                    </select>
                 </td>
             </tr>
         @endforeach

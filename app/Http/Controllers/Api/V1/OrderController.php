@@ -920,6 +920,19 @@ class OrderController extends Controller
     {
         //$orders = Order::with(['customer', 'delivery_man.rating'])->withCount('details')->where(['user_id' => $request->user()->id])->get();
       	$orders = Order::with(['customer', 'delivery_man.rating', 'time_slot', 'delivery_address'])->withCount('details')->where(['user_id' => $request['user_id']])->latest()->get();
+        if(isset($orders) && !empty($orders) && !empty($orders[0])){
+            foreach($orders as $order){
+                $id = $order['id'];
+                $orderHistories = DB::table('order_histories')->where('order_id', $id)->get();
+                if(isset($orderHistories) && !empty($orderHistories) && !empty($orderHistories[0])){
+                    foreach($orderHistories as $history){
+                        if($history->status_captured == "delivered"){
+                            $order['delivery_date'] = date("Y-m-d", strtotime($history->created_at));
+                        }
+                    }
+                }
+            }
+        }
 
         $orders->map(function ($data) {
             $data['deliveryman_review_count'] = DMReview::where(['delivery_man_id' => $data['delivery_man_id'], 'order_id' => $data['id']])->count();

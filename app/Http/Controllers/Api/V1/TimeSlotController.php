@@ -17,7 +17,7 @@ class TimeSlotController extends Controller
             if(count($timeSlots) > 0){
                 $newTimeSlot = array();
 
-                $twoHourTime = date("h:i A", strtotime('+2 hours'));
+                $twoHourTime = date("h:i A", strtotime('+3 hours'));
                 $sTimeArray = explode(" ", $twoHourTime);
                 $sTimeStr = $sTimeArray[0];
                 $sTimeStrArray = explode(":", $sTimeStr);

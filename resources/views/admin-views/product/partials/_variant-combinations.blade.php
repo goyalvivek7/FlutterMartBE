@@ -20,6 +20,9 @@
             <td class="text-center">
                 <label for="" class="control-label">Discount</label>
             </td>
+            <td class="text-center">
+                <label for="" class="control-label">Discount Type</label>
+            </td>
         </tr>
         </thead>
         <tbody>
@@ -58,6 +61,13 @@
                     </td>
                     <td>
                         <input type="text" name="discount_{{ $str }}" value="" class="form-control" required>
+                    </td>
+                    <td>
+                        <select name="discount_type_{{ $str }}" class="form-control js-select2-custom">
+                            <option value="">Select Discount Type</option>
+                            <option value="percent">Percent</option>
+                            <option value="amount">Amount</option>
+                        </select>
                     </td>
                 </tr>
             @endif
