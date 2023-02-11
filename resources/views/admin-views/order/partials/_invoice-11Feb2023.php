@@ -48,7 +48,7 @@
     </tr>
     <tr style="">
         <td>
-            <b>Payment Method : </b><?php echo str_replace('_',' ',$order['payment_method']); ?>
+            <b>Payment Method : </b><?php str_replace('_',' ',$order['payment_method']); ?>
         </td>
     </tr>
     <tr style="">
@@ -102,30 +102,27 @@
                 </td>
                 <td>
                     <?php //echo $detail['price']-$detail['discount_on_product'] ." "; ?>
-                  	<!-- <s><?php //echo $detail->product_org_price." Rs"; ?></s> - <?php //echo $detail->price ." Rs"."  ( -".$detail->discount_on_product." Rs"." Extra Discount)"; ?> -->
-                      <s>INR <?php echo $detail['product_org_price']; ?></s> - INR <?php echo $detail['price']; ?> (INR -<?php echo $detail['discount_on_product']; ?> Discount)
+                  	<s><?php echo $detail->product_org_price." Rs"; ?></s> - <?php echo $detail->price ." Rs"."  ( -".$detail->discount_on_product." Rs"." Extra Discount)"; ?>
                 </td>
               <td><?php echo $detail->quantity; ?></td>
               <td>
-                <?php $amount=$detail['price']*$detail['quantity']; ?>
-                INR <?php echo $amount; ?>
+              	<?php $amount=(($detail->price - $detail->discount_on_product)*$detail->quantity); ?>
+                <?php $amount." Rs"; ?>
+                <?php echo $amount; ?>
               </td>
             </tr>
         <?php }
     } ?>
 </table>
 <table width="100%">
-    <tr><td>Item Price: INR <?php echo $cartData->basic_amount; ?></td></tr>
-    <tr><td>Item Discount: INR <?php if(isset($cartData->product_base_discount) && $cartData->product_base_discount != "" && $cartData->product_base_discount != 0){ echo "-".$cartData->product_base_discount; } else { echo '0'; } ?></td></tr>
-    <tr><td>Coupon Discount: INR <?php if(isset($cartData->coupon_discount) && $cartData->coupon_discount != "" && $cartData->coupon_discount != 0){ echo "-".$cartData->coupon_discount; } else { echo '0'; } ?></td></tr>
-    <?php if($cartData->coupon_code != ""){ ?>
-        <tr><td>Coupon Code: <?php echo $cartData->coupon_code; ?></td></tr>
-    <?php } ?>
-    <tr><td>Item Total: INR <?php echo $cartData->total_amount; ?></td></tr>
-    <tr><td>Tax: INR <?php echo $cartData->tax_amount; ?></td></tr>
-    <tr><td>Delivery Charge: INR <?php echo $cartData->delivery_charge; ?></td></tr>
-    <tr><td>Wallet Deduction: INR <?php if(isset($cartData->wallet_balance) && $cartData->wallet_balance != "" && $cartData->wallet_balance != 0){ echo $cartData->wallet_balance; } else { echo '0'; } ?></td></tr>
-    <tr><td>Sub Total: INR <?php echo $cartData->remaining_sub_total; ?></td></tr>
+    <tr><td>Item Price: <?php echo $cartData->basic_amount; ?></td></tr>
+    <tr><td>Item Discount: <?php echo $cartData->basic_amount - $cartData->total_amount; ?></td></tr>
+    <tr><td>Item Total: <?php echo $cartData->total_amount; ?></td></tr>
+    <tr><td>Tax: <?php echo $cartData->tax_amount; ?></td></tr>
+    <tr><td>Delivery Charge: <?php echo $cartData->delivery_charge; ?></td></tr>
+    <tr><td>Coupon Discount: - <?php echo $cartData->coupon_discount; ?></td></tr>
+    <tr><td>Wallet Deduction: - <?php echo $cartData->wallet_balance; ?></td></tr>
+    <tr><td>Sub Total: <?php echo $cartData->remaining_sub_total; ?></td></tr>
     <hr />
-    <tr><td><strong>Total: INR <?php echo $cartData->final_amount; ?></strong></td></tr>
+    <tr><td><strong>Total: <?php echo $cartData->final_amount; ?></strong></td></tr>
 </table>

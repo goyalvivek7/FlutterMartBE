@@ -373,7 +373,9 @@ class OrderController extends Controller
     public function generate_invoice($id)
     {
         $order = Order::where('id', $id)->first();
-        return view('admin-views.order.invoice', compact('order'));
+        $cartId = $order['cart_id'];
+        $cartData = DB::table('cart_final')->where(['id' => $cartId])->first();
+        return view('admin-views.order.invoice', compact('order','cartData'));
     }
 
     public function add_payment_ref_code(Request $request, $id)
