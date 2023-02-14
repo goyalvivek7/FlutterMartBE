@@ -22,12 +22,7 @@
                 <form action="{{route('admin.business-settings.privacy-policy')}}" method="post" id="tnc-form">
                     @csrf
                     <div class="form-group">
-                        <label for="privecy_title">Title</label>
-                        <input class="ckeditor form-control" name="privecy_title" value="{!! $data->title !!}" />
-                    </div>
-                    <div class="form-group">
-                        <label for="privacy_policy">Description</label>
-                        <textarea class="ckeditor form-control" name="privacy_policy">{!! $data->description !!}</textarea>
+                        <textarea class="ckeditor form-control" name="privacy_policy">{!! $data['value'] !!}</textarea>
                     </div>
 
                     <button type="submit" class="btn btn-primary">{{\App\CentralLogics\translate('submit')}}</button>

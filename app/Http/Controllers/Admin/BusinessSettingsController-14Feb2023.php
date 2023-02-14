@@ -469,29 +469,21 @@ class BusinessSettingsController extends Controller
 
     public function terms_and_conditions()
     {
-        // $tnc = BusinessSetting::where(['key' => 'terms_and_conditions'])->first();
-        // if ($tnc == false) {
-        //     BusinessSetting::insert([
-        //         'key'   => 'terms_and_conditions',
-        //         'value' => '',
-        //     ]);
-        // }
-        $data = DB::table('pages')->where(['url' => 'terms_and_conditions'])->first();
-        return view('admin-views.business-settings.terms-and-conditions', compact('data'));
+        $tnc = BusinessSetting::where(['key' => 'terms_and_conditions'])->first();
+        if ($tnc == false) {
+            BusinessSetting::insert([
+                'key'   => 'terms_and_conditions',
+                'value' => '',
+            ]);
+        }
+        return view('admin-views.business-settings.terms-and-conditions', compact('tnc'));
     }
 
     public function terms_and_conditions_update(Request $request)
     {
-        // BusinessSetting::where(['key' => 'terms_and_conditions'])->update([
-        //     'value' => $request->tnc,
-        // ]);
-
-        $updateData = [
-            'title' => $request->terms_title,
-            'description' => $request->tnc
-        ];
-
-        DB::table('pages')->where('url', 'terms_and_conditions')->update($updateData);
+        BusinessSetting::where(['key' => 'terms_and_conditions'])->update([
+            'value' => $request->tnc,
+        ]);
 
         Toastr::success('Terms and Conditions updated!');
         return back();
@@ -499,30 +491,22 @@ class BusinessSettingsController extends Controller
 
     public function privacy_policy()
     {
-        // $data = BusinessSetting::where(['key' => 'privacy_policy'])->first();
-        // if ($data == false) {
-        //     $data = [
-        //         'key' => 'privacy_policy',
-        //         'value' => '',
-        //     ];
-        //     BusinessSetting::insert($data);
-        // }
-        $data = DB::table('pages')->where(['url' => 'privacy_policy'])->first();
+        $data = BusinessSetting::where(['key' => 'privacy_policy'])->first();
+        if ($data == false) {
+            $data = [
+                'key' => 'privacy_policy',
+                'value' => '',
+            ];
+            BusinessSetting::insert($data);
+        }
         return view('admin-views.business-settings.privacy-policy', compact('data'));
     }
 
     public function privacy_policy_update(Request $request)
     {
-        // BusinessSetting::where(['key' => 'privacy_policy'])->update([
-        //     'value' => $request->privacy_policy,
-        // ]);
-
-        $updateData = [
-            'title' => $request->privecy_title,
-            'description' => $request->privacy_policy
-        ];
-
-        DB::table('pages')->where('url', 'privacy_policy')->update($updateData);
+        BusinessSetting::where(['key' => 'privacy_policy'])->update([
+            'value' => $request->privacy_policy,
+        ]);
 
         Toastr::success('Privacy policy updated!');
         return back();
@@ -530,31 +514,22 @@ class BusinessSettingsController extends Controller
 
     public function about_us()
     {
-        // $data = BusinessSetting::where(['key' => 'about_us'])->first();
-        // if ($data == false) {
-        //     $data = [
-        //         'key' => 'about_us',
-        //         'value' => '',
-        //     ];
-        //     BusinessSetting::insert($data);
-        // }
-        $data = DB::table('pages')->where(['url' => 'about_tesmart'])->first();
-
+        $data = BusinessSetting::where(['key' => 'about_us'])->first();
+        if ($data == false) {
+            $data = [
+                'key' => 'about_us',
+                'value' => '',
+            ];
+            BusinessSetting::insert($data);
+        }
         return view('admin-views.business-settings.about-us', compact('data'));
     }
 
     public function about_us_update(Request $request)
     {
-        // BusinessSetting::where(['key' => 'about_us'])->update([
-        //     'value' => $request->about_us,
-        // ]);
-
-        $updateData = [
-            'title' => $request->about_us_title,
-            'description' => $request->about_us
-        ];
-
-        DB::table('pages')->where('url', 'about_tesmart')->update($updateData);
+        BusinessSetting::where(['key' => 'about_us'])->update([
+            'value' => $request->about_us,
+        ]);
 
         Toastr::success('About us updated!');
         return back();

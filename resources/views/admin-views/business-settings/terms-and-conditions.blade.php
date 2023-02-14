@@ -22,7 +22,12 @@
                 <form action="{{route('admin.business-settings.terms-and-conditions')}}" method="post" id="tnc-form">
                     @csrf
                     <div class="form-group">
-                        <textarea class="ckeditor form-control" name="tnc">{!! $tnc->value !!}</textarea>
+                        <label for="terms_title">Title</label>
+                        <input class="ckeditor form-control" name="terms_title" value="{!! $data->title !!}" />
+                    </div>
+                    <div class="form-group">
+                        <label for="tnc">Description</label>
+                        <textarea class="ckeditor form-control" name="tnc">{!! $data->description !!}</textarea>
                     </div>
 
                     <button type="submit" class="btn btn-primary">{{\App\CentralLogics\translate('submit')}}</button>
