@@ -165,6 +165,7 @@ Route::group(['namespace' => 'Api\V1', 'middleware'=>'localization'], function (
         Route::get('cancel-issues', 'SubscriptionController@cancel_issues');
         Route::post('pause-subscription', 'SubscriptionController@pause_subscription');
         Route::post('cancel-subscription', 'SubscriptionController@cancel_subscription');
+        Route::post('user-update-subscription', 'SubscriptionController@user_update_subscription');
     });
 
     Route::get('pages', 'TimeSlotController@all_pages');

@@ -26,6 +26,103 @@ use Session;
 class SubscriptionController extends Controller
 {  
 
+    public function user_update_subscription(Request $request){
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+            'order_id' => 'required',
+            'update_date' => 'required',
+            'update_quantity' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            $response['status'] = 'fail';
+            $response['message'] = 'Please send all required fields.';
+            $response['data'] = []; 
+            return response()->json($response, 200);
+        }
+
+        if($request['user_id'] != ""){
+            $userId = $request['user_id'];
+            $orderId = $request['order_id'];
+            $updateDate = $request['update_date'];
+            $updateQuantity = $request['update_quantity'];
+            $todayDate = date("Y-m-d");
+
+            if(strtotime($updateDate) <= strtotime($todayDate)){
+                $response['status'] = 'fail';
+                $response['message'] = 'You can not update today data, today order in processing';
+                $response['data'] = []; 
+                return response()->json($response, 200);
+            } else {
+                $checkOrder = DB::table('subscription_orders')->where([ 'order_id' => $orderId, 'user_id' => $userId ])->first();
+                $daysFormation = json_decode($checkOrder->days_formation);
+
+                if(isset($checkOrder) && !empty($checkOrder)){
+                    //echo '<pre />'; print_r($checkOrder);
+                    $orderHistory = json_decode($checkOrder->order_history);
+                    //echo '<pre />'; print_r($orderHistory);
+                    $updateCounter = 0; $productPrice = 0;
+                    foreach($orderHistory as $dailyData){
+                        $productPrice = $dailyData->price;
+                        if($dailyData->date == $updateDate){
+                            //echo "find: ".$dailyData->date;
+                            $dailyData->quantity = $updateQuantity;
+                            $updateCounter++;
+                        }
+                    }
+                    if($updateCounter==0){
+                        $newArray['date'] = $updateDate;
+                        $newArray['payment_status'] = 'pending';
+                        $newArray['delivery_status'] = 'pending';
+                        $newArray['delivery_man'] = '';
+                        $newArray['price'] = $productPrice;
+                        $newArray['quantity'] = $updateQuantity;
+
+                        array_push($orderHistory, $newArray);
+
+                        $daysFormation[] = $updateDate;
+
+                        $updateCounter++;
+                    }
+
+                    if($updateCounter>0){
+
+                        DB::table('subscription_orders')->where(['order_id' => $orderId, 'user_id' => $userId])->update([
+                            'order_history' => json_encode($orderHistory),
+                            'days_formation' => json_encode($daysFormation)
+                        ]);
+
+                        $checkOrder = DB::table('subscription_orders')->where([ 'order_id' => $orderId, 'user_id' => $userId ])->first();
+
+                        $response['status'] = 'success';
+                        $response['message'] = 'Subscription Order Updated';
+                        $response['data'][] = $checkOrder;
+                        return response()->json($response, 200);
+
+                    } else {
+
+                        $response['status'] = 'fail';
+                        $response['message'] = 'Order not found.';
+                        $response['data'] = []; 
+                        return response()->json($response, 200);
+                    }
+
+                    //echo '<pre />'; print_r($orderHistory);
+                    //echo $orderHistory;
+                } else {
+                    $response['status'] = 'fail';
+                    $response['message'] = 'Order not found.';
+                    $response['data'] = []; 
+                    return response()->json($response, 200);
+                }
+            }
+            // echo $updateDate." - ".strtotime($updateDate).'<br />';
+            // echo $todayDate." - ".strtotime($todayDate).'<br />';
+            // echo $userId." - ".$orderId." - ".$updateDate." - ".$updateQuantity;
+            
+        }
+    }
+
     public function cancel_subscription(Request $request){
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',
